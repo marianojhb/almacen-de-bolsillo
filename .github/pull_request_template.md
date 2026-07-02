@@ -12,8 +12,7 @@
 - [ ] Refactor / maintenance
 
 ## Changes made
-- [ ] 
-- [ ] 
+- [X] <!-- list changes made -->
 
 ## Screenshots
 <!-- Add screenshots if this PR changes the UI. -->
