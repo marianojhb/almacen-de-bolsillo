@@ -5,10 +5,10 @@
 
 
 ## Type of change
-[] Bug fix
-[] New feature
-[] Documentation
-[] Refactor / maintenance
+- [] Bug fix
+- [] New feature
+- [] Documentation
+- [] Refactor / maintenance
 
 ## Changes made
 -
