@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"pnpm --dir backend dev\" \"pnpm --dir frontend dev\"",
+    "dev": "concurrently \"pnpm --dir backend dev\" \"pnpm --dir frontend start\"",
     "dev:backend": "pnpm --dir backend dev",
-    "dev:frontend": "pnpm --dir frontend dev",
+    "dev:frontend": "pnpm --dir frontend start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
