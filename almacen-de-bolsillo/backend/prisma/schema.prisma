@@ -3,8 +3,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -12,10 +11,19 @@ datasource db {
 }
 
 model Product {
-  id          Int     @id @default(autoincrement())
-  name        String
-  price       Float
-  description String?
-  stock       Int     @default(0)
-  status      Boolean @default(true)
+  id          Int      @id @default(autoincrement()) @map("id_product_p")
+  sku         String   @unique @map("sku_p")
+  shortname   String   @map("shortname_p")
+  longname    String   @map("longname_p")
+  description String?  @map("description_p")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  price       Float    @map("price_p")
+  stock       Int      @default(0) @map("stock_p")
+  stockMin    Int      @default(0) @map("stock_min_p")
+  discount    Float    @default(0) @map("discount_p")
+  status      Boolean  @default(true) @map("status")
+  categoryId  Int      @map("id_category_p")
+
+  @@map("products")
 }
