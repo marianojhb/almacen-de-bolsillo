@@ -89,7 +89,7 @@ model Transaction {
   amount        Decimal       @map("amount_t") @db.Decimal(10, 2)
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
-  paymentMethod PaymentMethod @default(EFECTIVO)
+  paymentMethod PaymentMethod @default(EFECTIVO) @map("payment_method_t")
 
   @@map("transactions_t")
 }
@@ -117,8 +117,8 @@ model User {
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
   isActive     Boolean      @default(true) @map("is_active_u")
-  passwordHash String       @map("passwordHash_u")
-  role         Role         @default(EMPLOYEE)
+  passwordHash String       @map("password_hash_u")
+  role         Role         @default(EMPLOYEE) @map("role_u")
   salesOrders  SalesOrder[]
 
   @@map("user_u")
@@ -128,13 +128,14 @@ model SalesOrder {
   id              Int                @id @default(autoincrement()) @map("id_sales_orders_so")
   invoice         String?            @map("invoice_so")
   date            DateTime           @default(now()) @map("date_so")
-  sellerId        Int
+  sellerId        Int                @map("id_user_so")
   createdAt       DateTime           @default(now()) @map("created_at")
   discount        Decimal            @default(0) @map("discount_so") @db.Decimal(10, 2)
   iva             Decimal            @default(0) @map("iva_so") @db.Decimal(10, 2)
-  status          Boolean            @default(true) @map("status_so")
+  isActive        Boolean            @default(true) @map("is_active_so")
   total           Decimal            @default(0) @map("total_so") @db.Decimal(10, 2)
   updatedAt       DateTime           @updatedAt @map("updated_at")
+  paymentMethod   PaymentMethod      @default(EFECTIVO) @map("payment_method_so")
   salesOrdersItem SalesOrdersItems[]
   seller          User               @relation(fields: [sellerId], references: [id])
 
@@ -142,7 +143,7 @@ model SalesOrder {
 }
 
 model SalesOrdersItems {
-  salesOrdersItemId Int        @map("id_sales_orders_items_soi")
+  salesOrdersItemId Int        @map("id_sales_order_soi")
   productId         Int        @map("id_product_soi")
   quantity          Int        @default(0) @map("quantity_soi")
   shortname         String     @map("shortname_soi")
