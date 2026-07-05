@@ -1,5 +1,6 @@
 import express from 'express';
 import productsRouter from './modules/products/products.routes.js';
+import categoriesRouter from './modules/categories/categories.routes.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/products', productsRouter);
+app.use('/categories', categoriesRouter);
 
 // const PORT = process.env.PORT || 3000;
 function getPORT(): number {
