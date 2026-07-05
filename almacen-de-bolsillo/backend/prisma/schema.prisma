@@ -1,7 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -12,22 +8,20 @@ datasource db {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement()) @map("id_product_p")
-  sku         String?  @unique @map("sku_p")
-  shortname   String   @map("shortname_p")
-  longname    String   @map("longname_p")
-  description String?  @map("description_p")
-  price       Decimal  @map("price_p") @db.Decimal(10, 2)
-  stock       Int      @default(0) @map("stock_p")
-  stockMin    Int      @default(0) @map("stock_min_p")
-  discount    Decimal  @default(0) @map("discount_p") @db.Decimal(10, 2)
-  status      Boolean  @default(true) @map("status_p")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int      @map("id_category_p")
-
+  id                  Int                   @id @default(autoincrement()) @map("id_product_p")
+  sku                 String?               @unique @map("sku_p")
+  shortname           String                @map("shortname_p")
+  longname            String                @map("longname_p")
+  description         String?               @map("description_p")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  price               Decimal               @map("price_p") @db.Decimal(10, 2)
+  stock               Int                   @default(0) @map("stock_p")
+  stockMin            Int                   @default(0) @map("stock_min_p")
+  discount            Decimal               @default(0) @map("discount_p") @db.Decimal(10, 2)
+  categoryId          Int                   @map("id_category_p")
+  status              Boolean               @default(true) @map("status_p")
+  category            Category              @relation(fields: [categoryId], references: [id])
   purchaseOrdersItems PurchaseOrdersItems[]
   saleOrdersItems     SalesOrdersItems[]
 
@@ -37,78 +31,65 @@ model Product {
 model Category {
   id          Int       @id @default(autoincrement()) @map("id_category_c")
   name        String    @map("name_c")
-  description String?   @map("description_c")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @updatedAt @map("updated_at")
-
-  products Product[]
+  description String?   @map("description_c")
+  products    Product[]
 
   @@map("categories_c")
 }
 
 model Supplier {
-  id        Int      @id @default(autoincrement()) @map("id_supplier_s")
-  name      String   @map("name_s")
-  cuit      String?  @unique @map("cuit_s")
-  phone     String?  @map("phone_s")
-  email     String?  @map("email_s")
-  address   String?  @map("address_s")
-  status    Boolean  @default(true) @map("status_s")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
+  id             Int             @id @default(autoincrement()) @map("id_supplier_s")
+  name           String          @map("name_s")
+  cuit           String?         @unique @map("cuit_s")
+  phone          String?         @map("phone_s")
+  email          String?         @map("email_s")
+  address        String?         @map("address_s")
+  status         Boolean         @default(true) @map("status_s")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
   purchaseOrders PurchaseOrder[]
 
   @@map("suppliers_s")
 }
 
 model PurchaseOrder {
-  id        Int      @id @unique @default(autoincrement()) @map("id_purchase_orders_po")
-  date      DateTime @default(now()) @map("date_po")
-  total     Decimal  @default(0) @map("total_po") @db.Decimal(10, 2)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  supplier   Supplier @relation(fields: [supplierId], references: [id])
-  supplierId Int      @map("id_supplier_po")
-
+  id                  Int                   @id @unique @default(autoincrement()) @map("id_purchase_orders_po")
+  date                DateTime              @default(now()) @map("date_po")
+  total               Decimal               @default(0) @map("total_po") @db.Decimal(10, 2)
+  supplierId          Int                   @map("id_supplier_po")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
   purchaseOrdersItems PurchaseOrdersItems[]
+  supplier            Supplier              @relation(fields: [supplierId], references: [id])
 
   @@map("purchase_orders_po")
 }
 
 model PurchaseOrdersItems {
-  productId       Int      @map("id_product_poi")
-  purchaseOrderId Int      @map("id_purchase_order_poi")
-  quantity        Int      @default(0) @map("quantity_poi")
-  price           Decimal  @default(0) @map("price_poi") @db.Decimal(10, 2)
-  discount        Decimal  @default(0) @map("discount_poi") @db.Decimal(10, 2)
-  subtotal        Decimal  @default(0) @map("subtotal_poi") @db.Decimal(10, 2)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  product       Product       @relation(fields: [productId], references: [id])
-  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  productId       Int           @map("id_product_poi")
+  purchaseOrderId Int           @map("id_purchase_order_poi")
+  quantity        Int           @default(0) @map("quantity_poi")
+  price           Decimal       @default(0) @map("price_poi") @db.Decimal(10, 2)
+  discount        Decimal       @default(0) @map("discount_poi") @db.Decimal(10, 2)
+  subtotal        Decimal       @default(0) @map("subtotal_poi") @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  product         Product       @relation(fields: [productId], references: [id])
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
 
   @@id([productId, purchaseOrderId])
   @@map("purchase_orders_items_poi")
-}
-
-/////
-
-enum PaymentMethod {
-  EFECTIVO
-  MERCADOPAGO
-  UALA
 }
 
 model Transaction {
   id            Int           @id @default(autoincrement()) @map("id_transaction_t")
   date          DateTime      @default(now()) @map("date_t")
   amount        Decimal       @map("amount_t") @db.Decimal(10, 2)
-  paymentMethod PaymentMethod @default(EFECTIVO)
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
+  paymentMethod PaymentMethod @default(EFECTIVO)
 
   @@map("transactions_t")
 }
@@ -116,83 +97,66 @@ model Transaction {
 model Balance {
   id              Int      @id @default(autoincrement()) @map("id_balance_b")
   date            DateTime @default(now()) @map("date_b")
-  opening         Decimal  @map("opening_b") @db.Decimal(10, 2)
   cashIn          Decimal  @map("cash_in_b") @db.Decimal(10, 2)
   cashOut         Decimal  @map("cash_out_b") @db.Decimal(10, 2)
   expectedClosing Decimal  @map("expected_closing_b")
   actualClosing   Decimal  @map("actual_closing_b")
   difference      Decimal  @map("difference_b")
   createdAt       DateTime @default(now()) @map("created_at")
+  opening         Decimal  @map("opening_b") @db.Decimal(10, 2)
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("balance_b")
 }
 
-enum Role {
-  ADMIN
-  BUSINESS_OWNER
-  SUPERVISOR
-  EMPLOYEE
-}
-
 model User {
-  id           Int      @id @default(autoincrement()) @map("id_user_u")
-  username     String   @unique @map("username_u")
-  email        String   @unique @map("email_u")
-  passwordHash String   @map("passwordHash_u")
-  isActive     Boolean  @default(true) @map("is_active_u")
-  last_access  DateTime @map("last_access_u")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  role         Role     @default(EMPLOYEE)
-
-  salesOrders SalesOrder[]
+  id           Int          @id @default(autoincrement()) @map("id_user_u")
+  username     String       @unique @map("username_u")
+  email        String       @unique @map("email_u")
+  last_access  DateTime     @map("last_access_u")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  isActive     Boolean      @default(true) @map("is_active_u")
+  passwordHash String       @map("passwordHash_u")
+  role         Role         @default(EMPLOYEE)
+  salesOrders  SalesOrder[]
 
   @@map("user_u")
 }
 
 model SalesOrder {
-  id        Int      @id @default(autoincrement()) @map("id_sales_orders_so")
-  invoice   String?  @map("invoice_so")
-  date      DateTime @default(now()) @map("date_so")
-  status    Boolean  @default(true) @map("status_so")
-  iva       Decimal  @default(0) @map("iva_so") @db.Decimal(10, 2)
-  total     Decimal  @default(0) @map("total_so") @db.Decimal(10, 2)
-  discount  Decimal  @default(0) @map("discount_so") @db.Decimal(10, 2)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  seller   User @relation(fields: [sellerId], references: [id])
-  sellerId Int
-
+  id              Int                @id @default(autoincrement()) @map("id_sales_orders_so")
+  invoice         String?            @map("invoice_so")
+  date            DateTime           @default(now()) @map("date_so")
+  sellerId        Int
+  createdAt       DateTime           @default(now()) @map("created_at")
+  discount        Decimal            @default(0) @map("discount_so") @db.Decimal(10, 2)
+  iva             Decimal            @default(0) @map("iva_so") @db.Decimal(10, 2)
+  status          Boolean            @default(true) @map("status_so")
+  total           Decimal            @default(0) @map("total_so") @db.Decimal(10, 2)
+  updatedAt       DateTime           @updatedAt @map("updated_at")
   salesOrdersItem SalesOrdersItems[]
+  seller          User               @relation(fields: [sellerId], references: [id])
 
   @@map("sales_orders_so")
 }
 
 model SalesOrdersItems {
-  salesOrdersItemId Int      @map("id_sales_orders_items_soi")
-  productId         Int      @map("id_product_soi")
-  quantity          Int      @default(0) @map("quantity_soi")
-  shortname         String   @map("shortname_soi")
-  longname          String?  @map("longname_soi")
-  price             Decimal  @default(0) @map("price_soi") @db.Decimal(10, 2)
-  subtotal          Decimal  @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
-  discount          Decimal  @default(0) @map("discount_soi") @db.Decimal(10, 2)
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-
-  salesOrder SalesOrder @relation(fields: [salesOrdersItemId], references: [id])
-  product    Product    @relation(fields: [productId], references: [id])
+  salesOrdersItemId Int        @map("id_sales_orders_items_soi")
+  productId         Int        @map("id_product_soi")
+  quantity          Int        @default(0) @map("quantity_soi")
+  shortname         String     @map("shortname_soi")
+  longname          String?    @map("longname_soi")
+  price             Decimal    @default(0) @map("price_soi") @db.Decimal(10, 2)
+  subtotal          Decimal    @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
+  discount          Decimal    @default(0) @map("discount_soi") @db.Decimal(10, 2)
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+  product           Product    @relation(fields: [productId], references: [id])
+  salesOrder        SalesOrder @relation(fields: [salesOrdersItemId], references: [id])
 
   @@id([salesOrdersItemId, productId])
   @@map("sales_orders_items_soi")
-}
-
-enum Gender {
-  M
-  F
-  OTHER
 }
 
 model Employee {
@@ -203,13 +167,32 @@ model Employee {
   dni       String?   @map("dni_e")
   cuil      String?   @map("cuil_e")
   dob       DateTime? @map("dob_e")
-  gender    Gender    @default(M) @map("gender_e")
-  isActive  Boolean   @default(true) @map("is_active_e")
   salary    Decimal?  @map("salary_e") @db.Decimal(10, 2)
   jobTitle  String?   @map("job_title_e")
   pto       String?   @map("pto_e")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
+  isActive  Boolean   @default(true) @map("is_active_e")
+  gender    Gender    @default(M) @map("gender_e")
 
   @@map("employee_e")
+}
+
+enum PaymentMethod {
+  EFECTIVO
+  MERCADOPAGO
+  UALA
+}
+
+enum Role {
+  ADMIN
+  BUSINESS_OWNER
+  SUPERVISOR
+  EMPLOYEE
+}
+
+enum Gender {
+  M
+  F
+  OTHER
 }
