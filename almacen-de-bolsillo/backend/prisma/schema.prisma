@@ -4,6 +4,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -12,7 +13,7 @@ datasource db {
 
 model Product {
   id          Int      @id @default(autoincrement()) @map("id_product_p")
-  sku         String   @unique @map("sku_p")
+  sku         String?  @unique @map("sku_p")
   shortname   String   @map("shortname_p")
   longname    String   @map("longname_p")
   description String?  @map("description_p")
@@ -34,10 +35,11 @@ model Product {
 }
 
 model Category {
-  id        Int      @id @default(autoincrement()) @map("id_category_c")
-  name      String   @map("name_c")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          Int       @id @default(autoincrement()) @map("id_category_c")
+  name        String    @map("name_c")
+  description String?   @map("description_c")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
 
   products Product[]
 
@@ -47,10 +49,10 @@ model Category {
 model Supplier {
   id        Int      @id @default(autoincrement()) @map("id_supplier_s")
   name      String   @map("name_s")
-  cuit      String   @unique @map("cuit_s")
-  phone     String   @map("phone_s")
-  email     String   @map("email_s")
-  address   String   @map("address_s")
+  cuit      String?  @unique @map("cuit_s")
+  phone     String?  @map("phone_s")
+  email     String?  @map("email_s")
+  address   String?  @map("address_s")
   status    Boolean  @default(true) @map("status_s")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -80,8 +82,8 @@ model PurchaseOrdersItems {
   purchaseOrderId Int      @map("id_purchase_order_poi")
   quantity        Int      @default(0) @map("quantity_poi")
   price           Decimal  @default(0) @map("price_poi") @db.Decimal(10, 2)
-  discount        Decimal  @map("discount_poi") @db.Decimal(10, 2)
-  subtotal        Decimal  @map("subtotal_poi") @db.Decimal(10, 2)
+  discount        Decimal  @default(0) @map("discount_poi") @db.Decimal(10, 2)
+  subtotal        Decimal  @default(0) @map("subtotal_poi") @db.Decimal(10, 2)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -101,12 +103,12 @@ enum PaymentMethod {
 }
 
 model Transaction {
-  id        Int           @id @default(autoincrement()) @map("id_transaction_t")
-  date      DateTime      @default(now()) @map("date_t")
-  amount    Decimal       @map("amount_t") @db.Decimal(10, 2)
-  type      PaymentMethod
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  id            Int           @id @default(autoincrement()) @map("id_transaction_t")
+  date          DateTime      @default(now()) @map("date_t")
+  amount        Decimal       @map("amount_t") @db.Decimal(10, 2)
+  paymentMethod PaymentMethod @default(EFECTIVO)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
 
   @@map("transactions_t")
 }
@@ -114,45 +116,36 @@ model Transaction {
 model Balance {
   id              Int      @id @default(autoincrement()) @map("id_balance_b")
   date            DateTime @default(now()) @map("date_b")
+  opening         Decimal  @map("opening_b") @db.Decimal(10, 2)
   cashIn          Decimal  @map("cash_in_b") @db.Decimal(10, 2)
   cashOut         Decimal  @map("cash_out_b") @db.Decimal(10, 2)
   expectedClosing Decimal  @map("expected_closing_b")
   actualClosing   Decimal  @map("actual_closing_b")
   difference      Decimal  @map("difference_b")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("balance_b")
 }
 
-enum RoleType {
+enum Role {
   ADMIN
-  OWNER
+  BUSINESS_OWNER
+  SUPERVISOR
   EMPLOYEE
 }
 
-model Role {
-  id        Int      @id @default(autoincrement()) @map("id_role_r")
-  name      String   @map("name_r")
-  type      RoleType @map("type_r")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  users User[]
-
-  @@map("role_r")
-}
-
 model User {
-  id          Int      @id @map("id_user_u")
-  username    String   @map("username_u")
-  email       String   @map("email_u")
-  password    String   @map("password_u")
-  status      Boolean  @default(true) @map("status_u")
-  last_access DateTime @map("last_access_u")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           Int      @id @default(autoincrement()) @map("id_user_u")
+  username     String   @unique @map("username_u")
+  email        String   @unique @map("email_u")
+  passwordHash String   @map("passwordHash_u")
+  isActive     Boolean  @default(true) @map("is_active_u")
+  last_access  DateTime @map("last_access_u")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  role         Role     @default(EMPLOYEE)
 
-  role        Role         @relation(fields: [roleId], references: [id])
-  roleId      Int          @map("id_role_u")
   salesOrders SalesOrder[]
 
   @@map("user_u")
@@ -160,12 +153,12 @@ model User {
 
 model SalesOrder {
   id        Int      @id @default(autoincrement()) @map("id_sales_orders_so")
-  invoice   String   @map("invoice_so")
+  invoice   String?  @map("invoice_so")
   date      DateTime @default(now()) @map("date_so")
   status    Boolean  @default(true) @map("status_so")
-  iva       Decimal  @map("iva_so") @db.Decimal(10, 2)
-  total     Decimal  @map("total_so") @db.Decimal(10, 2)
-  discount  Decimal  @map("discount_so") @db.Decimal(10, 2)
+  iva       Decimal  @default(0) @map("iva_so") @db.Decimal(10, 2)
+  total     Decimal  @default(0) @map("total_so") @db.Decimal(10, 2)
+  discount  Decimal  @default(0) @map("discount_so") @db.Decimal(10, 2)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -180,12 +173,12 @@ model SalesOrder {
 model SalesOrdersItems {
   salesOrdersItemId Int      @map("id_sales_orders_items_soi")
   productId         Int      @map("id_product_soi")
-  quantity          Int      @map("quantity_soi")
+  quantity          Int      @default(0) @map("quantity_soi")
   shortname         String   @map("shortname_soi")
-  longname          String   @map("longname_soi")
-  price             Decimal  @map("price_soi") @db.Decimal(10, 2)
-  subtotal          Decimal  @map("subtotal_soi") @db.Decimal(10, 2)
-  discount          Decimal  @map("discount_soi") @db.Decimal(10, 2)
+  longname          String?  @map("longname_soi")
+  price             Decimal  @default(0) @map("price_soi") @db.Decimal(10, 2)
+  subtotal          Decimal  @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
+  discount          Decimal  @default(0) @map("discount_soi") @db.Decimal(10, 2)
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
@@ -196,21 +189,27 @@ model SalesOrdersItems {
   @@map("sales_orders_items_soi")
 }
 
+enum Gender {
+  M
+  F
+  OTHER
+}
+
 model Employee {
-  id        Int      @id @default(autoincrement()) @map("id_employee_e")
-  firstname String   @map("firstname_e")
-  lastname  String   @map("lastname_e")
-  fullname  String   @map("fullname_e")
-  dni       String   @map("dni_e")
-  cuil      String   @map("cuil_e")
-  dob       DateTime @map("dob_e")
-  gender    String   @map("gender_e")
-  status    Boolean  @default(true) @map("status_e")
-  salary    Decimal  @map("salary_e") @db.Decimal(10, 2)
-  jobTitle  String   @map("job_title_e")
-  pto       String   @map("pto_e")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id        Int       @id @default(autoincrement()) @map("id_employee_e")
+  firstname String?   @map("firstname_e")
+  lastname  String?   @map("lastname_e")
+  fullname  String?   @map("fullname_e")
+  dni       String?   @map("dni_e")
+  cuil      String?   @map("cuil_e")
+  dob       DateTime? @map("dob_e")
+  gender    Gender    @default(M) @map("gender_e")
+  isActive  Boolean   @default(true) @map("is_active_e")
+  salary    Decimal?  @map("salary_e") @db.Decimal(10, 2)
+  jobTitle  String?   @map("job_title_e")
+  pto       String?   @map("pto_e")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("employee_e")
 }
