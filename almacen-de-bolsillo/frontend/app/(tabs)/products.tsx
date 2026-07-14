@@ -1,4 +1,5 @@
-import { FlatList, Text, View } from "react-native";
+import { FlatList, Text, View, Pressable } from "react-native";
+import { router } from "expo-router";
 
 type Product = {
   id: number;
@@ -46,20 +47,24 @@ export default function ProductsScreen() {
           const hasLowStock = item.stock <= item.minimumStock;
 
           return (
-            // productCard
-            <View className="flex flex-row justify-between items-center p-4 mb-3 border border-[#d4d4d4] rounded-xl">
-              {/* product informacion */}
-              <View className="gap-1">
-                {/* productName */}
-                <Text className="text-[17px] font-semibold">{item.name}</Text>
-                {/* productPrice */}
-                <Text className="text-base">${item.price.toLocaleString("es-AR")}</Text>
-
-                <Text>Stock: {item.stock}</Text>
+            <Pressable
+              onPress={() => router.push(`/products/${item.id}`)}
+              className="rounded-xl bg-white active:scale-[0.98] active:opacity-70">
+              {/* productCard */}
+              <View className="flex flex-row justify-between items-center p-4 mb-3 border border-[#d4d4d4] rounded-xl">
+                {/* product information */}
+                <View className="gap-1">
+                  {/* productName */}
+                  <Text className="text-[17px] font-semibold">{item.name}</Text>
+                  {/* productPrice */}
+                  <Text className="text-base">${item.price.toLocaleString("es-AR")}</Text>
+                  {/* el stock */}
+                  <Text>Stock: {item.stock}</Text>
+                </View>
+                {/* alerta de bajo stock */}
+                {hasLowStock && <Text className="font-bold">Stock bajo</Text>}
               </View>
-
-              {hasLowStock && <Text className="font-bold">Stock bajo</Text>}
-            </View>
+            </Pressable>
           );
         }}
       />
