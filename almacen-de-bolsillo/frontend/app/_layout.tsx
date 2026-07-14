@@ -17,6 +17,20 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="products/new"
+          options={{
+            title: "Nuevo producto",
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
+        <Stack.Screen
+          name="products/[id]"
+          options={{
+            title: "Producto",
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
