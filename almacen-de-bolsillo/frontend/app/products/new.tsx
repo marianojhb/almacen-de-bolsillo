@@ -1,6 +1,7 @@
 import { router, Stack } from "expo-router";
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import colors from "tailwindcss/colors";
 
 export default function NewProductScreen() {
   const [sku, setSku] = useState("");
@@ -59,87 +60,96 @@ export default function NewProductScreen() {
       />
 
       <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView className="flex-1" contentContainerClassName="gap-5 p-5" keyboardShouldPersistTaps="handled">
+        <ScrollView
+          className="flex-1 dark:bg-black"
+          contentContainerClassName="gap-5 p-5"
+          keyboardShouldPersistTaps="handled">
           <View>
-            <Text className="mb-2 text-sm font-semibold text-gray-700">SKU</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-white ">SKU</Text>
 
             <TextInput
               value={sku}
               onChangeText={setSku}
               placeholder="Ejemplo: BEB-001"
+              placeholderTextColor={colors.gray[400]}
               autoCapitalize="characters"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-base"
+              className="rounded-xl border border-gray-300 px-4 py-3 text-base dark:text-white"
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Nombre</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Nombre</Text>
 
             <TextInput
               value={name}
               onChangeText={setName}
               placeholder="Nombre del producto"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-base"
+              placeholderTextColor={colors.gray[400]}
+              className="rounded-xl border border-gray-300 px-4 py-3 text-base dark:text-white"
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Categoría</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Categoría</Text>
 
             <TextInput
               value={category}
               onChangeText={setCategory}
               placeholder="Ejemplo: Bebidas"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-base"
+              placeholderTextColor={colors.gray[400]}
+              className="rounded-xl border border-gray-300 px-4 py-3 text-base dark:text-white"
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Precio</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Precio</Text>
 
             <TextInput
               value={price}
               onChangeText={setPrice}
               placeholder="0"
               keyboardType="decimal-pad"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-base"
+              placeholderTextColor={colors.gray[400]}
+              className="rounded-xl border border-gray-300 px-4 py-3 text-base dark:text-white"
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Stock actual</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Stock actual</Text>
 
             <TextInput
               value={stock}
               onChangeText={setStock}
               placeholder="0"
               keyboardType="number-pad"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-base"
+              placeholderTextColor={colors.gray[400]}
+              className="rounded-xl border border-gray-300 px-4 py-3 text-base dark:text-white"
             />
           </View>
 
           <View>
-            <Text className="mb-2 text-sm font-semibold text-gray-700">Stock mínimo</Text>
+            <Text className="mb-2 text-sm font-semibold text-gray-700 dark:text-white">Stock mínimo</Text>
 
             <TextInput
               value={minimumStock}
               onChangeText={setMinimumStock}
               placeholder="0"
               keyboardType="number-pad"
-              className="rounded-xl border border-gray-300 px-4 py-3 text-base"
+              placeholderTextColor={colors.gray[400]}
+              className="rounded-xl border border-gray-300 px-4 py-3 text-base dark:text-white"
             />
           </View>
 
           <Pressable
             onPress={handleSaveProduct}
-            className="mt-2 items-center rounded-xl bg-[#111A1A] px-4 py-4 active:opacity-75">
-            <Text className="text-base font-semibold text-white">Guardar producto</Text>
+            className="mt-2 items-center rounded-xl bg-[#111A1A] px-4 py-4 active:opacity-75 dark:bg-white">
+            <Text className="text-base font-semibold text-white dark:text-black">Guardar producto</Text>
           </Pressable>
 
           <Pressable
             onPress={() => router.back()}
-            className="items-center rounded-xl border border-gray-300 px-4 py-4 active:opacity-60">
-            <Text className="text-base font-semibold text-gray-800">Cancelar</Text>
+            className="items-center rounded-xl border border-gray-300 px-4 py-4 active:opacity-60 ">
+            <Text className="text-base font-semibold text-gray-800 dark:text-white">Cancelar</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>

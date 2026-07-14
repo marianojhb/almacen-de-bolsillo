@@ -30,26 +30,26 @@ export default function ProductDetailScreen() {
       {/* container */}
       <View className="flex-1 p-4">
         {/* title */}
-        <Text className="text-[28px] font-bold mb-5">{product.name}</Text>
+        <Text className="text-[28px] font-bold mb-5 dark:text-white">{product.name}</Text>
 
         {/* card */}
         <View className="p-5 border border-[#d4d4d4] rounded-xl gap-1.5">
           {/* label */}
-          <Text className="mt-3 text-[14px] font-semibold">SKU</Text>
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white">SKU</Text>
           {/* value */}
-          <Text className="text-[17px]">{product.sku}</Text>
+          <Text className="text-[17px] dark:text-white">{product.sku}</Text>
 
-          <Text className="mt-3 text-[14px] font-semibold">Categoría</Text>
-          <Text className="text-[17px]">{product.category}</Text>
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white">Categoría</Text>
+          <Text className="text-[17px] dark:text-white">{product.category}</Text>
 
-          <Text className="mt-3 text-[14px] font-semibold">Precio</Text>
-          <Text className="text-[17px]">${product.price.toLocaleString("es-AR")}</Text>
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white">Precio</Text>
+          <Text className="text-[17px] dark:text-white">${product.price.toLocaleString("es-AR")}</Text>
 
-          <Text className="mt-3 text-[14px] font-semibold">Stock actual</Text>
-          <Text className="text-[17px]">{product.stock}</Text>
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock actual</Text>
+          <Text className="text-[17px] dark:text-white">{product.stock}</Text>
 
-          <Text className="mt-3 text-[14px] font-semibold">Stock mínimo</Text>
-          <Text className="text-[17px]">{product.minimumStock}</Text>
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock mínimo</Text>
+          <Text className="text-[17px] dark:text-white">{product.minimumStock}</Text>
 
           {/* warning */}
           {hasLowStock && <Text className="mt-5 text-base font-bold text-red-500">Stock bajo</Text>}
