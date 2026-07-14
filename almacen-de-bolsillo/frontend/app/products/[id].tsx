@@ -3,7 +3,6 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
 
 export default function ProductDetailScreen() {
-
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
@@ -20,7 +19,8 @@ export default function ProductDetailScreen() {
 
   const hasLowStock = product.stock <= product.minimumStock;
 
-  return (    <>
+  return (
+    <>
       <Stack.Screen
         options={{
           title: product.name,
