@@ -1,9 +1,11 @@
 import { FlatList, Text, View, Pressable } from "react-native";
 import { router } from "expo-router";
-import { products } from "@/data/products";
 import NewProductButton from "@/components/NewProductButton";
+import {useProducts} from "@/contexts/useProducts";
 
 export default function ProductsScreen() {
+  const { products } = useProducts();
+
   return (
     // container
     <>

@@ -2,8 +2,11 @@ import { router, Stack } from "expo-router";
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import colors from "tailwindcss/colors";
+import { useProducts } from "@/contexts/useProducts";
+import type { NewProduct } from "@/types/Product";
 
 export default function NewProductScreen() {
+  const { addProduct } = useProducts();
   const [sku, setSku] = useState("");
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -31,8 +34,7 @@ export default function NewProductScreen() {
       return;
     }
 
-    const newProduct = {
-      id: Date.now(),
+    const newProduct: NewProduct = {
       sku: sku.trim(),
       name: name.trim(),
       category: category.trim(),
@@ -41,7 +43,7 @@ export default function NewProductScreen() {
       minimumStock: numericMinimumStock,
     };
 
-    console.log("Producto creado:", newProduct);
+    addProduct(newProduct);
 
     Alert.alert("Producto registrado", `${newProduct.name} fue registrado correctamente.`, [
       {

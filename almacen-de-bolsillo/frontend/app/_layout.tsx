@@ -1,3 +1,5 @@
+import { ProductsProvider } from "@/contexts/ProductsProvider";
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -15,23 +17,25 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="products/new"
-          options={{
-            title: "Nuevo producto",
-            headerBackButtonDisplayMode: "minimal",
-          }}
-        />
-        <Stack.Screen
-          name="products/[id]"
-          options={{
-            title: "Producto",
-            headerBackButtonDisplayMode: "minimal",
-          }}
-        />
-      </Stack>
+      <ProductsProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="products/new"
+            options={{
+              title: "Nuevo producto",
+              headerBackButtonDisplayMode: "minimal",
+            }}
+          />
+          <Stack.Screen
+            name="products/[id]"
+            options={{
+              title: "Producto",
+              headerBackButtonDisplayMode: "minimal",
+            }}
+          />
+        </Stack>
+      </ProductsProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
   );

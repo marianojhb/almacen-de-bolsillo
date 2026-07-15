@@ -1,9 +1,10 @@
-import { products } from "@/data/products";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Text, View } from "react-native";
+import { useProducts } from "@/contexts/useProducts";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { products } = useProducts();
 
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
 
