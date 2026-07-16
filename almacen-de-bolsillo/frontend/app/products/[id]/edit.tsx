@@ -77,7 +77,7 @@ export default function ProductEditScreen() {
     <>
       <Stack.Screen
         options={{
-          title: product?.name,
+          title: `Edit: ${product?.name}`,
         }}
       />
       <KeyboardAvoidingView
@@ -150,7 +150,7 @@ export default function ProductEditScreen() {
               blurOnSubmit
               onChangeText={(value) =>
                 setProductState((currentProduct) =>
-                  currentProduct ? { ...currentProduct, stock: parseInt(value) || 0 } : currentProduct,
+                  currentProduct ? { ...currentProduct, stock: Number(value) || 0 } : currentProduct,
                 )
               }
               value={productState?.stock?.toString() ?? ""}

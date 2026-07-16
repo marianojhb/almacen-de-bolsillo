@@ -2,15 +2,6 @@
 import { useState } from "react";
 import { Text, TextInput, Pressable, View, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
-// tiene la estructura del form
-
-// luego en edit, va a tener initialProducts que sale de productos
-// luego en new, va a tener initialProducts ahi mismo o sale
-
-// recibe como props: la funcion: si es addProduct o editProduct, y el initialProduct que es el producto que se va a editar o un producto vacio para new
-
-// recibe como props tambien: productformvalues, parsedproduct form values y los props se configuran en fordcutformprop
-
 export type ProductFormValues = {
   sku: string;
   name: string;
@@ -76,40 +67,40 @@ export function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: 
             placeholder="SKU"
             value={sku}
             onChangeText={setSku}
-            className="mb-4 rounded border border-gray-300 px-3 py-2"
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
           <TextInput
             placeholder="Nombre"
             value={name}
             onChangeText={setName}
-            className="mb-4 rounded border border-gray-300 px-3 py-2"
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
           <TextInput
             placeholder="Categoría"
             value={category}
             onChangeText={setCategory}
-            className="mb-4 rounded border border-gray-300 px-3 py-2"
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
           <TextInput
             placeholder="Precio"
             value={price}
             onChangeText={setPrice}
             keyboardType="decimal-pad"
-            className="mb-4 rounded border border-gray-300 px-3 py-2"
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
           <TextInput
             placeholder="Stock actual"
             value={stock}
             onChangeText={setStock}
             keyboardType="number-pad"
-            className="mb-4 rounded border border-gray-300 px-3 py-2"
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
           <TextInput
             placeholder="Stock mínimo"
             value={minimumStock}
             onChangeText={setMinimumStock}
             keyboardType="number-pad"
-            className="mb-4 rounded border border-gray-300 px-3 py-2"
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
           <View className="w-full flex-row gap-3">
             <Pressable

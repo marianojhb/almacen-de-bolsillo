@@ -1,7 +1,7 @@
 import { FlatList, Text, View, Pressable } from "react-native";
 import { router } from "expo-router";
 import NewProductButton from "@/components/NewProductButton";
-import {useProducts} from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/useProducts";
 
 export default function ProductsScreen() {
   const { products } = useProducts();
@@ -10,7 +10,7 @@ export default function ProductsScreen() {
     // container
     <>
       <View className="mb-4 flex-row items-center justify-between  px-2 py-1">
-        <Text className="text-3xl font-bold">Productos</Text>
+        <Text className="text-3xl font-bold dark:text-white">Productos</Text>
         <NewProductButton />
       </View>
 

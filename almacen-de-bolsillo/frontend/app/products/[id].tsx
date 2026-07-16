@@ -29,18 +29,13 @@ export default function ProductDetailScreen() {
         }}
       />
 
-      {/* container */}
-      <View className="flex p-4 mb-4 flex-row items-center justify-between  px-2 py-1">
-        {/* title */}
+      <View className="flex p-4 mb-4 flex-row items-center justify-between  px-2 py-1 ">
         <Text className="text-[28px] font-bold mb-5 dark:text-white">{product.name}</Text>
-        {/* edit button */}
         <EditProductButton id={id} />
       </View>
-      {/* card */}
-      <View className="p-5 border border-[#d4d4d4] rounded-xl gap-1.5">
-        {/* label */}
+
+      <View className="p-5 border border-[#d4d4d4] rounded-xl gap-1.5 dark:bg-gray-900">
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">SKU</Text>
-        {/* value */}
         <Text className="text-[17px] dark:text-white">{product.sku}</Text>
 
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Categoría</Text>
@@ -55,7 +50,6 @@ export default function ProductDetailScreen() {
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock mínimo</Text>
         <Text className="text-[17px] dark:text-white">{product.minimumStock}</Text>
 
-        {/* warning */}
         {hasLowStock && <Text className="mt-5 text-base font-bold text-red-500">Stock bajo</Text>}
       </View>
     </>
