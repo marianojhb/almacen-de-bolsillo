@@ -34,6 +34,13 @@ export default function RootLayout() {
               headerBackButtonDisplayMode: "minimal",
             }}
           />
+          <Stack.Screen
+            name="products/[id]/edit"
+            options={{
+              title: "Editar producto",
+              headerBackButtonDisplayMode: "minimal",
+            }}
+          />
         </Stack>
       </ProductsProvider>
       <StatusBar style="auto" />

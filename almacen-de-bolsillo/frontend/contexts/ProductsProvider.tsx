@@ -48,11 +48,18 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     setProducts((currentProducts) => [...currentProducts, newProduct]);
   }
 
+  function updateProduct(updatedProduct: Product): void {
+    setProducts((currentProducts) =>
+      currentProducts.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)),
+    );
+  }
+
   return (
     <ProductsContext.Provider
       value={{
         products,
         addProduct,
+        updateProduct,
       }}>
       {children}
     </ProductsContext.Provider>
