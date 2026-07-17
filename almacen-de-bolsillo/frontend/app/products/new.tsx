@@ -12,9 +12,18 @@ export default function NewProductScreen2() {
         submitLabel="Guardar"
         onCancel={() => router.back()}
         onSubmit={(values) => {
-          addProduct(values);
-          Alert.alert("Producto registrado", `${values.name} fue registrado correctamente.`, [
-            { text: "Aceptar", onPress: () => router.back() },
+          const productWasAdded = addProduct(values);
+
+          if (!productWasAdded) {
+            Alert.alert("SKU duplicado", "Ya existe un producto registrado con ese SKU.");
+            return;
+          }
+
+          Alert.alert("Producto registrado", `${values.name.trim()} fue registrado correctamente.`, [
+            {
+              text: "Aceptar",
+              onPress: () => router.back(),
+            },
           ]);
         }}
       />

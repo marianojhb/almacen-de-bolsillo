@@ -39,19 +39,44 @@ export const initialProducts: Product[] = [
 export function ProductsProvider({ children }: ProductsProviderProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
-  function addProduct(product: NewProduct): void {
+  function addProduct(product: NewProduct): boolean {
+    const normalizedSku = product.sku.trim().toUpperCase();
+    const skuAlreadyExists = products.some((currentProduct) => currentProduct.sku.toUpperCase() === normalizedSku);
+
+    if (skuAlreadyExists) {
+      return false;
+    }
+
     const newProduct: Product = {
       id: Date.now(),
       ...product,
+      sku: normalizedSku,
     };
 
     setProducts((currentProducts) => [...currentProducts, newProduct]);
+
+    return true;
   }
 
-  function updateProduct(updatedProduct: Product): void {
-    setProducts((currentProducts) =>
-      currentProducts.map((product) => (product.id === updatedProduct.id ? updatedProduct : product)),
+  function updateProduct(updatedProduct: Product): boolean {
+    const normalizedSku = updatedProduct.sku.trim().toUpperCase();
+    const skuAlreadyExists = products.some(
+      (product) => product.id !== updatedProduct.id && product.sku.toUpperCase() === normalizedSku,
     );
+
+    if (skuAlreadyExists) {
+      return false;
+    }
+
+    setProducts((currentProducts) =>
+      currentProducts.map((currentProduct) =>
+        currentProduct.id === updatedProduct.id
+          ? { ...currentProduct, ...updatedProduct, sku: normalizedSku }
+          : currentProduct,
+      ),
+    );
+
+    return true;
   }
 
   return (
