@@ -26,13 +26,13 @@ export type ProductFormProps = {
   onCancel: () => void;
 };
 
-export function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: ProductFormProps) {
-  const [sku, setSku] = useState(initialValues?.sku || "");
-  const [name, setName] = useState(initialValues?.name || "");
-  const [category, setCategory] = useState(initialValues?.category || "");
-  const [price, setPrice] = useState(initialValues?.price || "");
-  const [stock, setStock] = useState(initialValues?.stock || "");
-  const [minimumStock, setMinimumStock] = useState(initialValues?.minimumStock || "");
+export default function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: ProductFormProps) {
+  const [sku, setSku] = useState(initialValues?.sku ?? "");
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [category, setCategory] = useState(initialValues?.category ?? "");
+  const [price, setPrice] = useState(initialValues?.price ?? "");
+  const [stock, setStock] = useState(initialValues?.stock ?? "");
+  const [minimumStock, setMinimumStock] = useState(initialValues?.minimumStock ?? "");
 
   const handleSubmit = () => {
     if (!sku.trim() || !name.trim() || !category.trim() || !price.trim() || !stock.trim() || !minimumStock.trim()) {
@@ -63,24 +63,28 @@ export function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: 
         contentContainerClassName="gap-5 p-5"
         keyboardShouldPersistTaps="handled">
         <View className="flex-1 p-4">
-          <TextInput
-            placeholder="SKU"
-            value={sku}
-            onChangeText={setSku}
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
-          />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Nombre</Text>
           <TextInput
             placeholder="Nombre"
             value={name}
             onChangeText={setName}
             className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">SKU</Text>
+          <TextInput
+            placeholder="SKU"
+            value={sku}
+            onChangeText={setSku}
+            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+          />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
           <TextInput
             placeholder="Categoría"
             value={category}
             onChangeText={setCategory}
             className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Precio</Text>
           <TextInput
             placeholder="Precio"
             value={price}
@@ -88,6 +92,7 @@ export function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: 
             keyboardType="decimal-pad"
             className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock actual</Text>
           <TextInput
             placeholder="Stock actual"
             value={stock}
@@ -95,6 +100,7 @@ export function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: 
             keyboardType="number-pad"
             className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
           />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
           <TextInput
             placeholder="Stock mínimo"
             value={minimumStock}
