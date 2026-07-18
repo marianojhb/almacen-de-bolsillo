@@ -1,8 +1,9 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { useProducts } from "@/contexts/useProducts";
 import { useState, useEffect } from "react";
 import type { Product } from "@/types/Product";
+import ProductForm from "@/components/ProductForm";
 
 export default function ProductEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -10,12 +11,10 @@ export default function ProductEditScreen() {
 
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
   const [productState, setProductState] = useState<Product | null>(null);
-  const [priceInput, setPriceInput] = useState("");
 
   useEffect(() => {
     if (product) {
       setProductState(product);
-      setPriceInput(product.price.toString());
     }
   }, [product]);
 
@@ -27,52 +26,6 @@ export default function ProductEditScreen() {
     );
   }
 
-  const handleSaveProduct = () => {
-    if (
-      !productState?.sku?.trim() ||
-      !productState?.name?.trim() ||
-      !productState?.category?.trim() ||
-      !priceInput.trim() ||
-      !productState?.stock?.toString().trim() ||
-      !productState?.minimumStock?.toString().trim()
-    ) {
-      Alert.alert("Campos incompletos", "Todos los campos son obligatorios.");
-      return;
-    }
-
-    const numericPrice = Number(priceInput.replace(",", "."));
-    const numericStock = Number(productState.stock);
-    const numericMinimumStock = Number(productState.minimumStock);
-
-    if (Number.isNaN(numericPrice) || Number.isNaN(numericStock) || Number.isNaN(numericMinimumStock)) {
-      Alert.alert("Datos inválidos", "Precio y stock deben contener valores numéricos.");
-      return;
-    }
-
-    if (numericPrice < 0 || numericStock < 0 || numericMinimumStock < 0) {
-      Alert.alert("Datos inválidos", "El precio y las cantidades de stock no pueden ser negativas.");
-      return;
-    }
-
-    const updatedProduct: Product = {
-      ...productState,
-      sku: productState.sku.trim(),
-      name: productState.name.trim(),
-      category: productState.category.trim(),
-      price: numericPrice,
-      stock: numericStock,
-      minimumStock: numericMinimumStock,
-    };
-
-    updateProduct(updatedProduct);
-
-    Alert.alert("Producto actualizado", `${updatedProduct.name} fue actualizado correctamente.`, [
-      {
-        text: "Aceptar",
-        onPress: () => router.back(),
-      },
-    ]);
-  };
   return (
     <>
       <Stack.Screen
@@ -80,7 +33,39 @@ export default function ProductEditScreen() {
           title: `Edit: ${product?.name}`,
         }}
       />
-      <KeyboardAvoidingView
+      <ProductForm
+        initialValues={{
+          sku: product?.sku ?? "",
+          name: product?.name ?? "",
+          category: product?.category ?? "",
+          price: product?.price.toString() ?? "",
+          stock: product?.stock.toString() ?? "",
+          minimumStock: product?.minimumStock.toString() ?? "",
+        }}
+        submitLabel="Guardar"
+        onCancel={() => router.back()}
+        onSubmit={(values) => {
+          const updatedProduct: Product = {
+            ...productState!,
+            sku: values.sku.trim(),
+            name: values.name.trim(),
+            category: values.category.trim(),
+            price: values.price,
+            stock: values.stock,
+            minimumStock: values.minimumStock,
+          };
+
+          updateProduct(updatedProduct);
+
+          Alert.alert("Producto actualizado", `${updatedProduct.name} fue actualizado correctamente.`, [
+            {
+              text: "Aceptar",
+              onPress: () => router.back(),
+            },
+          ]);
+        }}
+      />
+      {/* <KeyboardAvoidingView
         className="flex-1 bg-white dark:bg-black"
         behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
@@ -88,9 +73,7 @@ export default function ProductEditScreen() {
           contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 160 }}
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           keyboardShouldPersistTaps="handled">
-          {/* container */}
           <View className="mb-4 flex-row items-center justify-between">
-            {/* title */}
             <TextInput
               className="text-[28px] font-bold mb-5  dark:text-white bg-slate-300 dark:bg-slate-800 rounded ps-1 pe-3 py-1"
               returnKeyType="done"
@@ -102,13 +85,9 @@ export default function ProductEditScreen() {
               value={productState?.name ?? ""}
               placeholder="Nombre del producto"
             />
-            {/* edit button */}
           </View>
-          {/* card */}
           <View className="border border-[#d4d4d4] rounded-xl gap-1.5 p-5">
-            {/* label */}
             <Text className="mt-3 text-[14px] font-semibold dark:text-white">SKU</Text>
-            {/* value */}
             <TextInput
               className="text-[17px] dark:text-white bg-slate-300 dark:bg-slate-800 rounded ps-1 pe-3 py-1"
               returnKeyType="done"
@@ -147,7 +126,6 @@ export default function ProductEditScreen() {
               className="text-[17px] dark:text-white bg-slate-300 dark:bg-slate-800 rounded ps-1 pe-3 py-1"
               keyboardType="number-pad"
               returnKeyType="done"
-              blurOnSubmit
               onChangeText={(value) =>
                 setProductState((currentProduct) =>
                   currentProduct ? { ...currentProduct, stock: Number(value) || 0 } : currentProduct,
@@ -161,7 +139,6 @@ export default function ProductEditScreen() {
               className="text-[17px] dark:text-white bg-slate-300 dark:bg-slate-800 rounded ps-1 pe-3 py-1"
               keyboardType="number-pad"
               returnKeyType="done"
-              blurOnSubmit
               onChangeText={(value) =>
                 setProductState((currentProduct) =>
                   currentProduct ? { ...currentProduct, minimumStock: parseInt(value) || 0 } : currentProduct,
@@ -183,7 +160,7 @@ export default function ProductEditScreen() {
             </Pressable>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAvoidingView> */}
     </>
   );
 }

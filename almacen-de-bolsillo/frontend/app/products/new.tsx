@@ -1,7 +1,7 @@
 import { useProducts } from "@/contexts/useProducts";
 import { Alert } from "react-native";
 import { router, Stack } from "expo-router";
-import { ProductForm } from "@/components/ProductForm";
+import ProductForm from "@/components/ProductForm";
 
 export default function NewProductScreen2() {
   const { addProduct } = useProducts();
