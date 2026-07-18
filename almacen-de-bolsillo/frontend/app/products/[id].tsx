@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 import { useProducts } from "@/contexts/useProducts";
 import EditProductButton from "@/components/EditProductButton";
 
@@ -44,8 +44,17 @@ export default function ProductDetailScreen() {
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Precio</Text>
         <Text className="text-[17px] dark:text-white">${product.price.toLocaleString("es-AR")}</Text>
 
-        <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock actual</Text>
-        <Text className="text-[17px] dark:text-white">{product.stock}</Text>
+        <View className="flex-row items-center justify-between dark:text-white">
+          <View>
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock actual</Text>
+            <Text className="text-[17px] dark:text-white">{product.stock}</Text>
+          </View>
+          <Pressable
+            onPress={() => router.push(`/products/${product.id}/stock-adjustment`)}
+            className="inline-block items-center rounded-lg border border-gray-300 px-3 py-2 bg-[#111A1A] active:opacity-75 ">
+            <Text className="font-semibold text-base text-white">Ajustar stock</Text>
+          </Pressable>
+        </View>
 
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock mínimo</Text>
         <Text className="text-[17px] dark:text-white">{product.minimumStock}</Text>

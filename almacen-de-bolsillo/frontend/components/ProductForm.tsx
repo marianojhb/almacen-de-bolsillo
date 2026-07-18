@@ -26,6 +26,8 @@ export type ProductFormProps = {
   onCancel: () => void;
 };
 
+const inputClassName = "mb-4 h-12 rounded border border-gray-300 px-3 py-0 text-base leading-5 dark:text-white";
+
 export default function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: ProductFormProps) {
   const [sku, setSku] = useState(initialValues?.sku ?? "");
   const [name, setName] = useState(initialValues?.name ?? "");
@@ -68,21 +70,24 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             placeholder="Nombre"
             value={name}
             onChangeText={setName}
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+            textAlignVertical="center"
+            className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">SKU</Text>
           <TextInput
             placeholder="SKU"
             value={sku}
             onChangeText={setSku}
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+            textAlignVertical="center"
+            className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
           <TextInput
             placeholder="Categoría"
             value={category}
             onChangeText={setCategory}
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+            textAlignVertical="center"
+            className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Precio</Text>
           <TextInput
@@ -90,7 +95,8 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             value={price}
             onChangeText={setPrice}
             keyboardType="decimal-pad"
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+            textAlignVertical="center"
+            className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock actual</Text>
           <TextInput
@@ -98,7 +104,8 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             value={stock}
             onChangeText={setStock}
             keyboardType="number-pad"
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+            textAlignVertical="center"
+            className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
           <TextInput
@@ -106,7 +113,8 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             value={minimumStock}
             onChangeText={setMinimumStock}
             keyboardType="number-pad"
-            className="mb-4 rounded border border-gray-300 px-3 py-2 dark:text-white"
+            textAlignVertical="center"
+            className={inputClassName}
           />
           <View className="w-full flex-row gap-3">
             <Pressable
