@@ -17,6 +17,18 @@ const getStockMovementsByProductIdFromDatabase = async (productId: number) => {
   return stockMovements;
 };
 
+const getStockMovementsByProductSkuFromDatabase = async (productSku: string) => {
+  const stockMovements = await prisma.stockMovements.findMany({
+    where: {
+      product: {
+        sku: productSku,
+      },
+    },
+  });
+
+  return stockMovements;
+};
+
 const postStockMovementToDatabase = async (stockMovementData: Prisma.StockMovementsCreateInput) => {
   const stockMovement = await prisma.stockMovements.create({
     data: stockMovementData,
@@ -47,6 +59,7 @@ export {
   getStockMovementsFromDatabase,
   getStockMovementByIdFromDatabase,
   getStockMovementsByProductIdFromDatabase,
+  getStockMovementsByProductSkuFromDatabase,
   postStockMovementToDatabase,
   updateStockMovementFromDatabase,
   deleteStockMovementFromDatabase,

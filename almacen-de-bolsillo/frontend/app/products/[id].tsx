@@ -49,11 +49,18 @@ export default function ProductDetailScreen() {
             <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock actual</Text>
             <Text className="text-[17px] dark:text-white">{product.stock}</Text>
           </View>
-          <Pressable
-            onPress={() => router.push(`/products/${product.id}/stock-adjustment`)}
-            className="inline-block items-center rounded-lg border border-gray-300 px-3 py-2 bg-[#111A1A] active:opacity-75 ">
-            <Text className="font-semibold text-base text-white">Ajustar stock</Text>
-          </Pressable>
+          <View className="flex-row gap-3">
+            <Pressable
+              onPress={() => router.push(`/products/${product.id}/stock-adjustment`)}
+              className="inline-block items-center rounded-lg border border-gray-300 px-3 py-2 bg-[#111A1A] active:opacity-75 ">
+              <Text className="font-semibold text-base text-white">Ajustar</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push(`/products/${product.id}/movements`)}
+              className="inline-block items-center rounded-lg border border-gray-300 px-3 py-2 bg-[#111A1A] active:opacity-75 ">
+              <Text className="font-semibold text-base text-white">Historial</Text>
+            </Pressable>
+          </View>
         </View>
 
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock mínimo</Text>

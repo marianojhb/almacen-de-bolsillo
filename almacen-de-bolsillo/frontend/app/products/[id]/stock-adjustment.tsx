@@ -2,8 +2,8 @@ import { useProducts } from "@/contexts/useProducts";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import type { StockMovement } from "@/types/StockMovement";
-
+import type { StockMovement, NewStockMovement } from "@/types/StockMovement";
+import { movements } from "@/data/movements";
 const stockAdjustmentSignClassName = "w-6 text-center text-xl leading-6 dark:text-white";
 const stockAdjustmentInputClassName = "h-12 min-w-24 px-3 py-0 text-center text-xl leading-6 dark:text-white";
 
@@ -15,7 +15,6 @@ export default function StockAdjustmentScreen() {
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
   const [inputAdjustmentValue, setInputAdjustmentValue] = useState("");
   const [inputReason, setInputReason] = useState("");
-  const [inputStockMovement, setInputStockMovement] = useState<StockMovement | null>(null);
 
   if (!product) {
     return (
@@ -27,17 +26,17 @@ export default function StockAdjustmentScreen() {
 
   const currentStock = product.stock;
 
-  function handleStockAdjustment() {
-    if (!product) return;
+  function handleStockAdjustment(): boolean {
+    if (!product) return false;
 
     if (inputAdjustmentValue.trim() === "") {
-      return;
+      return false;
     }
 
     const quantity = Number(inputAdjustmentValue);
 
     if (!Number.isInteger(quantity) || quantity < 0) {
-      return;
+      return false;
     }
 
     let newStock: number = product.stock;
@@ -62,13 +61,17 @@ export default function StockAdjustmentScreen() {
 
     updateProduct({ ...product, stock: newStock });
     // TODO: Update table of stock movements
-    setInputStockMovement({
-      productId: product.id,
-      adjustment: stockDifference,
+    const newStockMovement: NewStockMovement = {
       stockMovementType: movementType,
+      productId: product.id,
+      quantity: stockDifference,
+      previousStock: currentStock,
+      newStock: newStock,
       reason: inputReason.trim() !== "" ? inputReason.trim() : undefined,
       date: new Date(),
-    });
+    };
+    movements.push({ ...newStockMovement, id: movements.length + 1 });
+    return true;
   }
   return (
     <>
@@ -151,8 +154,15 @@ export default function StockAdjustmentScreen() {
           </Pressable>
           <Pressable
             onPress={() => {
-              handleStockAdjustment();
-              router.back();
+              if (handleStockAdjustment()) {
+                router.back();
+              } else {
+                Alert.alert(
+                  "Error",
+                  "Por favor, ingrese un valor válido para el ajuste de stock. Debe ser un número entero no negativo.",
+                  [{ text: "Aceptar" }],
+                );
+              }
             }}
             className="
              w-[48%]

@@ -41,6 +41,20 @@ export default function RootLayout() {
               headerBackButtonDisplayMode: "minimal",
             }}
           />
+          <Stack.Screen
+            name="products/[id]/movements"
+            options={{
+              title: "Movimientos de stock",
+              headerBackButtonDisplayMode: "minimal",
+            }}
+          />
+          <Stack.Screen
+            name="products/[id]/stock-adjustment"
+            options={{
+              title: "Ajustes de stock",
+              headerBackButtonDisplayMode: "minimal",
+            }}
+          />
         </Stack>
       </ProductsProvider>
       <StatusBar style="auto" />
