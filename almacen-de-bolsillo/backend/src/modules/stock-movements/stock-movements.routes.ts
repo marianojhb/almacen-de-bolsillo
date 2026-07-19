@@ -3,6 +3,7 @@ import {
   getStockMovements,
   getStockMovementById,
   getStockMovementsByProductId,
+  getStockMovementsByProductSku,
   postStockMovement,
   updateStockMovement,
   deleteStockMovement,
@@ -14,7 +15,8 @@ stockMovementsRouter.get("/", getStockMovements);
 
 stockMovementsRouter.get("/:id", getStockMovementById);
 
-stockMovementsRouter.get("/product/:productId", getStockMovementsByProductId);
+stockMovementsRouter.get("/product/id/:productId", getStockMovementsByProductId);
+stockMovementsRouter.get("/product/sku/:productId", getStockMovementsByProductSku);
 
 stockMovementsRouter.post("/", postStockMovement);
 

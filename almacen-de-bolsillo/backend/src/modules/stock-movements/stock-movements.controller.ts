@@ -3,6 +3,7 @@ import {
   getStockMovementsFromDatabase,
   getStockMovementByIdFromDatabase,
   getStockMovementsByProductIdFromDatabase,
+  getStockMovementsByProductSkuFromDatabase,
   postStockMovementToDatabase,
   updateStockMovementFromDatabase,
   deleteStockMovementFromDatabase,
@@ -43,6 +44,23 @@ const getStockMovementsByProductId = async (req: Request, res: Response) => {
     res.json(stockMovements);
   } catch (error) {
     console.error("Error fetching stock movements by product ID:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getStockMovementsByProductSku = async (req: Request, res: Response) => {
+  const productSku = req.params.productSku;
+
+  if (typeof productSku !== "string" || productSku.trim() === "") {
+    res.status(400).json({ message: "Invalid product SKU" });
+    return;
+  }
+
+  try {
+    const stockMovements = await getStockMovementsByProductSkuFromDatabase(productSku);
+    res.json(stockMovements);
+  } catch (error) {
+    console.error("Error fetching stock movements by product SKU:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -88,6 +106,7 @@ export {
   getStockMovements,
   getStockMovementById,
   getStockMovementsByProductId,
+  getStockMovementsByProductSku,
   postStockMovement,
   updateStockMovement,
   deleteStockMovement,
