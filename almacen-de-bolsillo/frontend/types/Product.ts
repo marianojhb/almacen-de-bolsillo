@@ -6,6 +6,7 @@ export type Product = {
   price: number;
   stock: number;
   minimumStock: number;
+  isActive: boolean;
 };
 
 export type NewProduct = Omit<Product, "id">;
