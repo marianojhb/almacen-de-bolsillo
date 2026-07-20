@@ -25,6 +25,7 @@ model Product {
   purchaseOrdersItems PurchaseOrdersItems[]
   saleOrdersItems     SalesOrdersItems[]
   stockMovements      StockMovements[]
+  isActive            Boolean               @default(true) @map("is_active_p")
 
   @@map("products_p")
 }
@@ -36,6 +37,7 @@ model Category {
   updatedAt   DateTime? @updatedAt @map("updated_at")
   description String?   @map("description_c")
   products    Product[]
+  isActive    Boolean   @default(true) @map("is_active_c")
 
   @@map("categories_c")
 }
@@ -50,6 +52,7 @@ model Supplier {
   status         Boolean         @default(true) @map("status_s")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
+  isActive       Boolean         @default(true) @map("is_active_s")
   purchaseOrders PurchaseOrder[]
 
   @@map("suppliers_s")
@@ -64,6 +67,7 @@ model PurchaseOrder {
   updatedAt           DateTime              @updatedAt @map("updated_at")
   purchaseOrdersItems PurchaseOrdersItems[]
   userId              Int                   @default(3) @map("id_user_po")
+  isActive            Boolean               @default(true) @map("is_active_po")
 
   supplier Supplier @relation(fields: [supplierId], references: [id])
   buyer    User     @relation(fields: [userId], references: [id])
