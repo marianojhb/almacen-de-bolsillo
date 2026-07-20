@@ -22,23 +22,21 @@ export default function ProductsScreen() {
         data={activeProducts}
         keyExtractor={(product) => product.id.toString()}
         renderItem={({ item }) => {
-          const hasLowStock = item.stock <= item.minimumStock;
+          const hasLowStock = item.stock <= item.stockMin;
 
           return (
             <>
               <Pressable
                 onPress={() => router.push(`/products/${item.id}`)}
                 className="rounded-xl  active:scale-[0.98] active:opacity-70  ">
-                {/* productCard */}
                 <View className="flex flex-row justify-between items-center p-4 mb-3 bg-white dark:bg-gray-900 border border-[#d4d4d4] dark:border-gray-600 rounded-xl ">
-                  {/* product information */}
                   <View className="gap-1">
-                    {/* productName */}
-                    <Text className="text-[17px] font-semibold dark:text-white">{item.name}</Text>
-                    {/* productPrice */}
-                    <Text className="text-base dark:text-white">${item.price.toLocaleString("es-AR")}</Text>
-                    {/* el stock */}
+                    <Text className="text-[22px] font-semibold dark:text-white pb-2">{item.shortname}</Text>
+                    <Text className="font-semibold dark:text-white">{item.longname}</Text>
+                    <Text className="text-base dark:text-white">Precio: ${item.price.toLocaleString("es-AR")}</Text>
                     <Text className="dark:text-white">Stock: {item.stock}</Text>
+                    <Text className="dark:text-white">Stock mínimo: {item.stockMin}</Text>
+                    <Text className="dark:text-white">Categoría: {item.categoryId}</Text>
                     <Text className="dark:text-white">Estado: {item.isActive ? "Activo" : "Inactivo"}</Text>
                   </View>
                   {/* alerta de bajo stock */}

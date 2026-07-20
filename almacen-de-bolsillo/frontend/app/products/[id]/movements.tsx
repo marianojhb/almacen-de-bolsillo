@@ -18,7 +18,7 @@ export default function StockMovementsScreen() {
   }
   return (
     <View>
-      <Text className="text-lg font-bold dark:text-white px-1 py-3 ">Movimientos de Producto: {product?.name}</Text>
+      <Text className="text-lg font-bold dark:text-white px-1 py-3 ">Movimientos de Producto: {product?.shortname}</Text>
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item.id.toString()}

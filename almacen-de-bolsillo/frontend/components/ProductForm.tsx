@@ -4,20 +4,24 @@ import { Text, TextInput, Pressable, View, Alert, KeyboardAvoidingView, ScrollVi
 
 export type ProductFormValues = {
   sku: string;
-  name: string;
-  category: string;
+  shortname: string;
+  longname: string;
   price: string;
   stock: string;
-  minimumStock: string;
+  stockMin: string;
+  categoryId: string;
+  isActive: boolean;
 };
 
 export type ParsedProductFormValues = {
   sku: string;
-  name: string;
-  category: string;
+  shortname: string;
+  longname: string;
   price: number;
   stock: number;
-  minimumStock: number;
+  stockMin: number;
+  categoryId: number;
+  isActive: boolean;
 };
 export type ProductFormProps = {
   initialValues?: ProductFormValues;
@@ -30,21 +34,52 @@ const inputClassName = "mb-4 h-12 rounded border border-gray-300 px-3 py-0 text-
 
 export default function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: ProductFormProps) {
   const [sku, setSku] = useState(initialValues?.sku ?? "");
-  const [name, setName] = useState(initialValues?.name ?? "");
-  const [category, setCategory] = useState(initialValues?.category ?? "");
+  const [shortname, setShortname] = useState(initialValues?.shortname ?? "");
+  const [longname, setLongname] = useState(initialValues?.longname ?? "");
   const [price, setPrice] = useState(initialValues?.price ?? "");
   const [stock, setStock] = useState(initialValues?.stock ?? "");
-  const [minimumStock, setMinimumStock] = useState(initialValues?.minimumStock ?? "");
+  const [stockMin, setStockMin] = useState(initialValues?.stockMin ?? "");
+  const [categoryId, setCategoryId] = useState(initialValues?.categoryId ?? "");
+  const [isActive, setIsActive] = useState(initialValues?.isActive ?? true);
 
   const handleSubmit = () => {
-    if (!sku.trim() || !name.trim() || !category.trim() || !price.trim() || !stock.trim() || !minimumStock.trim()) {
+    if (
+      !sku.trim() ||
+      !shortname.trim() ||
+      !longname.trim() ||
+      !price.trim() ||
+      !stock.trim() ||
+      !stockMin.trim() ||
+      !categoryId.toString().trim() ||
+      isActive === null
+    ) {
       Alert.alert("Campos incompletos", "Todos los campos son obligatorios.");
       return;
     }
-
-    const numericPrice = Number(price);
-    const numericStock = Number(stock);
-    const numericMinimumStock = Number(minimumStock);
+    const trimmedSku = sku.trim();
+    if (trimmedSku.length < 3 || trimmedSku.length > 20) {
+      Alert.alert("SKU inválido", "El SKU debe tener entre 3 y 20 caracteres.");
+      return;
+    }
+    const trimmedShortName = shortname.trim();
+    if (trimmedShortName.length < 3 || trimmedShortName.length > 50) {
+      Alert.alert("Nombre corto inválido", "El nombre corto debe tener entre 3 y 50 caracteres.");
+      return;
+    }
+    const trimmedLongName = longname.trim();
+    if (trimmedLongName.length < 3 || trimmedLongName.length > 100) {
+      Alert.alert("Nombre largo inválido", "El nombre largo debe tener entre 3 y 100 caracteres.");
+      return;
+    }
+    const trimmedCategoryId = categoryId.trim();
+    if (trimmedCategoryId.length < 1 || trimmedCategoryId.length > 10) {
+      Alert.alert("Categoría inválida", "La categoría debe tener entre 1 y 10 caracteres.");
+      return;
+    }
+    const numericPrice = Number(price.trim());
+    const numericStock = Number(stock.trim());
+    const numericMinimumStock = Number(stockMin.trim());
+    const numericCategoryId = Number(categoryId.trim());
 
     if (Number.isNaN(numericPrice) || Number.isNaN(numericStock) || Number.isNaN(numericMinimumStock)) {
       Alert.alert("Datos inválidos", "Precio y stock deben contener valores numéricos.");
@@ -55,7 +90,16 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
       Alert.alert("Datos inválidos", "El precio y las cantidades de stock no pueden ser negativas.");
       return;
     }
-    onSubmit({ sku, name, category, price: numericPrice, stock: numericStock, minimumStock: numericMinimumStock });
+    onSubmit({
+      sku: trimmedSku,
+      shortname: trimmedShortName,
+      longname: trimmedLongName,
+      price: numericPrice,
+      stock: numericStock,
+      stockMin: numericMinimumStock,
+      categoryId: numericCategoryId,
+      isActive: isActive,
+    });
   };
 
   return (
@@ -65,11 +109,19 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
         contentContainerClassName="gap-5 p-5"
         keyboardShouldPersistTaps="handled">
         <View className="flex-1 p-4">
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Nombre</Text>
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Nombre corto</Text>
           <TextInput
-            placeholder="Nombre"
-            value={name}
-            onChangeText={setName}
+            placeholder="Nombre corto"
+            value={shortname}
+            onChangeText={setShortname}
+            textAlignVertical="center"
+            className={inputClassName}
+          />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Nombre largo</Text>
+          <TextInput
+            placeholder="Nombre largo"
+            value={longname}
+            onChangeText={setLongname}
             textAlignVertical="center"
             className={inputClassName}
           />
@@ -78,14 +130,6 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             placeholder="SKU"
             value={sku}
             onChangeText={setSku}
-            textAlignVertical="center"
-            className={inputClassName}
-          />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
-          <TextInput
-            placeholder="Categoría"
-            value={category}
-            onChangeText={setCategory}
             textAlignVertical="center"
             className={inputClassName}
           />
@@ -110,12 +154,28 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
           <TextInput
             placeholder="Stock mínimo"
-            value={minimumStock}
-            onChangeText={setMinimumStock}
+            value={stockMin}
+            onChangeText={setStockMin}
             keyboardType="number-pad"
             textAlignVertical="center"
             className={inputClassName}
           />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
+          <TextInput
+            placeholder="Categoría"
+            value={categoryId}
+            onChangeText={setCategoryId}
+            textAlignVertical="center"
+            className={inputClassName}
+          />
+          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
+          <Pressable
+            onPress={() => setIsActive(!isActive)}
+            className={`mb-4 h-12 w-full items-center justify-center rounded border border-gray-300 px-3 py-0 text-base leading-5 dark:text-white ${
+              isActive ? "bg-green-500" : "bg-red-500"
+            }`}>
+            <Text className="text-white">{isActive ? "Activo" : "Inactivo"}</Text>
+          </Pressable>
           <View className="w-full flex-row gap-3">
             <Pressable
               onPress={onCancel}

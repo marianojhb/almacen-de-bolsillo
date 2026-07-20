@@ -77,7 +77,7 @@ export default function StockAdjustmentScreen() {
     <>
       <Stack.Screen
         options={{
-          title: `Ajustar stock: ${product?.name}`,
+          title: `Ajustar stock: ${product?.shortname}`,
         }}
       />
       <View className="flex-1 p-4">
