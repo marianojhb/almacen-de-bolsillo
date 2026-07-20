@@ -9,7 +9,6 @@ export default function StockMovementsScreen() {
   const filteredProducts = movements.filter((product) => product.productId === Number(id));
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
 
-
   if (filteredProducts.length === 0) {
     return (
       <View className="flex-1 p-4">
@@ -24,17 +23,25 @@ export default function StockMovementsScreen() {
         data={filteredProducts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View className="flex-row justify-between p-1 border-b border-gray-300 py-2 dark:border-gray-700 items-center">
-            <Text className="dark:text-white">{item.date.toLocaleDateString()}</Text>
-            <Text className="dark:text-white">
-              {" "}
-              {/* {item.stockMovementType === "MANUAL_ENTRY" ? "+" : "-"}  */}
+          <View className="flex-row justify-between p-1 border-b border-gray-300 py-2 dark:border-gray-700 items-center  ">
+            <Text numberOfLines={1} className="w-24 shrink-0 text-sm dark:text-white">
+              {item.date.toLocaleDateString()}
+            </Text>
+            <Text numberOfLines={1} className="w-12 shrink-0 text-center text-sm dark:text-white">
               {item.quantity}
             </Text>
-            <Text
-              className={`dark:text-white  h-8 border border-gray-300 dark:border-gray-700 p-2 w-24 text-center text-xs text-white font-bold rounded-lg ${item.stockMovementType === "MANUAL_ENTRY" ? "bg-green-500" : "bg-red-500"}`}>
-              {item.stockMovementType === "MANUAL_ENTRY" ? "ENTRY" : "EXIT"}
+            <Text className="flex-1 min-w-0 px-2 text-sm dark:text-white">
+              {item.reason ?? "Sin motivo"}
             </Text>
+            <View className="w-20 shrink-0 items-end">
+              <Text
+                numberOfLines={1}
+                className={`h-8 rounded-lg border border-gray-300 px-2 py-2 text-center text-xs font-bold text-white dark:border-gray-700 ${
+                  item.stockMovementType === "MANUAL_ENTRY" ? "bg-green-500" : "bg-red-500"
+                }   w-20`}>
+                {item.stockMovementType === "MANUAL_ENTRY" ? "ENTRY" : "EXIT"}
+              </Text>
+            </View>
           </View>
         )}
       />

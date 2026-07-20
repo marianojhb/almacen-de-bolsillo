@@ -136,6 +136,7 @@ export default function StockAdjustmentScreen() {
           textAlignVertical="center"
           className="h-12 w-full rounded-lg border border-gray-300 px-3 py-0 text-left text-xl leading-6 dark:text-white mx-auto"
         />
+        {/* <Text className="text-sm dark:text-slate-500 ps-1 pt-1">Máximo 17 caracteres</Text> */}
 
         <View className="w-full flex-row gap-3 py-4">
           <Pressable
