@@ -15,6 +15,7 @@ export const initialProducts: Product[] = [
     price: 1800,
     stock: 12,
     minimumStock: 5,
+    isActive: true,
   },
   {
     id: 2,
@@ -24,6 +25,7 @@ export const initialProducts: Product[] = [
     price: 1500,
     stock: 3,
     minimumStock: 5,
+    isActive: false,
   },
   {
     id: 3,
@@ -33,11 +35,13 @@ export const initialProducts: Product[] = [
     price: 1300,
     stock: 8,
     minimumStock: 4,
+    isActive: true,
   },
 ];
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const activeProducts = products.filter((product) => product.isActive === true);
 
   function addProduct(product: NewProduct): boolean {
     const normalizedSku = product.sku.trim().toUpperCase();
@@ -75,7 +79,23 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
           : currentProduct,
       ),
     );
+    return true;
+  }
 
+  function deleteProduct(updatedProduct: Product): boolean {
+    const productExists = products.some((product) => product.id === updatedProduct.id);
+
+    if (!productExists) {
+      return false;
+    }
+
+    setProducts((currentProducts) =>
+      currentProducts.map((currentProduct) =>
+        currentProduct.id === updatedProduct.id
+          ? { ...currentProduct, ...updatedProduct, isActive: false }
+          : currentProduct,
+      ),
+    );
     return true;
   }
 
@@ -83,8 +103,10 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     <ProductsContext.Provider
       value={{
         products,
+        activeProducts,
         addProduct,
         updateProduct,
+        deleteProduct,
       }}>
       {children}
     </ProductsContext.Provider>

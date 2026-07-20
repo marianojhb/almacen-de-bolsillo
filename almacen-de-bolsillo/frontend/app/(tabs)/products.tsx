@@ -2,20 +2,24 @@ import { FlatList, Text, View, Pressable } from "react-native";
 import { router } from "expo-router";
 import NewProductButton from "@/components/NewProductButton";
 import { useProducts } from "@/contexts/useProducts";
+import ListAllProductsButton from "@/components/ListAllProductsButton";
 
 export default function ProductsScreen() {
-  const { products } = useProducts();
+  const { activeProducts } = useProducts();
 
   return (
     // container
     <>
-      <View className="mb-4 flex-row items-center justify-between  px-2 py-1">
+      <View className="mb-4 flex-row items-center justify-end  px-2 py-1">
         <Text className="text-3xl font-bold dark:text-white">Productos</Text>
-        <NewProductButton />
+        <View className="ml-auto flex-row gap-2">
+          <ListAllProductsButton />
+          <NewProductButton />
+        </View>
       </View>
 
       <FlatList
-        data={products}
+        data={activeProducts}
         keyExtractor={(product) => product.id.toString()}
         renderItem={({ item }) => {
           const hasLowStock = item.stock <= item.minimumStock;
@@ -35,6 +39,7 @@ export default function ProductsScreen() {
                     <Text className="text-base dark:text-white">${item.price.toLocaleString("es-AR")}</Text>
                     {/* el stock */}
                     <Text className="dark:text-white">Stock: {item.stock}</Text>
+                    <Text className="dark:text-white">Estado: {item.isActive ? "Activo" : "Inactivo"}</Text>
                   </View>
                   {/* alerta de bajo stock */}
                   {hasLowStock && <Text className="font-bold text-red-500">Stock bajo</Text>}

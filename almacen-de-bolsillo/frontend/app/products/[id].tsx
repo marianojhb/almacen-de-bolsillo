@@ -2,6 +2,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useProducts } from "@/contexts/useProducts";
 import EditProductButton from "@/components/EditProductButton";
+import DeleteProductButton from "@/components/DeleteProductButton";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,8 +30,12 @@ export default function ProductDetailScreen() {
         }}
       />
 
-      <View className="flex p-4 mb-4 flex-row items-center justify-between  px-2 py-1 ">
+      <View className="flex p-4 flex-row items-center justify-between  px-2 py-1 ">
         <Text className="text-[28px] font-bold mb-5 dark:text-white">{product.name}</Text>
+      </View>
+
+      <View className="ml-auto flex-row gap-2 pb-4">
+        <DeleteProductButton id={id} />
         <EditProductButton id={id} />
       </View>
 

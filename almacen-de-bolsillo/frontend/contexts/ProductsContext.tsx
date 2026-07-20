@@ -3,8 +3,10 @@ import type { Product, NewProduct } from "@/types/Product";
 
 export type ProductsContextType = {
   products: Product[];
+  activeProducts: Product[];
   addProduct: (product: NewProduct) => boolean; // booleano, si el producto ya existe o no
   updateProduct: (updatedProduct: Product) => boolean;
+  deleteProduct: (updatedProduct: Product) => boolean;
 };
 
 export const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
