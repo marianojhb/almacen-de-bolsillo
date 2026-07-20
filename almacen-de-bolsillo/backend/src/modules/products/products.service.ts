@@ -1,11 +1,18 @@
 import { prisma } from "../../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
 
-const getProductsFromDatabase = async () => {
-  const products = await prisma.product.findMany({
+type GetProductsOptions = {
+  includeInactive?: boolean;
+};
+
+const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
+  if (includeInactive) {
+    return prisma.product.findMany();
+  }
+
+  return prisma.product.findMany({
     where: { isActive: true },
   });
-  return products;
 };
 
 const getProductByIdFromDatabase = async (productId: number) => {
