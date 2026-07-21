@@ -1,45 +1,43 @@
-import { useState, ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { ProductsContext } from "@/contexts/ProductsContext";
 import type { Product, NewProduct } from "@/types/Product";
+import { getProducts, updateProductRequest } from "@/services/productsApi";
 
 type ProductsProviderProps = {
   children: ReactNode;
 };
 
-export const initialProducts: Product[] = [
-  {
-    id: 1,
-    sku: "BEB-001",
-    name: "Coca-Cola 500 ml",
-    category: "Bebidas",
-    price: 1800,
-    stock: 12,
-    minimumStock: 5,
-  },
-  {
-    id: 2,
-    sku: "LAC-001",
-    name: "Leche entera",
-    category: "Lácteos",
-    price: 1500,
-    stock: 3,
-    minimumStock: 5,
-  },
-  {
-    id: 3,
-    sku: "ALM-001",
-    name: "Azúcar 1 kg",
-    category: "Almacén",
-    price: 1300,
-    stock: 8,
-    minimumStock: 4,
-  },
-];
-
 export function ProductsProvider({ children }: ProductsProviderProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
 
-  function addProduct(product: NewProduct): boolean {
+  // State to track loading and error states
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+
+  const activeProducts = products.filter((product) => product.isActive === true);
+
+  useEffect(() => {
+    // Obtener los productos desde la API y actualizar el estado
+    const fetchProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        setProductsError(null);
+        const products = await getProducts();
+        setProducts(products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProductsError("Error fetching products");
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+
+    // Actualizar el estado y el fetch con los productos obtenidos desde la API
+  }, []);
+
+  async function addProduct(product: NewProduct): Promise<boolean> {
     const normalizedSku = product.sku.trim().toUpperCase();
     const skuAlreadyExists = products.some((currentProduct) => currentProduct.sku.toUpperCase() === normalizedSku);
 
@@ -58,7 +56,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     return true;
   }
 
-  function updateProduct(updatedProduct: Product): boolean {
+  async function updateProduct(updatedProduct: Product): Promise<boolean> {
     const normalizedSku = updatedProduct.sku.trim().toUpperCase();
     const skuAlreadyExists = products.some(
       (product) => product.id !== updatedProduct.id && product.sku.toUpperCase() === normalizedSku,
@@ -68,23 +66,51 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
       return false;
     }
 
+    const productToUpdate: Product = {
+      ...updatedProduct,
+      sku: normalizedSku,
+    };
+
+    try {
+      await updateProductRequest(productToUpdate.id, productToUpdate);
+
+      const productsFromBackend = await getProducts();
+      setProducts(productsFromBackend);
+
+      return true;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      return false;
+    }
+  }
+
+  async function deleteProduct(updatedProduct: Product): Promise<boolean> {
+    const productExists = products.some((product) => product.id === updatedProduct.id);
+
+    if (!productExists) {
+      return false;
+    }
+
     setProducts((currentProducts) =>
       currentProducts.map((currentProduct) =>
         currentProduct.id === updatedProduct.id
-          ? { ...currentProduct, ...updatedProduct, sku: normalizedSku }
+          ? { ...currentProduct, ...updatedProduct, isActive: false }
           : currentProduct,
       ),
     );
-
     return true;
   }
 
   return (
     <ProductsContext.Provider
       value={{
+        isLoadingProducts,
+        productsError,
         products,
+        activeProducts,
         addProduct,
         updateProduct,
+        deleteProduct,
       }}>
       {children}
     </ProductsContext.Provider>

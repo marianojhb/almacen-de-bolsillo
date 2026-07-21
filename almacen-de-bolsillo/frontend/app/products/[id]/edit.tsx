@@ -30,34 +30,45 @@ export default function ProductEditScreen() {
     <>
       <Stack.Screen
         options={{
-          title: `Edit: ${product?.name}`,
+          title: `Edit: ${product?.shortname}`,
         }}
       />
       <ProductForm
         initialValues={{
           sku: product?.sku ?? "",
-          name: product?.name ?? "",
-          category: product?.category ?? "",
+          shortname: product?.shortname ?? "",
+          longname: product?.longname ?? "",
           price: product?.price.toString() ?? "",
           stock: product?.stock.toString() ?? "",
-          minimumStock: product?.minimumStock.toString() ?? "",
+          stockMin: product?.stockMin.toString() ?? "",
+          categoryId: product?.categoryId.toString() ?? "",
+          isActive: product?.isActive ?? true,
         }}
         submitLabel="Guardar"
         onCancel={() => router.back()}
-        onSubmit={(values) => {
+        onSubmit={async (values) => {
           const updatedProduct: Product = {
             ...productState!,
             sku: values.sku.trim(),
-            name: values.name.trim(),
-            category: values.category.trim(),
+            shortname: values.shortname.trim(),
+            longname: values.longname.trim(),
             price: values.price,
             stock: values.stock,
-            minimumStock: values.minimumStock,
+            stockMin: values.stockMin,
+            categoryId: values.categoryId,
+            isActive: values.isActive,
           };
 
-          updateProduct(updatedProduct);
+          const wasUpdated = await updateProduct(updatedProduct);
 
-          Alert.alert("Producto actualizado", `${updatedProduct.name} fue actualizado correctamente.`, [
+          if (!wasUpdated) {
+            Alert.alert(
+              "Error",
+              "No se pudo actualizar el producto. Verificá que el SKU no esté duplicado e intentá nuevamente.",
+            );
+            return;
+          }
+          Alert.alert("Producto actualizado", `${updatedProduct.shortname} fue actualizado correctamente.`, [
             {
               text: "Aceptar",
               onPress: () => router.back(),

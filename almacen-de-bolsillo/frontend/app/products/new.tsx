@@ -3,7 +3,7 @@ import { Alert } from "react-native";
 import { router, Stack } from "expo-router";
 import ProductForm from "@/components/ProductForm";
 
-export default function NewProductScreen2() {
+export default function NewProductScreen() {
   const { addProduct } = useProducts();
   return (
     <>
@@ -19,7 +19,7 @@ export default function NewProductScreen2() {
             return;
           }
 
-          Alert.alert("Producto registrado", `${values.name.trim()} fue registrado correctamente.`, [
+          Alert.alert("Producto registrado", `${values.shortname.trim()} fue registrado correctamente.`, [
             {
               text: "Aceptar",
               onPress: () => router.back(),

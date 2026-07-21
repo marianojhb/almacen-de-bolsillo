@@ -1,14 +1,14 @@
 export type StockMovementType = "PURCHASE" | "SALE" | "MANUAL_ENTRY" | "MANUAL_EXIT" | "ADJUSTMENT";
 
- export type StockMovement = {
+export type StockMovement = {
   id: number;
-  stockMovementType: StockMovementType;
+  type: StockMovementType;
   productId: number;
   quantity: number;
   previousStock: number;
   newStock: number;
   reason?: string;
-  date: Date;
+  createdAt: string;
 };
 
-export type NewStockMovement = Omit<StockMovement, "id">;
+export type NewStockMovement = Omit<StockMovement, "id" | "createdAt">;

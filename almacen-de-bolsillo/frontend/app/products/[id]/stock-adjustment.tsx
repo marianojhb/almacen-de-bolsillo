@@ -3,7 +3,8 @@ import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import type { StockMovement, NewStockMovement } from "@/types/StockMovement";
-import { movements } from "@/data/movements";
+import { postStockMovement } from "@/services/movementsApi";
+
 const stockAdjustmentSignClassName = "w-6 text-center text-xl leading-6 dark:text-white";
 const stockAdjustmentInputClassName = "h-12 min-w-24 px-3 py-0 text-center text-xl leading-6 dark:text-white";
 
@@ -62,22 +63,26 @@ export default function StockAdjustmentScreen() {
     updateProduct({ ...product, stock: newStock });
     // TODO: Update table of stock movements
     const newStockMovement: NewStockMovement = {
-      stockMovementType: movementType,
+      type: movementType,
       productId: product.id,
       quantity: stockDifference,
       previousStock: currentStock,
       newStock: newStock,
       reason: inputReason.trim() !== "" ? inputReason.trim() : undefined,
-      date: new Date(),
     };
-    movements.push({ ...newStockMovement, id: movements.length + 1 });
+    try {
+      postStockMovement(newStockMovement);
+    } catch (error) {
+      console.log("Error", error);
+    }
+
     return true;
   }
   return (
     <>
       <Stack.Screen
         options={{
-          title: `Ajustar stock: ${product?.name}`,
+          title: `Ajustar stock: ${product?.shortname}`,
         }}
       />
       <View className="flex-1 p-4">
@@ -136,6 +141,7 @@ export default function StockAdjustmentScreen() {
           textAlignVertical="center"
           className="h-12 w-full rounded-lg border border-gray-300 px-3 py-0 text-left text-xl leading-6 dark:text-white mx-auto"
         />
+        {/* <Text className="text-sm dark:text-slate-500 ps-1 pt-1">Máximo 17 caracteres</Text> */}
 
         <View className="w-full flex-row gap-3 py-4">
           <Pressable

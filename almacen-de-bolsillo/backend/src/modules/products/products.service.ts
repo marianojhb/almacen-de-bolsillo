@@ -1,9 +1,18 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
 
-const getProductsFromDatabase = async () => {
-  const products = await prisma.product.findMany();
-  return products;
+type GetProductsOptions = {
+  includeInactive?: boolean;
+};
+
+const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
+  if (includeInactive) {
+    return prisma.product.findMany();
+  }
+
+  return prisma.product.findMany({
+    where: { isActive: true },
+  });
 };
 
 const getProductByIdFromDatabase = async (productId: number) => {
@@ -24,14 +33,15 @@ const postProductToDatabase = async (productData: Prisma.ProductCreateInput) => 
 const updateProductFromDatabase = async (productId: number, productData: Prisma.ProductUpdateInput) => {
   const product = await prisma.product.update({
     where: { id: productId },
-    data: productData, 
+    data: productData,
   });
   return product;
 };
 
 const deleteProductFromDatabase = async (productId: number) => {
-  const product = await prisma.product.delete({
+  const product = await prisma.product.update({
     where: { id: productId },
+    data: { isActive: false },
   });
   return product;
 };
