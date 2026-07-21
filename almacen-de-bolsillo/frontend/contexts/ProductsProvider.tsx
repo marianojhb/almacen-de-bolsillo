@@ -14,15 +14,13 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
 
-  const activeProducts = products.filter((product) => product.isActive === true);
-
   useEffect(() => {
     // Obtener los productos desde la API y actualizar el estado
     const fetchProducts = async () => {
       try {
         setIsLoadingProducts(true);
         setProductsError(null);
-        const products = await getProducts();
+        const products = await getProducts(true);
         setProducts(products);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -74,7 +72,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       await updateProductRequest(productToUpdate.id, productToUpdate);
 
-      const productsFromBackend = await getProducts();
+      const productsFromBackend = await getProducts(true);
       setProducts(productsFromBackend);
 
       return true;
@@ -107,7 +105,6 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
         isLoadingProducts,
         productsError,
         products,
-        activeProducts,
         addProduct,
         updateProduct,
         deleteProduct,

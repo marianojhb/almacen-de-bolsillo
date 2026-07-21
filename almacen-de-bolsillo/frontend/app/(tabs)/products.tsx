@@ -3,9 +3,14 @@ import { router } from "expo-router";
 import NewProductButton from "@/components/NewProductButton";
 import { useProducts } from "@/contexts/useProducts";
 import ListAllProductsButton from "@/components/ListAllProductsButton";
+import { useState, useEffect } from "react";
 
 export default function ProductsScreen() {
-  const { activeProducts, isLoadingProducts, productsError } = useProducts();
+  const { products, isLoadingProducts, productsError } = useProducts();
+  const [showInactiveProducts, setShowInactiveProducts] = useState(true);
+
+  const filteredProducts = products.filter((product) => product.isActive === true);
+  let visibleProducts = showInactiveProducts ? products : filteredProducts;
 
   return (
     // container
@@ -20,7 +25,7 @@ export default function ProductsScreen() {
           <Text className="text-[20px] dark:text-white">{productsError}</Text>
         </View>
       )}
-      {!isLoadingProducts && !productsError && activeProducts.length === 0 && (
+      {!isLoadingProducts && !productsError && products.length === 0 && (
         <View className="flex-1 p-4">
           <Text className="text-[20px] dark:text-white">No hay productos...</Text>
         </View>
@@ -30,13 +35,13 @@ export default function ProductsScreen() {
           <View className="mb-4 flex-row items-center justify-end  px-2 py-1">
             <Text className="text-3xl font-bold dark:text-white">Productos</Text>
             <View className="ml-auto flex-row gap-2">
-              <ListAllProductsButton />
+              <ListAllProductsButton showInactiveProducts={showInactiveProducts} onPress={() => setShowInactiveProducts(!showInactiveProducts)} />
               <NewProductButton />
             </View>
           </View>
 
           <FlatList
-            data={activeProducts}
+            data={visibleProducts}
             keyExtractor={(product) => product.id.toString()}
             renderItem={({ item }) => {
               const hasLowStock = item.stock <= item.stockMin;
