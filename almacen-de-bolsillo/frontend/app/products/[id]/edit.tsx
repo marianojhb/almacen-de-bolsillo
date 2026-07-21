@@ -46,7 +46,7 @@ export default function ProductEditScreen() {
         }}
         submitLabel="Guardar"
         onCancel={() => router.back()}
-        onSubmit={(values) => {
+        onSubmit={async (values) => {
           const updatedProduct: Product = {
             ...productState!,
             sku: values.sku.trim(),
@@ -59,8 +59,15 @@ export default function ProductEditScreen() {
             isActive: values.isActive,
           };
 
-          updateProduct(updatedProduct);
+          const wasUpdated = await updateProduct(updatedProduct);
 
+          if (!wasUpdated) {
+            Alert.alert(
+              "Error",
+              "No se pudo actualizar el producto. Verificá que el SKU no esté duplicado e intentá nuevamente.",
+            );
+            return;
+          }
           Alert.alert("Producto actualizado", `${updatedProduct.shortname} fue actualizado correctamente.`, [
             {
               text: "Aceptar",

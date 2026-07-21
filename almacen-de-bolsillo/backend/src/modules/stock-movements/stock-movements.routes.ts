@@ -13,10 +13,9 @@ const stockMovementsRouter: Router = Router();
 
 stockMovementsRouter.get("/", getStockMovements);
 
-stockMovementsRouter.get("/:id", getStockMovementById);
-
-stockMovementsRouter.get("/product/id/:productId", getStockMovementsByProductId);
-stockMovementsRouter.get("/product/sku/:productId", getStockMovementsByProductSku);
+stockMovementsRouter.get("/product/id/:productId", getStockMovementsByProductId); // + específica
+stockMovementsRouter.get("/product/sku/:productSku", getStockMovementsByProductSku); // + específica
+stockMovementsRouter.get("/:id", getStockMovementById); // menos específica
 
 stockMovementsRouter.post("/", postStockMovement);
 

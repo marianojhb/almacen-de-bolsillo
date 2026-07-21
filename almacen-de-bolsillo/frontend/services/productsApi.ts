@@ -11,3 +11,19 @@ export async function getProducts(): Promise<Product[]> {
 
   return response.json();
 }
+
+export async function updateProductRequest(productId: number, product: Product): Promise<Product> {
+  const response = await fetch(`${API_URL}/products/${productId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(product),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error updating product");
+  }
+
+  return response.json();
+}

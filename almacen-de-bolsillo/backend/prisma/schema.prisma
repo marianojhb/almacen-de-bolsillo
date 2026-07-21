@@ -195,7 +195,7 @@ model StockMovements {
   quantity      Int               @map("quantity_sm")
   previousStock Int               @map("previous_stock_sm")
   newStock      Int               @map("new_stock_sm")
-  reason        String            @map("reason_sm")
+  reason        String?            @map("reason_sm")
   createdAt     DateTime          @default(now()) @map("created_at_sm")
   product       Product           @relation(fields: [productId], references: [id])
 

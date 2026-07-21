@@ -57,12 +57,12 @@ export default function ProductDetailScreen() {
           <View className="flex-row gap-3">
             <Pressable
               onPress={() => router.push(`/products/${product.id}/stock-adjustment`)}
-              className="inline-block items-center rounded-lg border border-gray-300 px-3 py-2 bg-[#111A1A] active:opacity-75 ">
+              className="inline-block items-center w-24 rounded-lg border border-gray-300 px-2 py-2 bg-[#111A1A] active:opacity-75 ">
               <Text className="font-semibold text-base text-white">Ajustar</Text>
             </Pressable>
             <Pressable
               onPress={() => router.push(`/products/${product.id}/movements`)}
-              className="inline-block items-center rounded-lg border border-gray-300 px-3 py-2 bg-[#111A1A] active:opacity-75 ">
+              className="inline-block w-24 items-center rounded-lg border border-gray-300 px-2 py-2 bg-[#111A1A] active:opacity-75 ">
               <Text className="font-semibold text-base text-white">Historial</Text>
             </Pressable>
           </View>

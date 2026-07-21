@@ -1,6 +1,16 @@
 // Product Form
 import { useState } from "react";
-import { Text, TextInput, Pressable, View, Alert, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import {
+  Text,
+  TextInput,
+  Pressable,
+  View,
+  Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Switch,
+} from "react-native";
 
 export type ProductFormValues = {
   sku: string;
@@ -30,7 +40,7 @@ export type ProductFormProps = {
   onCancel: () => void;
 };
 
-const inputClassName = "mb-4 h-12 rounded border border-gray-300 px-3 py-0 text-base leading-5 dark:text-white";
+const inputClassName = "mb-1 h-12 rounded border border-gray-300 px-3 py-0 text-base leading-5 dark:text-white";
 
 export default function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: ProductFormProps) {
   const [sku, setSku] = useState(initialValues?.sku ?? "");
@@ -106,10 +116,10 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
     <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView
         className="flex-1 dark:bg-black"
-        contentContainerClassName="gap-5 p-5"
+        contentContainerClassName="gap-5 p-2"
         keyboardShouldPersistTaps="handled">
-        <View className="flex-1 p-4">
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Nombre corto</Text>
+        <View className="flex-1 p-1">
+          <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-1">Nombre corto</Text>
           <TextInput
             placeholder="Nombre corto"
             value={shortname}
@@ -117,7 +127,7 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             textAlignVertical="center"
             className={inputClassName}
           />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Nombre largo</Text>
+          <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-2">Nombre largo</Text>
           <TextInput
             placeholder="Nombre largo"
             value={longname}
@@ -168,14 +178,11 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             textAlignVertical="center"
             className={inputClassName}
           />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
-          <Pressable
-            onPress={() => setIsActive(!isActive)}
-            className={`mb-4 h-12 w-full items-center justify-center rounded border border-gray-300 px-3 py-0 text-base leading-5 dark:text-white ${
-              isActive ? "bg-green-500" : "bg-red-500"
-            }`}>
-            <Text className="text-white">{isActive ? "Activo" : "Inactivo"}</Text>
-          </Pressable>
+          <View className="flex flex-row justify-between py-4 ">
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
+            <Switch className="mb-2" value={isActive} onValueChange={setIsActive} />
+          </View>
+
           <View className="w-full flex-row gap-3">
             <Pressable
               onPress={onCancel}
