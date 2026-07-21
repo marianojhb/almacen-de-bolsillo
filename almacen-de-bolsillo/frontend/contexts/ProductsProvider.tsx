@@ -70,10 +70,13 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     };
 
     try {
-      await updateProductRequest(productToUpdate.id, productToUpdate);
+      const savedProduct = await updateProductRequest(productToUpdate.id, productToUpdate);
 
-      const productsFromBackend = await getProducts(true);
-      setProducts(productsFromBackend);
+      setProducts((currentProducts) =>
+        currentProducts.map((currentProduct) =>
+          currentProduct.id === savedProduct.id ? savedProduct : currentProduct,
+        ),
+      );
 
       return true;
     } catch (error) {

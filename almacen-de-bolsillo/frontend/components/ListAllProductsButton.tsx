@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
 
 type ListAllProductsButtonProps = {
