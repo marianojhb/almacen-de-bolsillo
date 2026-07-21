@@ -2,8 +2,8 @@ import type { Product } from "@/types/Product";
 
 const API_URL = "http://192.168.0.45:3000";
 
-export async function getProducts(): Promise<Product[]> {
-  const response = await fetch(`${API_URL}/products`);
+export async function getProducts(includeInactive?: boolean): Promise<Product[]> {
+  const response = await fetch(`${API_URL}/products?includeInactive=${includeInactive}`);
 
   if (!response.ok) {
     throw new Error("Error fetching products");
@@ -26,4 +26,14 @@ export async function updateProductRequest(productId: number, product: Product):
   }
 
   return response.json();
+}
+
+export async function deleteProductRequest(productId: number): Promise<void> {
+  const response = await fetch(`${API_URL}/products/${productId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Error deleting product");
+  }
 }
