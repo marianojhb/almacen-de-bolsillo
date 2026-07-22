@@ -72,7 +72,7 @@ export default function ProductDetailScreen() {
         <Text className="text-[17px] dark:text-white">{product.stockMin}</Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Categoría</Text>
         {hasLowStock && <Text className="mt-5 text-base font-bold text-red-500">Stock bajo</Text>}
-        <Text className="text-[17px] dark:text-white">{product.categoryId}</Text>
+        <Text className="text-[17px] dark:text-white">{product.category.name}</Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Estado</Text>
         <Text className="text-[17px] dark:text-white">{product.isActive ? "Activo" : "Inactivo"}</Text>
       </View>
