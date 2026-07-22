@@ -11,6 +11,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
+import type { Category } from "@/types/Product";
 
 export type ProductFormValues = {
   sku: string;
@@ -35,6 +36,7 @@ export type ParsedProductFormValues = {
 };
 export type ProductFormProps = {
   initialValues?: ProductFormValues;
+  categories?: Category[];
   submitLabel?: string;
   onSubmit: (values: ParsedProductFormValues) => void;
   onCancel: () => void;
@@ -42,7 +44,13 @@ export type ProductFormProps = {
 
 const inputClassName = "mb-1 h-12 rounded border border-gray-300 px-3 py-0 text-base leading-5 dark:text-white";
 
-export default function ProductForm({ initialValues, submitLabel, onSubmit, onCancel }: ProductFormProps) {
+export default function ProductForm({
+  initialValues,
+  categories = [],
+  submitLabel,
+  onSubmit,
+  onCancel,
+}: ProductFormProps) {
   const [sku, setSku] = useState(initialValues?.sku ?? "");
   const [shortname, setShortname] = useState(initialValues?.shortname ?? "");
   const [longname, setLongname] = useState(initialValues?.longname ?? "");
@@ -171,13 +179,37 @@ export default function ProductForm({ initialValues, submitLabel, onSubmit, onCa
             className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
-          <TextInput
-            placeholder="Categoría"
-            value={categoryId}
-            onChangeText={setCategoryId}
-            textAlignVertical="center"
-            className={inputClassName}
-          />
+          {categories.length > 0 ? (
+            <View className="flex-wrap flex-row gap-2">
+              {categories.map((category) => {
+                const isSelected = categoryId === category.id.toString();
+
+                return (
+                  <Pressable
+                    key={category.id}
+                    onPress={() => setCategoryId(category.id.toString())}
+                    className={`w-32  border px-3 py-3 rounded-2xl items-center h-12 ${
+                      isSelected
+                        ? "border-[#111A1A] bg-[#111A1A] dark:bg-white"
+                        : "border-gray-300 bg-white dark:bg-black"
+                    }`}>
+                    <Text
+                      className={`text-sm ${isSelected ? "text-white dark:text-black" : "text-black dark:text-white"}`}>
+                      {category.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : (
+            <TextInput
+              placeholder="Categoría"
+              value={categoryId}
+              onChangeText={setCategoryId}
+              textAlignVertical="center"
+              className={inputClassName}
+            />
+          )}
           <View className="flex flex-row justify-between py-4 ">
             <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
             <Switch className="mb-2" value={isActive} onValueChange={setIsActive} />
