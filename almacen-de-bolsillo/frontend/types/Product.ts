@@ -11,3 +11,15 @@ export type Product = {
 };
 
 export type NewProduct = Omit<Product, "id">;
+
+export type ProductWithCategory = Product & {
+  category: {
+    id: number;
+    name: string;
+  };
+};
+
+export type Category = {
+  id: number;
+  name: string;
+};

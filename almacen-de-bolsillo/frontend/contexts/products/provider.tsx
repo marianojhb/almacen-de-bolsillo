@@ -1,14 +1,14 @@
 import { useState, useEffect, ReactNode } from "react";
 import { ProductsContext } from "@/contexts/products/context";
-import type { Product, NewProduct } from "@/types/Product";
-import { getProducts, updateProductRequest } from "@/services/productsApi";
+import type { Product, ProductWithCategory, NewProduct } from "@/types/Product";
+import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
 
 type ProductsProviderProps = {
   children: ReactNode;
 };
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithCategory[]>([]);
 
   // State to track loading and error states
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -43,15 +43,20 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
       return false;
     }
 
-    const newProduct: Product = {
-      id: Date.now(),
+    const productToCreate: NewProduct = {
       ...product,
       sku: normalizedSku,
     };
 
-    setProducts((currentProducts) => [...currentProducts, newProduct]);
+    try {
+      const savedProduct = await createProductRequest(productToCreate);
+      setProducts((currentProducts) => [...currentProducts, savedProduct]);
 
-    return true;
+      return true;
+    } catch (error) {
+      console.error("Error creating product:", error);
+      return false;
+    }
   }
 
   async function updateProduct(updatedProduct: Product): Promise<boolean> {
