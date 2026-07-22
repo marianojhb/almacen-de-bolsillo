@@ -1,4 +1,4 @@
-import { useProducts } from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/products";
 import { Alert } from "react-native";
 import { router, Stack } from "expo-router";
 import ProductForm from "@/components/ProductForm";

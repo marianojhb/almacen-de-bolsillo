@@ -1,8 +1,8 @@
-import { useProducts } from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/products";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import type { StockMovement, NewStockMovement } from "@/types/StockMovement";
+import type { NewStockMovement } from "@/types/StockMovement";
 import { postStockMovement } from "@/services/movementsApi";
 
 const stockAdjustmentSignClassName = "w-6 text-center text-xl leading-6 dark:text-white";
