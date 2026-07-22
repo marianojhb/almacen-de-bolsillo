@@ -43,7 +43,7 @@ app.use("/stock-movements", stockMovementsRouter);
 function getPORT(): number {
   return process.env.PORT ? Number(process.env.PORT) : 3000;
 }
-app.listen(getPORT(), () => {
+app.listen(getPORT(), "0.0.0.0", () => {
   console.log(`Server is running on port ${getPORT()}`);
   console.log(`Server is running at http://localhost:${getPORT()}`);
 });

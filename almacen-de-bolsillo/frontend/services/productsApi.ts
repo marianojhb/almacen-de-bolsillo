@@ -1,8 +1,8 @@
-import type { Product } from "@/types/Product";
+import type { ProductWithCategory } from "@/types/Product";
 
 const API_URL = "http://192.168.0.45:3000";
 
-export async function getProducts(includeInactive?: boolean): Promise<Product[]> {
+export async function getProducts(includeInactive?: boolean): Promise<ProductWithCategory[]> {
   const response = await fetch(`${API_URL}/products?includeInactive=${includeInactive}`);
 
   if (!response.ok) {
@@ -12,7 +12,7 @@ export async function getProducts(includeInactive?: boolean): Promise<Product[]>
   return response.json();
 }
 
-export async function updateProductRequest(productId: number, product: Product): Promise<Product> {
+export async function updateProductRequest(productId: number, product: ProductWithCategory): Promise<ProductWithCategory> {
   const response = await fetch(`${API_URL}/products/${productId}`, {
     method: "PUT",
     headers: {

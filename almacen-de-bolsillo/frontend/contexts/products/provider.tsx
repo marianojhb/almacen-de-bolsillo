@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from "react";
 import { ProductsContext } from "@/contexts/products/context";
-import type { Product, NewProduct } from "@/types/Product";
+import type { Product, ProductWithCategory, NewProduct } from "@/types/Product";
 import { getProducts, updateProductRequest } from "@/services/productsApi";
 
 type ProductsProviderProps = {
@@ -8,7 +8,7 @@ type ProductsProviderProps = {
 };
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithCategory[]>([]);
 
   // State to track loading and error states
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);

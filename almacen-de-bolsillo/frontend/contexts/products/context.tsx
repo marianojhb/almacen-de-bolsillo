@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import type { Product, NewProduct } from "@/types/Product";
+import type { Product, ProductWithCategory, NewProduct } from "@/types/Product";
 
 export type ProductsContextType = {
-  products: Product[];
+  products: ProductWithCategory[];
   isLoadingProducts: boolean;
   productsError: string | null;
   addProduct: (product: NewProduct) => Promise<boolean>; // booleano, si el producto ya existe o no

@@ -6,17 +6,29 @@ type GetProductsOptions = {
 };
 
 const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
+  const query = {
+    include: {
+      category: true,
+    },
+  };
   if (includeInactive) {
-    return prisma.product.findMany();
+    return prisma.product.findMany(query);
   }
 
   return prisma.product.findMany({
+    ...query,
     where: { isActive: true },
   });
 };
 
 const getProductByIdFromDatabase = async (productId: number) => {
+    const query = {
+    include: {
+      category: true,
+    },
+  };
   const product = await prisma.product.findUnique({
+    ...query,
     where: { id: productId },
   });
   return product;
