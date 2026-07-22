@@ -11,8 +11,8 @@ export default function NewProductScreen() {
       <ProductForm
         submitLabel="Guardar"
         onCancel={() => router.back()}
-        onSubmit={(values) => {
-          const productWasAdded = addProduct(values);
+        onSubmit={async (values) => {
+          const productWasAdded = await addProduct(values);
 
           if (!productWasAdded) {
             Alert.alert("SKU duplicado", "Ya existe un producto registrado con ese SKU.");

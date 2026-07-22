@@ -5,47 +5,50 @@ type GetProductsOptions = {
   includeInactive?: boolean;
 };
 
-const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
-  const query = {
-    include: {
-      category: true,
+const productWithCategoryQuery = {
+  include: {
+    category: {
+      select: {
+        id: true,
+        name: true,
+      },
     },
-  };
+  },
+} satisfies Prisma.ProductDefaultArgs;
+
+const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
   if (includeInactive) {
-    return prisma.product.findMany(query);
+    return prisma.product.findMany(productWithCategoryQuery);
   }
 
   return prisma.product.findMany({
-    ...query,
+    ...productWithCategoryQuery,
     where: { isActive: true },
   });
 };
 
 const getProductByIdFromDatabase = async (productId: number) => {
-    const query = {
-    include: {
-      category: true,
-    },
-  };
   const product = await prisma.product.findUnique({
-    ...query,
+    ...productWithCategoryQuery,
     where: { id: productId },
   });
   return product;
 };
 
-const postProductToDatabase = async (productData: Prisma.ProductCreateInput) => {
+const postProductToDatabase = async (productData: Prisma.ProductUncheckedCreateInput) => {
   const product = await prisma.product.create({
     data: productData,
+    ...productWithCategoryQuery,
   });
 
   return product;
 };
 
-const updateProductFromDatabase = async (productId: number, productData: Prisma.ProductUpdateInput) => {
+const updateProductFromDatabase = async (productId: number, productData: Prisma.ProductUncheckedUpdateInput) => {
   const product = await prisma.product.update({
     where: { id: productId },
     data: productData,
+    ...productWithCategoryQuery,
   });
   return product;
 };
@@ -54,6 +57,7 @@ const deleteProductFromDatabase = async (productId: number) => {
   const product = await prisma.product.update({
     where: { id: productId },
     data: { isActive: false },
+    ...productWithCategoryQuery,
   });
   return product;
 };

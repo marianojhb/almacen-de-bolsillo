@@ -58,12 +58,12 @@ export default function ProductsScreen() {
                       <View className="gap-1">
                         <Text className="text-[22px] font-semibold dark:text-white pb-2">{product.shortname}</Text>
                         <Text className="font-semibold dark:text-white">{product.longname}</Text>
-                        <Text className="text-base dark:text-white">Precio: ${product.price.toLocaleString("es-AR")}</Text>
+                        <Text className="text-base dark:text-white">
+                          Precio: ${product.price.toLocaleString("es-AR")}
+                        </Text>
                         <Text className="dark:text-white">Stock: {product.stock}</Text>
                         <Text className="dark:text-white">Stock mínimo: {product.stockMin}</Text>
-                        <Text className="dark:text-white">
-                          Categoría: {product.categoryId} {product.category.name}
-                        </Text>
+                        <Text className="dark:text-white">Categoría: {product.category.name}</Text>
                         <Text className="dark:text-white">Estado: {product.isActive ? "Activo" : "Inactivo"}</Text>
                       </View>
                       {/* alerta de bajo stock */}
