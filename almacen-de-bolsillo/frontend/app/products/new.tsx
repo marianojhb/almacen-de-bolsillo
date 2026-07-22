@@ -3,7 +3,7 @@ import { Alert, Text, View } from "react-native";
 import { router, Stack } from "expo-router";
 import ProductForm from "@/components/ProductForm";
 import { useEffect, useState } from "react";
-import { getCategories } from "@/services/categoriesApi";
+import { getCategories, createCategoryRequest } from "@/services/categoriesApi";
 import type { Category } from "@/types/Product";
 
 export default function NewProductScreen() {
@@ -29,6 +29,12 @@ export default function NewProductScreen() {
 
     fetchCategories();
   }, []);
+  const handleNewCategory = async (name: string) => {
+    const createdCategory = await createCategoryRequest({ name });
+    setCategories((currentCategories) => [...currentCategories, createdCategory]);
+
+    return createdCategory;
+  };
 
   return (
     <>
@@ -45,6 +51,7 @@ export default function NewProductScreen() {
       )}
       {!isLoadingCategories && !categoriesError && (
         <ProductForm
+          onCreateCategory={handleNewCategory}
           categories={categories}
           submitLabel="Guardar"
           onCancel={() => router.back()}

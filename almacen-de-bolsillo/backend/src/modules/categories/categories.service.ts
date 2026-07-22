@@ -1,8 +1,8 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
 
 const getCategoriesFromDatabase = async () => {
-  const categories = await prisma.category.findMany();
+  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
   return categories;
 };
 
