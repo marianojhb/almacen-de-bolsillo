@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactNode } from "react";
-import { ProductsContext } from "@/contexts/ProductsContext";
+import { ProductsContext } from "@/contexts/products/context";
 import type { Product, NewProduct } from "@/types/Product";
 import { getProducts, updateProductRequest } from "@/services/productsApi";
 

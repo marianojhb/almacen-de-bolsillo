@@ -1,4 +1,4 @@
-import { ProductsProvider } from "@/contexts/ProductsProvider";
+import { ProductsProvider } from "@/contexts/products";
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";

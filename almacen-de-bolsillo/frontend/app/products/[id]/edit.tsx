@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Alert, Text, View } from "react-native";
-import { useProducts } from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/products";
 import { useState, useEffect } from "react";
 import type { Product } from "@/types/Product";
 import ProductForm from "@/components/ProductForm";

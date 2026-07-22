@@ -1,8 +1,8 @@
+import type { Product } from "@/types/Product";
 import { router } from "expo-router";
 import { Alert, Pressable, Text } from "react-native";
 import { deleteProductRequest } from "@/services/productsApi";
-import { useProducts } from "@/contexts/useProducts";
-import type { Product } from "@/types/Product";
+import { useProducts } from "@/contexts/products";;
 
 export default function DeleteProductButton({ id }: { id: string }) {
   const { products, deleteProduct } = useProducts();

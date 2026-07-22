@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { useProducts } from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/products";
 import { View, Text, FlatList } from "react-native";
 // import { movements } from "@/data/movements";
 import { getStockMovements } from "@/services/movementsApi";

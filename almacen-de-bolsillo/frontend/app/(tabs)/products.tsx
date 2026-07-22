@@ -1,7 +1,7 @@
 import { FlatList, Text, View, Pressable } from "react-native";
 import { router } from "expo-router";
 import NewProductButton from "@/components/NewProductButton";
-import { useProducts } from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/products";
 import ListAllProductsButton from "@/components/ListAllProductsButton";
 import { useState, useEffect } from "react";
 
@@ -35,7 +35,10 @@ export default function ProductsScreen() {
           <View className="mb-4 flex-row items-center justify-end  px-2 py-1">
             <Text className="text-3xl font-bold dark:text-white">Productos</Text>
             <View className="ml-auto flex-row gap-2">
-              <ListAllProductsButton showInactiveProducts={showInactiveProducts} onPress={() => setShowInactiveProducts(!showInactiveProducts)} />
+              <ListAllProductsButton
+                showInactiveProducts={showInactiveProducts}
+                onPress={() => setShowInactiveProducts(!showInactiveProducts)}
+              />
               <NewProductButton />
             </View>
           </View>

@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
-import { useProducts } from "@/contexts/useProducts";
+import { useProducts } from "@/contexts/products";
 import EditProductButton from "@/components/EditProductButton";
 import DeleteProductButton from "@/components/DeleteProductButton";
 
