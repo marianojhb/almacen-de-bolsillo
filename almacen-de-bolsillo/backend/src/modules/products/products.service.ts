@@ -18,12 +18,16 @@ const productWithCategoryQuery = {
 
 const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
   if (includeInactive) {
-    return prisma.product.findMany(productWithCategoryQuery);
+    return prisma.product.findMany({
+      ...productWithCategoryQuery,
+      orderBy: { shortname: "asc" },
+    });
   }
 
   return prisma.product.findMany({
     ...productWithCategoryQuery,
     where: { isActive: true },
+    orderBy: { shortname: "asc" },
   });
 };
 

@@ -4,7 +4,7 @@ import { useProducts } from "@/contexts/products";
 import { useState, useEffect } from "react";
 import type { Category, Product } from "@/types/Product";
 import ProductForm from "@/components/ProductForm";
-import { getCategories } from "@/services/categoriesApi";
+import { getCategories, createCategoryRequest } from "@/services/categoriesApi";
 
 export default function ProductEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,6 +47,11 @@ export default function ProductEditScreen() {
       </View>
     );
   }
+  const handleNewCategory = async (name: string) => {
+    const createdCategory = await createCategoryRequest({ name });
+    setCategories((currentCategories) => [...currentCategories, createdCategory]);
+    return createdCategory;
+  };
 
   return (
     <>
@@ -67,6 +72,7 @@ export default function ProductEditScreen() {
       )}
       {!isLoadingCategories && !categoriesError && (
         <ProductForm
+          onCreateCategory={handleNewCategory}
           categories={categories}
           initialValues={{
             sku: product?.sku ?? "",

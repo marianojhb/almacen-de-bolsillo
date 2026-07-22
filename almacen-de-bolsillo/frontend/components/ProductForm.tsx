@@ -1,4 +1,5 @@
 // Product Form
+import type { Category } from "@/types/Product";
 import { useState } from "react";
 import {
   Text,
@@ -10,8 +11,8 @@ import {
   ScrollView,
   Platform,
   Switch,
+  Modal,
 } from "react-native";
-import type { Category } from "@/types/Product";
 
 export type ProductFormValues = {
   sku: string;
@@ -38,6 +39,7 @@ export type ProductFormProps = {
   initialValues?: ProductFormValues;
   categories?: Category[];
   submitLabel?: string;
+  onCreateCategory?: (name: string) => Promise<Category>;
   onSubmit: (values: ParsedProductFormValues) => void;
   onCancel: () => void;
 };
@@ -50,6 +52,7 @@ export default function ProductForm({
   submitLabel,
   onSubmit,
   onCancel,
+  onCreateCategory,
 }: ProductFormProps) {
   const [sku, setSku] = useState(initialValues?.sku ?? "");
   const [shortname, setShortname] = useState(initialValues?.shortname ?? "");
@@ -59,6 +62,9 @@ export default function ProductForm({
   const [stockMin, setStockMin] = useState(initialValues?.stockMin ?? "");
   const [categoryId, setCategoryId] = useState(initialValues?.categoryId ?? "");
   const [isActive, setIsActive] = useState(initialValues?.isActive ?? true);
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   const handleSubmit = () => {
     if (
@@ -118,6 +124,37 @@ export default function ProductForm({
       categoryId: numericCategoryId,
       isActive: isActive,
     });
+  };
+  const handleCreateCategory = async () => {
+    const trimmedName = newCategoryName.trim();
+
+    if (!trimmedName) {
+      Alert.alert("Categoría inválida", "Ingresá un nombre para la categoría.");
+      return;
+    }
+
+    if (categories.some((category) => category.name.toLowerCase() === trimmedName.toLowerCase())) {
+      Alert.alert("Categoría existente", "Ya existe una categoría con ese nombre.");
+      return;
+    }
+
+    if (!onCreateCategory) {
+      Alert.alert("No disponible", "No se configuró la creación de categorías.");
+      return;
+    }
+
+    try {
+      setIsCreatingCategory(true);
+      const createdCategory = await onCreateCategory(trimmedName);
+      setCategoryId(createdCategory.id.toString());
+      setNewCategoryName("");
+      setIsCategoryModalVisible(false);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      Alert.alert("Error", "No se pudo crear la categoría.");
+    } finally {
+      setIsCreatingCategory(false);
+    }
   };
 
   return (
@@ -179,37 +216,35 @@ export default function ProductForm({
             className={inputClassName}
           />
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
-          {categories.length > 0 ? (
-            <View className="flex-wrap flex-row gap-2">
-              {categories.map((category) => {
-                const isSelected = categoryId === category.id.toString();
 
-                return (
-                  <Pressable
-                    key={category.id}
-                    onPress={() => setCategoryId(category.id.toString())}
-                    className={`w-32  border px-3 py-3 rounded-2xl items-center h-12 ${
-                      isSelected
-                        ? "border-[#111A1A] bg-[#111A1A] dark:bg-white"
-                        : "border-gray-300 bg-white dark:bg-black"
-                    }`}>
-                    <Text
-                      className={`text-sm ${isSelected ? "text-white dark:text-black" : "text-black dark:text-white"}`}>
-                      {category.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          ) : (
-            <TextInput
-              placeholder="Categoría"
-              value={categoryId}
-              onChangeText={setCategoryId}
-              textAlignVertical="center"
-              className={inputClassName}
-            />
-          )}
+          <View className="flex-flow flex-wrap flex-row justify-start gap-4">
+            {categories.map((category) => {
+              const isSelected = categoryId === category.id.toString();
+
+              return (
+                <Pressable
+                  key={category.id}
+                  onPress={() => setCategoryId(category.id.toString())}
+                  className={`w-22 px-2 py-1 border rounded-xl items-stretch ${
+                    isSelected
+                      ? "border-[#111A1A] bg-[#111A1A] dark:bg-white"
+                      : "border-gray-300 bg-white dark:bg-black"
+                  }`}>
+                  <Text
+                    className={`text-sm ${isSelected ? "text-white text-base dark:text-black" : "text-black dark:text-white"}`}>
+                    {category.name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+
+            <Pressable
+              className="w-22 px-2 py-1 border rounded-xl items-stretch border-gray-300"
+              onPress={() => setIsCategoryModalVisible(true)}>
+              <Text className="text-sm text-black dark:text-white">+ Agregar</Text>
+            </Pressable>
+          </View>
+
           <View className="flex flex-row justify-between py-4 ">
             <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
             <Switch className="mb-2" value={isActive} onValueChange={setIsActive} />
@@ -251,6 +286,46 @@ export default function ProductForm({
           </View>
         </View>
       </ScrollView>
+        <Modal
+          visible={isCategoryModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsCategoryModalVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/50 px-4">
+            <View className="w-full rounded-2xl bg-white p-5 dark:bg-gray-900">
+              <Text className="mb-4 text-xl font-bold text-black dark:text-white">Nueva categoría</Text>
+
+              <Text className="mb-2 text-sm font-semibold text-black dark:text-white">Nombre</Text>
+              <TextInput
+                placeholder="Nombre de categoría"
+                value={newCategoryName}
+                onChangeText={setNewCategoryName}
+                className={inputClassName}
+              />
+
+              <View className="mt-4 flex-row gap-3">
+                <Pressable
+                  disabled={isCreatingCategory}
+                  onPress={() => {
+                    setNewCategoryName("");
+                    setIsCategoryModalVisible(false);
+                  }}
+                  className="flex-1 items-center rounded-xl border border-gray-300 px-4 py-3 active:opacity-60">
+                  <Text className="font-semibold text-black dark:text-white">Cancelar</Text>
+                </Pressable>
+
+                <Pressable
+                  disabled={isCreatingCategory}
+                  onPress={handleCreateCategory}
+                  className="flex-1 items-center rounded-xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
+                  <Text className="font-semibold text-white dark:text-black">
+                    {isCreatingCategory ? "Creando..." : "Crear"}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
     </KeyboardAvoidingView>
   );
 }
