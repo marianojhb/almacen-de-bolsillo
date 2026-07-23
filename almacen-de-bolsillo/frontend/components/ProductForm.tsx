@@ -1,6 +1,6 @@
 // Product Form
-import type { Category } from "@/types/Product";
 import { useState } from "react";
+import type { Category, NewCategory } from "@/types/Product";
 import {
   Text,
   TextInput,
@@ -39,7 +39,7 @@ export type ProductFormProps = {
   initialValues?: ProductFormValues;
   categories?: Category[];
   submitLabel?: string;
-  onCreateCategory?: (name: string) => Promise<Category>;
+  onCreateCategory?: (newCategory: NewCategory) => Promise<Category>;
   onSubmit: (values: ParsedProductFormValues) => void;
   onCancel: () => void;
 };
@@ -95,11 +95,7 @@ export default function ProductForm({
       Alert.alert("Nombre largo inválido", "El nombre largo debe tener entre 3 y 100 caracteres.");
       return;
     }
-    const trimmedCategoryId = categoryId.trim();
-    if (trimmedCategoryId.length < 1 || trimmedCategoryId.length > 10) {
-      Alert.alert("Categoría inválida", "La categoría debe tener entre 1 y 10 caracteres.");
-      return;
-    }
+
     const numericPrice = Number(price.trim());
     const numericStock = Number(stock.trim());
     const numericMinimumStock = Number(stockMin.trim());
@@ -145,7 +141,7 @@ export default function ProductForm({
 
     try {
       setIsCreatingCategory(true);
-      const createdCategory = await onCreateCategory(trimmedName);
+      const createdCategory = await onCreateCategory({ name: trimmedName });
       setCategoryId(createdCategory.id.toString());
       setNewCategoryName("");
       setIsCategoryModalVisible(false);
@@ -286,46 +282,46 @@ export default function ProductForm({
           </View>
         </View>
       </ScrollView>
-        <Modal
-          visible={isCategoryModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setIsCategoryModalVisible(false)}>
-          <View className="flex-1 items-center justify-center bg-black/50 px-4">
-            <View className="w-full rounded-2xl bg-white p-5 dark:bg-gray-900">
-              <Text className="mb-4 text-xl font-bold text-black dark:text-white">Nueva categoría</Text>
+      <Modal
+        visible={isCategoryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsCategoryModalVisible(false)}>
+        <View className="flex-1 items-center justify-center bg-black/50 px-4">
+          <View className="w-full rounded-2xl bg-white p-5 dark:bg-gray-900">
+            <Text className="mb-4 text-xl font-bold text-black dark:text-white">Nueva categoría</Text>
 
-              <Text className="mb-2 text-sm font-semibold text-black dark:text-white">Nombre</Text>
-              <TextInput
-                placeholder="Nombre de categoría"
-                value={newCategoryName}
-                onChangeText={setNewCategoryName}
-                className={inputClassName}
-              />
+            <Text className="mb-2 text-sm font-semibold text-black dark:text-white">Nombre</Text>
+            <TextInput
+              placeholder="Nombre de categoría"
+              value={newCategoryName}
+              onChangeText={setNewCategoryName}
+              className={inputClassName}
+            />
 
-              <View className="mt-4 flex-row gap-3">
-                <Pressable
-                  disabled={isCreatingCategory}
-                  onPress={() => {
-                    setNewCategoryName("");
-                    setIsCategoryModalVisible(false);
-                  }}
-                  className="flex-1 items-center rounded-xl border border-gray-300 px-4 py-3 active:opacity-60">
-                  <Text className="font-semibold text-black dark:text-white">Cancelar</Text>
-                </Pressable>
+            <View className="mt-4 flex-row gap-3">
+              <Pressable
+                disabled={isCreatingCategory}
+                onPress={() => {
+                  setNewCategoryName("");
+                  setIsCategoryModalVisible(false);
+                }}
+                className="flex-1 items-center rounded-xl border border-gray-300 px-4 py-3 active:opacity-60">
+                <Text className="font-semibold text-black dark:text-white">Cancelar</Text>
+              </Pressable>
 
-                <Pressable
-                  disabled={isCreatingCategory}
-                  onPress={handleCreateCategory}
-                  className="flex-1 items-center rounded-xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
-                  <Text className="font-semibold text-white dark:text-black">
-                    {isCreatingCategory ? "Creando..." : "Crear"}
-                  </Text>
-                </Pressable>
-              </View>
+              <Pressable
+                disabled={isCreatingCategory}
+                onPress={handleCreateCategory}
+                className="flex-1 items-center rounded-xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
+                <Text className="font-semibold text-white dark:text-black">
+                  {isCreatingCategory ? "Creando..." : "Crear"}
+                </Text>
+              </Pressable>
             </View>
           </View>
-        </Modal>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }

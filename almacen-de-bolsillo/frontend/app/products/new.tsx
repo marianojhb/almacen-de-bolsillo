@@ -1,57 +1,30 @@
 import { useProducts } from "@/contexts/products";
-import { Alert, Text, View } from "react-native";
+import { Alert, View, Text } from "react-native";
 import { router, Stack } from "expo-router";
 import ProductForm from "@/components/ProductForm";
-import { useEffect, useState } from "react";
-import { getCategories, createCategoryRequest } from "@/services/categoriesApi";
-import type { Category } from "@/types/Product";
 
 export default function NewProductScreen() {
-  const { addProduct } = useProducts();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoadingCategories(true);
-        setCategoriesError(null);
-        const categories = await getCategories();
-        setCategories(categories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        setCategoriesError("Error fetching categories");
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-  const handleNewCategory = async (name: string) => {
-    const createdCategory = await createCategoryRequest({ name });
-    setCategories((currentCategories) => [...currentCategories, createdCategory]);
-
-    return createdCategory;
-  };
+  const { addProduct, categories, addCategory, isLoadingCategories, categoriesError } = useProducts();
 
   return (
     <>
       <Stack.Screen options={{ title: "Nuevo producto" }} />
+
       {isLoadingCategories && (
         <View className="flex-1 p-4">
           <Text className="text-[20px] dark:text-white">Cargando categorías...</Text>
         </View>
       )}
+
       {categoriesError && (
         <View className="flex-1 p-4">
           <Text className="text-[20px] dark:text-white">{categoriesError}</Text>
         </View>
       )}
+
       {!isLoadingCategories && !categoriesError && (
         <ProductForm
-          onCreateCategory={handleNewCategory}
+          onCreateCategory={addCategory}
           categories={categories}
           submitLabel="Guardar"
           onCancel={() => router.back()}
