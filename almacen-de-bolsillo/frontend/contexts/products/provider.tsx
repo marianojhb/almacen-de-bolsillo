@@ -40,6 +40,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     const fetchCategories = async () => {
       try {
         setIsLoadingCategories(true);
+        setCategoriesError(null);
         const categories = await getCategories();
         setCategories(categories);
       } catch (error) {
