@@ -31,7 +31,7 @@ export default function ProductDetailScreen() {
       />
 
       <View className="flex p-4 flex-row items-center justify-between  px-2 py-1 ">
-        <Text className="text-[28px] font-bold mb-5 dark:text-white">{product.longname}</Text>
+        <Text className="text-[28px] font-bold mb-5 dark:text-white">{product.shortname}</Text>
       </View>
 
       <View className="ml-auto flex-row gap-2 pb-4">
