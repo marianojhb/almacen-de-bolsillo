@@ -1,7 +1,8 @@
 import { useState, useEffect, ReactNode } from "react";
 import { ProductsContext } from "@/contexts/products/context";
-import type { Product, ProductWithCategory, NewProduct } from "@/types/Product";
+import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/Product";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
+import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
 
 type ProductsProviderProps = {
   children: ReactNode;
@@ -9,10 +10,13 @@ type ProductsProviderProps = {
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
   const [products, setProducts] = useState<ProductWithCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // State to track loading and error states
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   useEffect(() => {
     // Obtener los productos desde la API y actualizar el estado
@@ -23,14 +27,30 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
         const products = await getProducts(true);
         setProducts(products);
       } catch (error) {
-        console.error("Error fetching products:", error);
-        setProductsError("Error fetching products");
+        console.error("Error cargando productos:", error);
+        setProductsError("Error cargando productos");
       } finally {
         setIsLoadingProducts(false);
       }
     };
 
     fetchProducts();
+
+    // Obtener las categorías desde la API y actualizar el estado
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const categories = await getCategories();
+        setCategories(categories);
+      } catch (error) {
+        console.error("Error cargando categorías:", error);
+        setCategoriesError("Error cargando categorías");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
 
     // Actualizar el estado y el fetch con los productos obtenidos desde la API
   }, []);
@@ -107,15 +127,25 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     return true;
   }
 
+  async function addCategory(category: NewCategory): Promise<Category> {
+    const createdCategory = await createCategoryRequest(category);
+    setCategories((currentCategories) => [...currentCategories, createdCategory]);
+    return createdCategory;
+  }
+
   return (
     <ProductsContext.Provider
       value={{
         isLoadingProducts,
+        isLoadingCategories,
         productsError,
+        categoriesError,
         products,
+        categories,
         addProduct,
         updateProduct,
         deleteProduct,
+        addCategory,
       }}>
       {children}
     </ProductsContext.Provider>
