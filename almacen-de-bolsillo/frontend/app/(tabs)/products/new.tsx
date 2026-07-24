@@ -1,15 +1,13 @@
 import { useProducts } from "@/contexts/products";
 import { Alert, View, Text } from "react-native";
 import { router, Stack } from "expo-router";
-import ProductForm from "@/components/ProductForm";
+import ProductForm from "@/components/products/ProductForm";
 
 export default function NewProductScreen() {
   const { addProduct, categories, addCategory, isLoadingCategories, categoriesError } = useProducts();
 
   return (
     <>
-      <Stack.Screen options={{ title: "Nuevo producto" }} />
-
       {isLoadingCategories && (
         <View className="flex-1 p-4">
           <Text className="text-[20px] dark:text-white">Cargando categorías...</Text>

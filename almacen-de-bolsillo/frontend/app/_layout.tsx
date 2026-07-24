@@ -1,3 +1,4 @@
+// @/app/_layout.tsx
 import { ProductsProvider } from "@/contexts/products";
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
@@ -18,46 +19,10 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <ProductsProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="products/new"
-            options={{
-              title: "Nuevo producto",
-              headerBackButtonDisplayMode: "minimal",
-            }}
-          />
-          <Stack.Screen
-            name="products/[id]"
-            options={{
-              title: "Producto",
-              headerBackButtonDisplayMode: "minimal",
-            }}
-          />
-          <Stack.Screen
-            name="products/[id]/edit"
-            options={{
-              title: "Editar producto",
-              headerBackButtonDisplayMode: "minimal",
-            }}
-          />
-          <Stack.Screen
-            name="products/[id]/movements"
-            options={{
-              title: "Movimientos de stock",
-              headerBackButtonDisplayMode: "minimal",
-            }}
-          />
-          <Stack.Screen
-            name="products/[id]/stock-adjustment"
-            options={{
-              title: "Ajustes de stock",
-              headerBackButtonDisplayMode: "minimal",
-            }}
-          />
-        </Stack>
+        <Stack screenOptions={{ headerShown: false }} />
+
+        <StatusBar style="auto" />
       </ProductsProvider>
-      <StatusBar style="auto" />
     </ThemeProvider>
   );
 }

@@ -1,8 +1,8 @@
 import { FlatList, Text, View, Pressable } from "react-native";
 import { router } from "expo-router";
-import NewProductButton from "@/components/NewProductButton";
+import NewProductButton from "@/components/products/NewProductButton";
 import { useProducts } from "@/contexts/products";
-import ListAllProductsButton from "@/components/ListAllProductsButton";
+import ListAllProductsButton from "@/components/products/ListAllProductsButton";
 import { useState } from "react";
 
 export default function ProductsScreen() {
