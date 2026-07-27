@@ -26,7 +26,7 @@ export default function TabScreen() {
         options={{
           title: "Productos",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
         }}
       />
       <Tabs.Screen

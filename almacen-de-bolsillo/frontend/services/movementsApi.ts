@@ -1,6 +1,6 @@
 import type { StockMovement, NewStockMovement } from "@/types/StockMovement";
-// import { API_URL } from "@/constants/api";
-const API_URL = "192.168.0.158:3000";
+import { API_URL } from "@/constants/api";
+// const API_URL = "https://192.168.0.158:3000";
 export async function getStockMovements(id: number): Promise<StockMovement[]> {
   const response = await fetch(`${API_URL}/stock-movements/product/id/${id}`, {
     method: "GET",
