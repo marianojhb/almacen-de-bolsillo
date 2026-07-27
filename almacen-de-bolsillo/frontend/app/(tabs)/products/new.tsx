@@ -1,6 +1,6 @@
 import { useProducts } from "@/contexts/products";
 import { Alert, View, Text } from "react-native";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import ProductForm from "@/components/products/ProductForm";
 
 export default function NewProductScreen() {
