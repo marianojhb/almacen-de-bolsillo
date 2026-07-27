@@ -8,7 +8,7 @@ We are a team of two students who developed an app called **Almacen de Bolsillo*
 
 ## Installation
 
-For installing the app you should first download [Expo Go](https://expo.dev/go) and from `almacen-de-bolsillo` directory, run `pnpm dev`. Also you may run both frontend and backend independently with `pnpm dev:frontend` and `pnpm dev:backend`.
+For installing the app you should first download [Expo Go](https://expo.dev/go) and from `almacen-de-bolsillo` directory, run `pnpm install`. You make start the app by typing `pnpm dev` from `almacen-de-bolsillo`, or you may also run frontend and backend independently with `pnpm dev:frontend` and `pnpm dev:backend` from the same directory.
 
 We wish you enjoy it.
 
