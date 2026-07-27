@@ -1,8 +1,10 @@
 import { View, Text } from "react-native";
-export default function MoreScreen() {
+const EditSaleScreen = () => {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text>More Screen</Text>
+      <Text>Edit Sale Screen</Text>
     </View>
   );
-}
+};
+
+export default EditSaleScreen;
