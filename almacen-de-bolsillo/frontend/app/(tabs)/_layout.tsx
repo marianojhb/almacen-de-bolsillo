@@ -14,9 +14,10 @@ export default function TabScreen() {
       />
 
       <Tabs.Screen
-        name="sales/index"
+        name="sales"
         options={{
           title: "Ventas",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
         }}
       />
