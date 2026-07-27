@@ -13,10 +13,7 @@ export type Product = {
 export type NewProduct = Omit<Product, "id">;
 
 export type ProductWithCategory = Product & {
-  category: {
-    id: number;
-    name: string;
-  };
+  category: Category;
 };
 
 export type Category = {
