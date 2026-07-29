@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { SalesOrderWithItems } from "@/types/Sales-Order";
 import { Pressable, Text, View, FlatList } from "react-native";
+import { router } from "expo-router";
 export default function SalesScreen() {
   const [sales, setSales] = useState<SalesOrderWithItems[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
@@ -20,7 +21,15 @@ export default function SalesScreen() {
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-3xl font-bold">Listado de ventas</Text>
       </View>
-
+      <View className="flex-row items-center mb-4 justify-end">
+        <Pressable
+          className="items-center rounded-xl bg-[#111A1A] px-4 py-2 active:opacity-75"
+          onPress={() => {
+            router.push("/sales/new");
+          }}>
+          <Text className="text-base font-semibold text-white">Crear nueva venta</Text>
+        </Pressable>
+      </View>
       <View className="flex-1">
         <FlatList
           ItemSeparatorComponent={() => <View className="h-2" />}
