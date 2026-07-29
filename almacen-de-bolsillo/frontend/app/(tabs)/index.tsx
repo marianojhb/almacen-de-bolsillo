@@ -1,7 +1,10 @@
-import { Text, View } from "react-native";
+// import { Redirect } from "expo-router";
 
+import { View, Text } from "react-native";
 export default function HomeScreen() {
-  return (
+  // return <Redirect href="/sales/new" />;
+
+    return (
     <View className="flex-1 p-6 justify-center">
       <Text className="text-[28px] font-bold mb-3 dark:text-white">Almacén de Bolsillo</Text>
 

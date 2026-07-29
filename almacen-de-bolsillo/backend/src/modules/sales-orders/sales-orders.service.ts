@@ -1,7 +1,29 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
+
+const salesOrderWithItemsQuery = {
+  include: {
+    salesOrdersItem: {
+      include: {
+        product: {
+          select: {
+            id: true,
+            shortname: true,
+            longname: true,
+            price: true,
+            stock: true,
+            isActive: true,
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.SalesOrderDefaultArgs;
 
 const getSalesOrdersFromDatabase = async () => prisma.salesOrder.findMany();
+
+const getSalesOrdersWithItemsFromDatabase = async () =>
+  prisma.salesOrder.findMany({ ...salesOrderWithItemsQuery, orderBy: { createdAt: "desc" } });
 
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({ where: { id: salesOrderId } });
@@ -17,6 +39,7 @@ const deleteSalesOrderFromDatabase = async (salesOrderId: number) =>
 
 export {
   getSalesOrdersFromDatabase,
+  getSalesOrdersWithItemsFromDatabase,
   getSalesOrderByIdFromDatabase,
   postSalesOrderToDatabase,
   updateSalesOrderFromDatabase,
