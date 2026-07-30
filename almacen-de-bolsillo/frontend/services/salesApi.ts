@@ -1,4 +1,4 @@
-import type { NewSalesOrder, SalesOrder, SalesOrderWithItems } from "@/types/Sales-Order";
+import type { NewSalesOrder, SalesOrder, SalesOrderWithItems } from "@/types/sales-order";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 

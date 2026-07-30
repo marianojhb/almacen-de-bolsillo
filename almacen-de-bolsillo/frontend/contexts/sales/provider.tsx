@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SalesContext } from "./context";
-import { SalesOrderWithItems } from "@/types/Sales-Order";
-import { getSalesOrdersWithItems, createSalesOrderRequest, deleteSalesOrderRequest} from "@/services/salesApi";
+import { SalesOrderWithItems } from "@/types/sales-order";
+import { getSalesOrdersWithItems, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
   children: React.ReactNode;
@@ -79,7 +79,8 @@ export function SalesProvider({ children }: SalesProviderProps) {
   }
 
   return (
-    <SalesContext.Provider value={{ sales, totalSales, isLoadingSales, errorSaleOrdersItems, addSale, refreshSales, deleteSale }}>
+    <SalesContext.Provider
+      value={{ sales, totalSales, isLoadingSales, errorSaleOrdersItems, addSale, refreshSales, deleteSale }}>
       {children}
     </SalesContext.Provider>
   );
