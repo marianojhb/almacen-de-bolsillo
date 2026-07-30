@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { SalesOrderWithItems } from "@/types/Sales-Order";
+import { SalesOrderWithItems } from "@/types/sales-order";
 
 interface SalesContextType {
   sales: SalesOrderWithItems[];

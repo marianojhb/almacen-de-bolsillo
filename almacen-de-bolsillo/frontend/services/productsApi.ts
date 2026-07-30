@@ -1,4 +1,4 @@
-import type { NewProduct, Product, ProductWithCategory } from "@/types/Product";
+import type { NewProduct, Product, ProductWithCategory } from "@/types/product";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
