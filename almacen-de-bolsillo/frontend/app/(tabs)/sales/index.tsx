@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SalesOrderWithItems } from "@/types/Sales-Order";
+import { SalesOrderWithItems } from "@/types/sales-order";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
 export default function SalesScreen() {

@@ -1,11 +1,11 @@
-import { View, Text, TextInput, ScrollView, Pressable, Modal, FlatList } from "react-native";
-import { useProducts } from "@/contexts/products";
+import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
+import { useSaleDraft } from "@/contexts/sale-draft";
 import { useState } from "react";
 import { router } from "expo-router";
 
 export const NewSaleScreen = () => {
   // contexts
-  const { products } = useProducts();
+  const { items } = useSaleDraft();
 
   // estilos
   const viewStyle = "flex-row items-center justify-between mb-4";
@@ -15,8 +15,6 @@ export const NewSaleScreen = () => {
   // form inputs states
   const [inputSubtotal, setInputSubtotal] = useState("");
   const [inputDiscount, setInputDiscount] = useState("");
-
-  const [isVisibleModal, setIsVisibleModal] = useState(false);
 
   // pure calculations
   const discount: number = Math.round(Number(inputSubtotal) * (Number(inputDiscount) / 100) * 100) / 100;
@@ -97,19 +95,11 @@ export const NewSaleScreen = () => {
           <Text className="text-base font-bold mr-2">Total: {totalConIVA}</Text>
         </View>
 
-        <Pressable
-          className="bg-blue-500 rounded-lg p-4 items-center w-full mt-4"
-          onPress={() => {
-            setIsVisibleModal(false);
-          }}>
+        <Pressable className="bg-blue-500 rounded-lg p-4 items-center w-full mt-4" onPress={() => {}}>
           <Text className="text-white">Guardar venta</Text>
         </Pressable>
 
-        <Pressable
-          className="bg-gray-500 rounded-lg p-4 items-center w-full mt-4"
-          onPress={() => {
-            setIsVisibleModal(false);
-          }}>
+        <Pressable className="bg-gray-500 rounded-lg p-4 items-center w-full mt-4" onPress={() => {}}>
           <Text className="text-white">Cancelar</Text>
         </Pressable>
       </ScrollView>
