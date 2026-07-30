@@ -7,13 +7,19 @@ import { useState, useMemo } from "react";
 export default function SelectProductsModal() {
   const { products, categories } = useProducts();
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState<string>("");
 
   const filteredProducts = useMemo(() => {
-    if (!categoryId) {
-      return products;
-    }
-    return products.filter((product) => product.categoryId === parseInt(categoryId));
-  }, [categoryId, products]);
+    const normalizedSearchText = searchText.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const matchesCategory = !categoryId || product.categoryId === Number(categoryId);
+
+      const matchesSearchText =
+        normalizedSearchText.length === 0 || product.shortname.toLowerCase().includes(normalizedSearchText);
+      return matchesCategory && matchesSearchText;
+    });
+  }, [categoryId, products, searchText]);
 
   return (
     <>
@@ -38,7 +44,8 @@ export default function SelectProductsModal() {
               className="flex-1 border border-white rounded-lg w-32 text-start p-2 text-sm text-white dark:text-black"
               placeholder="Filtrar por nombre"
               placeholderTextColor="#9ca3af"
-              keyboardType="default"></TextInput>
+              keyboardType="default"
+              onChangeText={setSearchText}></TextInput>
           </View>
           {/* pildoras */}
 
