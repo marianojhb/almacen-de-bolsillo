@@ -1,5 +1,6 @@
 import type { NewSalesOrder, SalesOrder, SalesOrderWithItems } from "@/types/Sales-Order";
-import { API_URL } from "@/constants/api";
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export async function getSalesOrders(): Promise<SalesOrder[]> {
   const response = await fetch(`${API_URL}/sales-orders`, {
