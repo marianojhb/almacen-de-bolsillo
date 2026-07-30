@@ -1,6 +1,6 @@
 import { View, Text, Modal, Pressable, FlatList, TextInput } from "react-native";
 import { useProducts } from "@/contexts/products";
-import { Product } from "@/types/Product";
+import { Product } from "@/types/product";
 import { router } from "expo-router";
 import { useState, useMemo } from "react";
 
