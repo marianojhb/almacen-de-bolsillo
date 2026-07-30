@@ -1,7 +1,6 @@
 import type { Category } from "@/types/Product";
-import { API_URL } from "@/constants/api";
 
-// const API_URL = "http://192.168.0.158:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export async function getCategories(): Promise<Category[]> {
   const response = await fetch(`${API_URL}/categories`);
