@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from "react";
 import { ProductsContext } from "@/contexts/products/context";
-import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/Product";
+import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/product";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
 
