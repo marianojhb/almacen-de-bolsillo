@@ -1,101 +1,149 @@
-import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
+import { View, Text, TextInput, ScrollView, Pressable, FlatList } from "react-native";
 import { useSaleDraft } from "@/contexts/sale-draft";
 import { useState } from "react";
 import { router } from "expo-router";
 
 export const NewSaleScreen = () => {
   // contexts
-  const { items } = useSaleDraft();
+  const { items, totalAmount, removeItem } = useSaleDraft();
 
   // estilos
-  const viewStyle = "flex-row items-center justify-between mb-4";
+  const viewStyle = "flex-row items-center justify-between mb-2";
   const textStyle = "text-base font-bold mr-2";
-  const inputStyle = " border border-gray-300 rounded-md p-2 w-1/2";
+  const inputStyle = "  rounded-md p-2 w-1/2";
 
   // form inputs states
-  const [inputSubtotal, setInputSubtotal] = useState("");
   const [inputDiscount, setInputDiscount] = useState("");
+  const [metodoDePago, setMetodoDePago] = useState("");
 
   // pure calculations
-  const discount: number = Math.round(Number(inputSubtotal) * (Number(inputDiscount) / 100) * 100) / 100;
-  const baseImponible: number = Math.round((Number(inputSubtotal) - discount) * 100) / 100; // redondear a 2 decimales
-
+  const discount: number = Math.round(Number(totalAmount) * (Number(inputDiscount) / 100) * 100) / 100;
+  const baseImponible: number = Math.round((Number(totalAmount) - discount) * 100) / 100; // Significa "...) * 100 / 100": redondea a 2 decimales
   const iva = Math.round(baseImponible * 0.21 * 100) / 100; // 21% de IVA
-
   const totalConIVA: number = Math.round((baseImponible + iva) * 100) / 100; // sumar el IVA y redondear a 2 decimales
 
   return (
     <>
       <View className="items-center justify-center">
-        <Text className="text-2xl font-bold">Nueva Venta</Text>
-        <Text className="text-lg text-gray-500">Complete los campos para crear una nueva venta</Text>
+        <Text className="text-2xl font-bold pt-2">Nueva Venta</Text>
       </View>
-      <ScrollView className="flex-1 p-4">
+      <ScrollView className="flex-1 p-2" alwaysBounceVertical={false} bounces={true}>
+        <Pressable
+          className="border rounded p-2 border-gray-300 w-full mb-2"
+          onPress={() => {
+            router.push("/sales/new/select-products");
+          }}>
+          <View className="flex-column items-start ">
+            <Text className="text-base font-bold pb-2">Items:</Text>
+
+            {items.length === 0 && (
+              <Text className="text-sm text-gray-500 dark:text-gray-400">No hay productos agregados </Text>
+            )}
+
+            {items.length > 0 &&
+              items.map((item) => (
+                <View key={item.productId}>
+                  <Text>{item.name}</Text>
+                  <View className="flex-row items-center justify-between w-full">
+                    <Text>
+                      Cantidad: {item.quantity} ${item.price} c/u
+                    </Text>
+                    <Text className="ms-auto">
+                      {(item.quantity * item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                    </Text>
+                    <Pressable
+                      className="border border-red-500 p-2 px-4 rounded ms-2"
+                      onPress={() => {
+                        removeItem(item.productId);
+                      }}>
+                      <Text className="text-red-500 font-bold">x</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+
+            <Text className="text-base font-bold pt-2 ms-auto">
+              Subtotal: {totalAmount.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+            </Text>
+          </View>
+        </Pressable>
+
         <View className={viewStyle}>
           <Text className={textStyle}>Número de factura</Text>
           <TextInput placeholder="Ingrese el número de factura" className={inputStyle}></TextInput>
         </View>
 
         <View className={viewStyle}>
-          <Text className={textStyle}>Subtotal</Text>
-          <TextInput
-            placeholder="Ingrese el subtotal"
-            value={inputSubtotal}
-            className={inputStyle}
-            onChangeText={setInputSubtotal}></TextInput>
-        </View>
-
-        <View className={viewStyle}>
           <Text className={textStyle}>Descuento</Text>
-          <View className="flex-row items-center justify-start w-1/2">
-            <TextInput
-              placeholder="Descuento"
-              className={inputStyle}
-              value={inputDiscount}
-              onChangeText={setInputDiscount}></TextInput>
-            <Text>{"  "}%</Text>
+          <View className={viewStyle + " gap-[1px]"}>
+            <Pressable
+              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "0" ? "bg-slate-300" : "bg-slate-100"}`}
+              onPress={() => setInputDiscount("0")}>
+              <Text>0%</Text>
+            </Pressable>
+            <Pressable
+              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "5" ? "bg-slate-300" : "bg-slate-100"}`}
+              onPress={() => setInputDiscount("5")}>
+              <Text>5%</Text>
+            </Pressable>
+            <Pressable
+              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "10" ? "bg-slate-300" : "bg-slate-100"}`}
+              onPress={() => setInputDiscount("10")}>
+              <Text>10%</Text>
+            </Pressable>
+            <Pressable
+              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "15" ? "bg-slate-300" : "bg-slate-100"}`}
+              onPress={() => setInputDiscount("15")}>
+              <Text>15%</Text>
+            </Pressable>
           </View>
         </View>
 
         <View className={viewStyle}>
           <Text className={textStyle}>Descuento total (-)</Text>
-          <Text className={inputStyle}>- {discount}</Text>
+          <Text className={inputStyle}>
+            - {discount.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+          </Text>
         </View>
 
         <View className={viewStyle}>
-          <Text className={textStyle}>Total sin IVA</Text>
-          <Text className={inputStyle}>{baseImponible}</Text>
+          <Text className={textStyle}>Total (sin IVA)</Text>
+          <Text className={inputStyle}>
+            {baseImponible.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+          </Text>
         </View>
 
         <View className={viewStyle}>
           <Text className={textStyle}>IVA</Text>
-          <Text className={inputStyle}>{iva}</Text>
+          <Text className={inputStyle}>{iva.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}</Text>
         </View>
 
         <View className={viewStyle}>
-          <Text className={textStyle}>Total con IVA</Text>
-          <Text className={inputStyle}>{totalConIVA}</Text>
+          <Text className={textStyle}>Total (IVA incl.)</Text>
+          <Text className={inputStyle}>
+            {totalConIVA.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+          </Text>
         </View>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>Método de pago</Text>
-          <TextInput placeholder="Ingrese el método de pago" className={inputStyle}></TextInput>
+        <View className="flex-row justify-center w-full items-center gap-x-[1px]">
+          <Pressable
+            className={`px-4 py-4 w-26 rounded-tl rounded-bl ${metodoDePago === "EFECTIVO" ? "bg-green-500" : "bg-slate-200"}`}
+            onPress={() => setMetodoDePago("EFECTIVO")}>
+            <Text className={`${metodoDePago === "EFECTIVO" ? "text-white" : "text-black"}`}>EFECTIVO</Text>
+          </Pressable>
+          <Pressable
+            className={`px-4 py-4 w-26  ${metodoDePago === "MERCADOPAGO" ? "bg-yellow-300" : "bg-slate-200"}`}
+            onPress={() => setMetodoDePago("MERCADOPAGO")}>
+            <Text className={`${metodoDePago === "MERCADOPAGO" ? "font-bold" : "text-black"}`}>MERCADOPAGO</Text>
+          </Pressable>
+          <Pressable
+            className={`px-4 py-4 w-26 rounded-tr rounded-br ${metodoDePago === "UALA" ? "bg-blue-500" : "bg-slate-200"}`}
+            onPress={() => setMetodoDePago("UALA")}>
+            <Text className={`${metodoDePago === "UALA" ? "text-white font-bold" : "text-black"}`}>UALA</Text>
+          </Pressable>
         </View>
 
-        <Pressable
-          className="bg-blue-500 rounded-lg p-4 items-center w-full mt-4"
-          onPress={() => {
-            router.push("/sales/new/select-products");
-          }}>
-          <Text className="text-white">Agregar productos</Text>
-        </Pressable>
-
-        <View className="flex-row items-center justify-between mb-4 mt-4">
-          <Text className="text-base font-bold mr-2">Productos agregados</Text>
-          <Text className="text-base font-bold mr-2">Total: {totalConIVA}</Text>
-        </View>
-
-        <Pressable className="bg-blue-500 rounded-lg p-4 items-center w-full mt-4" onPress={() => {}}>
+        <Pressable className="bg-black rounded-lg p-4 items-center w-full mt-4" onPress={() => {}}>
           <Text className="text-white">Guardar venta</Text>
         </Pressable>
 

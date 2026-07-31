@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useContext } from "react";
 import { SaleDraftContext } from "./context";
 import { SaleItem } from "@/types/sale-item";
 
@@ -9,8 +9,20 @@ type SalesDraftProviderProps = {
 export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
   const [items, setItems] = useState<SaleItem[]>([]);
 
+  const totalAmount = items.reduce((total, item) => total + item.price * item.quantity, 0);
+
   function addItem(item: SaleItem) {
-    setItems((currentItems) => [...currentItems, item]);
+    setItems((currentItems) => {
+      const itemAlreadyExists = items.some((currentProduct) => currentProduct.productId === item.productId);
+      if (itemAlreadyExists) {
+        return currentItems.map((updateItem) =>
+          updateItem.productId === item.productId
+            ? { ...updateItem, quantity: updateItem.quantity + item.quantity }
+            : updateItem,
+        );
+      }
+      return [...currentItems, item];
+    });
   }
 
   function removeItem(productId: number) {
@@ -25,6 +37,7 @@ export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
     <SaleDraftContext.Provider
       value={{
         items,
+        totalAmount,
         addItem,
         removeItem,
         clearSale,
