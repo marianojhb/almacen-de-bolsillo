@@ -1,24 +1,18 @@
-import type { Product } from "./product";
-
 export type SalesOrder = {
   id: number;
   invoice: string;
-  sellerId: number;
   createdAt: Date;
   discount: number;
   iva: number;
   isActive: boolean;
-  total: number;
+  total: number; // Final amount, including IVA and discount
   updatedAt: Date;
   paymentMethod: "EFECTIVO" | "MERCADOPAGO" | "UALA";
-  salesOrdersItems: SalesOrderItem[];
 };
 
-export type NewSalesOrder = Omit<SalesOrder, "id" | "createdAt" | "updatedAt" | "isActive">;
-
 export type SalesOrderItem = {
-  salesOrdersItemId: number;
   productId: number;
+  salesOrdersItemId: number;
   quantity: number;
   shortname: string;
   longname: string;
@@ -26,16 +20,19 @@ export type SalesOrderItem = {
   subtotal: number;
   discount: number;
   createdAt: Date;
-  updatedAt: Date;
-  product: Product;
-  salesOrder: SalesOrder; // Replace 'SalesOrder' with the actual type of the sales order
+  updatedAt: Date; // Replace 'SalesOrder' with the actual type of the sales order
 };
 
 export type SalesOrderWithItems = SalesOrder & {
   salesOrdersItems: SalesOrderItem[];
 };
 
-export type NewSalesOrderItem = Omit<
-  SalesOrderItem,
-  "salesOrdersItemId" | "createdAt" | "updatedAt" | "product" | "salesOrder"
->;
+// --------------- Nuevas ventas:
+
+export type NewSalesOrder = Omit<SalesOrder, "id" | "createdAt" | "updatedAt" | "isActive">;
+
+export type NewSalesOrderItem = Omit<SalesOrderItem, "salesOrdersItemId" | "createdAt" | "updatedAt">;
+
+export type NewSalesOrderWithItems = NewSalesOrder & {
+  newSalesOrdersItems: NewSalesOrderItem[];
+};
