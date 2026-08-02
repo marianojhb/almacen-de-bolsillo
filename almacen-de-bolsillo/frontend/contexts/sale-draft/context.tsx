@@ -1,12 +1,11 @@
 import { createContext } from "react";
-import type { SaleItem } from "@/types/sale-item";
+import type { NewSalesOrderItem } from "@/types/sales-order";
 
-type SaleDraftContextType = {
-  items: SaleItem[];
+interface SaleDraftContextType {
+  items: NewSalesOrderItem[];
   totalAmount: number;
-  addItem: (item: SaleItem) => void;
+  addItem: (item: NewSalesOrderItem) => void;
   removeItem: (productId: number) => void;
   clearSale: () => void;
-};
-
+}
 export const SaleDraftContext = createContext<SaleDraftContextType | null>(null);

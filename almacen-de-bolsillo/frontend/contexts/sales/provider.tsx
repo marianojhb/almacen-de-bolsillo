@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SalesContext } from "./context";
-import { SalesOrderWithItems } from "@/types/sales-order";
+import { SalesOrderWithItems, NewSalesOrderWithItems } from "@/types/sales-order";
 import { getSalesOrdersWithItems, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
@@ -55,7 +55,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
-  async function addSale(sale: Omit<SalesOrderWithItems, "id" | "createdAt">): Promise<boolean> {
+  async function addSale(sale: NewSalesOrderWithItems): Promise<boolean> {
     try {
       const newSale = await createSalesOrderRequest(sale);
       setSales((prevSales) => [...prevSales, newSale]);

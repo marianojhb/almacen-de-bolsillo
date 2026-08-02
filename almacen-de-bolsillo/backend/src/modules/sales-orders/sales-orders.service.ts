@@ -3,7 +3,7 @@ import type { Prisma } from "../../../generated/prisma/index.js";
 
 const salesOrderWithItemsQuery = {
   include: {
-    salesOrdersItem: {
+    salesOrdersItems: {
       include: {
         product: {
           select: {
@@ -28,8 +28,17 @@ const getSalesOrdersWithItemsFromDatabase = async () =>
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({ where: { id: salesOrderId } });
 
-const postSalesOrderToDatabase = async (salesOrderData: Prisma.SalesOrderCreateInput) =>
-  prisma.salesOrder.create({ data: salesOrderData });
+// const postSalesOrderToDatabase = async (salesOrderData: Prisma.SalesOrderCreateInput) => {
+//   return prisma.salesOrder.create({ data: salesOrderData });
+// };
+
+const postSalesOrderToDatabase = async (salesOrderData: any) => {
+  const { newSalesOrdersItems, ...newSalesOrders } = salesOrderData;
+  return prisma.salesOrder.create({
+    data: { ...newSalesOrders, salesOrdersItems: { create: newSalesOrdersItems } },
+    include: { salesOrdersItems: true },
+  });
+};
 
 const updateSalesOrderFromDatabase = async (salesOrderId: number, salesOrderData: Prisma.SalesOrderUpdateInput) =>
   prisma.salesOrder.update({ where: { id: salesOrderId }, data: salesOrderData });
