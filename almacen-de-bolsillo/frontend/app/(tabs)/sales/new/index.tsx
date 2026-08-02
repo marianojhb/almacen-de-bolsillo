@@ -1,20 +1,26 @@
-import { View, Text, TextInput, ScrollView, Pressable, FlatList } from "react-native";
+import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
 import { useSaleDraft } from "@/contexts/sale-draft";
+import { useSales } from "@/contexts/sales";
 import { useState } from "react";
 import { router } from "expo-router";
 
 export const NewSaleScreen = () => {
   // contexts
-  const { items, totalAmount, removeItem } = useSaleDraft();
+  const { items, totalAmount, removeItem, clearSale } = useSaleDraft();
+  const { addSale, refreshSales } = useSales();
 
   // estilos
   const viewStyle = "flex-row items-center justify-between mb-2";
-  const textStyle = "text-base font-bold mr-2";
-  const inputStyle = "  rounded-md p-2 w-1/2";
+  const textStyle = "font-bold mr-2";
+  const inputStyle = "text-right  rounded-md p-2 w-1/2";
 
   // form inputs states
   const [inputDiscount, setInputDiscount] = useState("");
-  const [metodoDePago, setMetodoDePago] = useState("");
+  const [metodoDePago, setMetodoDePago] = useState<"EFECTIVO" | "MERCADOPAGO" | "UALA">("EFECTIVO");
+  const [numeroFactura, setNumeroFactura] = useState("");
+
+  // buttons states
+  const [isSavingSale, setIsSavingSale] = useState(false);
 
   // pure calculations
   const discount: number = Math.round(Number(totalAmount) * (Number(inputDiscount) / 100) * 100) / 100;
@@ -22,12 +28,55 @@ export const NewSaleScreen = () => {
   const iva = Math.round(baseImponible * 0.21 * 100) / 100; // 21% de IVA
   const totalConIVA: number = Math.round((baseImponible + iva) * 100) / 100; // sumar el IVA y redondear a 2 decimales
 
+  const isDisabled: boolean = items.length === 0 || isSavingSale;
+
+  async function handleAddSale() {
+    // desabilitar boton de guardar venta
+    // metodoDePago === "" ? setIsDisabled(true) : setIsDisabled(false);
+    console.log("apretado");
+    const saleData = {
+      invoice: numeroFactura,
+      discount: discount,
+      iva: iva,
+      total: totalConIVA,
+      paymentMethod: metodoDePago,
+      newSalesOrdersItems: items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        shortname: item.shortname,
+        longname: item.longname,
+        price: item.price,
+        subtotal: item.quantity * item.price,
+        discount: 0, // descuento por línea por ahora fijo
+      })),
+    };
+    // console.log("saleData:", saleData);
+
+    setIsSavingSale(true);
+    // 1. Create the sale successfully
+    await addSale(saleData);
+
+    // 2. Clear the temporary draft
+    clearSale();
+
+    // 3. Reload the sales list
+    await refreshSales();
+
+    //4. Navigate to the list
+    router.replace("/sales");
+
+    setIsSavingSale(false);
+  }
   return (
     <>
       <View className="items-center justify-center">
         <Text className="text-2xl font-bold pt-2">Nueva Venta</Text>
       </View>
-      <ScrollView className="flex-1 p-2" alwaysBounceVertical={false} bounces={true}>
+      <ScrollView
+        className="flex-1 p-2"
+        alwaysBounceVertical={false}
+        bounces={true}
+        contentContainerClassName="flex-grow">
         <Pressable
           className="border rounded p-2 border-gray-300 w-full mb-2"
           onPress={() => {
@@ -43,7 +92,7 @@ export const NewSaleScreen = () => {
             {items.length > 0 &&
               items.map((item) => (
                 <View key={item.productId}>
-                  <Text>{item.name}</Text>
+                  <Text>{item.shortname}</Text>
                   <View className="flex-row items-center justify-between w-full">
                     <Text>
                       Cantidad: {item.quantity} ${item.price} c/u
@@ -70,7 +119,10 @@ export const NewSaleScreen = () => {
 
         <View className={viewStyle}>
           <Text className={textStyle}>Número de factura</Text>
-          <TextInput placeholder="Ingrese el número de factura" className={inputStyle}></TextInput>
+          <TextInput
+            placeholder="Número de factura"
+            className={inputStyle + " border border-gray-300"}
+            onChangeText={setNumeroFactura}></TextInput>
         </View>
 
         <View className={viewStyle}>
@@ -118,38 +170,48 @@ export const NewSaleScreen = () => {
           <Text className={inputStyle}>{iva.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}</Text>
         </View>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>Total (IVA incl.)</Text>
-          <Text className={inputStyle}>
+        <View className={viewStyle + " border-t border-gray-300 pt-2 mb-0"}>
+          <Text className={textStyle + " text-2xl"}>Total a pagar </Text>
+          <Text className={inputStyle + " text-2xl font-bold "}>
             {totalConIVA.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
           </Text>
         </View>
+        <Text className="text-sm text-gray-500">(IVA incluido)</Text>
 
-        <View className="flex-row justify-center w-full items-center gap-x-[1px]">
+        <View className="mt-auto">
+          <View className="flex-row justify-center items-center gap-x-[1px] mb-2">
+            <Pressable
+              className={`px-4 py-4 w-26 rounded-tl rounded-bl ${metodoDePago === "EFECTIVO" ? "bg-green-500" : "bg-slate-200"}`}
+              onPress={() => setMetodoDePago("EFECTIVO")}>
+              <Text className={`${metodoDePago === "EFECTIVO" ? "text-white" : "text-black"}`}>EFECTIVO</Text>
+            </Pressable>
+            <Pressable
+              className={`px-4 py-4 w-26  ${metodoDePago === "MERCADOPAGO" ? "bg-yellow-300" : "bg-slate-200"}`}
+              onPress={() => setMetodoDePago("MERCADOPAGO")}>
+              <Text className={`${metodoDePago === "MERCADOPAGO" ? "font-bold" : "text-black"}`}>MERCADOPAGO</Text>
+            </Pressable>
+            <Pressable
+              className={` px-4 py-4 w-26 rounded-tr rounded-br ${metodoDePago === "UALA" ? "bg-blue-500" : "bg-slate-200"}`}
+              onPress={() => setMetodoDePago("UALA")}>
+              <Text className={`${metodoDePago === "UALA" ? "text-white font-bold" : "text-black"}`}>UALA</Text>
+            </Pressable>
+          </View>
           <Pressable
-            className={`px-4 py-4 w-26 rounded-tl rounded-bl ${metodoDePago === "EFECTIVO" ? "bg-green-500" : "bg-slate-200"}`}
-            onPress={() => setMetodoDePago("EFECTIVO")}>
-            <Text className={`${metodoDePago === "EFECTIVO" ? "text-white" : "text-black"}`}>EFECTIVO</Text>
+            className={`rounded-lg p-4 items-center mt-8 ${!isDisabled ? " bg-green-500" : " bg-gray-300"}`}
+            onPress={handleAddSale}
+            disabled={isDisabled}>
+            <Text className="text-white">{isSavingSale ? "Guardando venta..." : "Guardar venta"}</Text>
           </Pressable>
           <Pressable
-            className={`px-4 py-4 w-26  ${metodoDePago === "MERCADOPAGO" ? "bg-yellow-300" : "bg-slate-200"}`}
-            onPress={() => setMetodoDePago("MERCADOPAGO")}>
-            <Text className={`${metodoDePago === "MERCADOPAGO" ? "font-bold" : "text-black"}`}>MERCADOPAGO</Text>
-          </Pressable>
-          <Pressable
-            className={`px-4 py-4 w-26 rounded-tr rounded-br ${metodoDePago === "UALA" ? "bg-blue-500" : "bg-slate-200"}`}
-            onPress={() => setMetodoDePago("UALA")}>
-            <Text className={`${metodoDePago === "UALA" ? "text-white font-bold" : "text-black"}`}>UALA</Text>
+            className="bg-gray-500 rounded-lg p-4 items-center w-full mt-4"
+            onPress={() => {
+              clearSale();
+
+              router.back();
+            }}>
+            <Text className="text-white">Cancelar</Text>
           </Pressable>
         </View>
-
-        <Pressable className="bg-black rounded-lg p-4 items-center w-full mt-4" onPress={() => {}}>
-          <Text className="text-white">Guardar venta</Text>
-        </Pressable>
-
-        <Pressable className="bg-gray-500 rounded-lg p-4 items-center w-full mt-4" onPress={() => {}}>
-          <Text className="text-white">Cancelar</Text>
-        </Pressable>
       </ScrollView>
     </>
   );
