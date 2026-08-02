@@ -104,8 +104,11 @@ export default function SelectProductsModal() {
                     addItem({
                       productId: product.id,
                       quantity: quantities[product.id] ?? 1,
-                      name: product.shortname,
+                      shortname: product.shortname,
+                      longname: product.longname,
                       price: product.price,
+                      discount: 0,
+                      subtotal: 0,
                     });
                   }}>
                   <Text className="text-white">Agregar</Text>
@@ -113,12 +116,6 @@ export default function SelectProductsModal() {
               </View>
             )}
           />
-          {/* <Pressable className="bg-green-500 rounded-lg p-4 items-center" onPress={() => {}}>
-                <Text className="text-white">Sí</Text>
-              </Pressable>
-              <Pressable className="bg-red-500 rounded-lg p-4 items-center" onPress={() => {}}>
-                <Text className="text-white">No</Text>
-              </Pressable> */}
         </View>
       </View>
     </>
