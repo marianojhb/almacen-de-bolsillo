@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"pnpm --dir backend dev\" \"pnpm --dir frontend start\"",
+    "dev": "concurrently \"pnpm --filter @almacen/shared dev\" \"pnpm --filter backend dev\" \"pnpm --filter frontend start\"",
     "dev:backend": "pnpm --dir backend dev",
     "dev:frontend": "pnpm --dir frontend start",
     "test": "echo \"Error: no test specified\" && exit 1"
