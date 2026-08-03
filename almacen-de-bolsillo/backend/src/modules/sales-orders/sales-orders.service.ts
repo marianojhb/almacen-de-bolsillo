@@ -1,5 +1,6 @@
-import { prisma } from "../../config/prisma.js";
+import { prisma } from "@/config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
+import type { NewSalesOrderWithItemsDto } from "@almacen/shared";
 
 const salesOrderWithItemsQuery = {
   include: {
@@ -28,14 +29,10 @@ const getSalesOrdersWithItemsFromDatabase = async () =>
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({ where: { id: salesOrderId } });
 
-// const postSalesOrderToDatabase = async (salesOrderData: Prisma.SalesOrderCreateInput) => {
-//   return prisma.salesOrder.create({ data: salesOrderData });
-// };
-
-const postSalesOrderToDatabase = async (salesOrderData: any) => {
-  const { newSalesOrdersItems, ...newSalesOrders } = salesOrderData;
+const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
+  const { salesOrdersItems, ...newSalesOrders } = salesOrderData;
   return prisma.salesOrder.create({
-    data: { ...newSalesOrders, salesOrdersItems: { create: newSalesOrdersItems } },
+    data: { ...newSalesOrders, salesOrdersItems: { create: salesOrdersItems } },
     include: { salesOrdersItems: true },
   });
 };
