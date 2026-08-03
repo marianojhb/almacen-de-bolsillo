@@ -1,17 +1,17 @@
 import { ReactNode, useState } from "react";
 import { SaleDraftContext } from "./context";
-import type { NewSalesOrderItem } from "@/types/sales-order";
+import type { NewSalesOrderItemDto } from "@almacen/shared";
 
 type SalesDraftProviderProps = {
   children: ReactNode;
 };
 
 export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
-  const [items, setItems] = useState<NewSalesOrderItem[]>([]);
+  const [items, setItems] = useState<NewSalesOrderItemDto[]>([]);
 
   const totalAmount = items.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  function addItem(item: NewSalesOrderItem) {
+  function addItem(item: NewSalesOrderItemDto) {
     setItems((currentItems) => {
       const itemAlreadyExists = items.some((currentProduct) => currentProduct.productId === item.productId);
       if (itemAlreadyExists) {
