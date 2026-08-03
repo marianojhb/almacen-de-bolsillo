@@ -22,6 +22,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@almacen/shared": "workspace:*",
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "@prisma/client-runtime-utils": "7.8.0",

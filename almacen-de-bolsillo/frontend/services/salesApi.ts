@@ -1,8 +1,8 @@
-import type { NewSalesOrderWithItems, SalesOrder, SalesOrderWithItems } from "@/types/sales-order";
+import type { NewSalesOrderWithItemsDto, SalesOrderDto, SalesOrderWithItemsDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getSalesOrders(): Promise<SalesOrder[]> {
+export async function getSalesOrders(): Promise<SalesOrderDto[]> {
   const response = await fetch(`${API_URL}/sales-orders`, {
     method: "GET",
     headers: {
@@ -17,7 +17,7 @@ export async function getSalesOrders(): Promise<SalesOrder[]> {
   return response.json();
 }
 
-export async function getSalesOrdersWithItems(): Promise<SalesOrderWithItems[]> {
+export async function getSalesOrdersWithItems(): Promise<SalesOrderWithItemsDto[]> {
   const response = await fetch(`${API_URL}/sales-orders/with-items`, {
     method: "GET",
     headers: {
@@ -32,7 +32,7 @@ export async function getSalesOrdersWithItems(): Promise<SalesOrderWithItems[]> 
   return response.json();
 }
 
-export async function createSalesOrderRequest(salesOrder: NewSalesOrderWithItems): Promise<SalesOrderWithItems> {
+export async function createSalesOrderRequest(salesOrder: NewSalesOrderWithItemsDto): Promise<SalesOrderWithItemsDto> {
   const response = await fetch(`${API_URL}/sales-orders`, {
     method: "POST",
     headers: {
