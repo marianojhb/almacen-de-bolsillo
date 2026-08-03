@@ -40,7 +40,7 @@ export const NewSaleScreen = () => {
       iva: iva,
       total: totalConIVA,
       paymentMethod: metodoDePago,
-      newSalesOrdersItems: items.map((item) => ({
+      salesOrdersItems: items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
         shortname: item.shortname,
