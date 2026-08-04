@@ -2,7 +2,7 @@ import { useProducts } from "@/contexts/products";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import type { NewStockMovement } from "@/types/StockMovement";
+import type { NewStockMovement } from "@/types/stock-movement";
 import { postStockMovement } from "@/services/movementsApi";
 
 const stockAdjustmentSignClassName = "w-6 text-center text-xl leading-6 dark:text-white";
@@ -10,12 +10,13 @@ const stockAdjustmentInputClassName = "h-12 min-w-24 px-3 py-0 text-center text-
 
 export default function StockAdjustmentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { products, updateProduct } = useProducts();
+  const { products, refreshProducts } = useProducts();
   const [movementType, setMovementType] = useState<"MANUAL_ENTRY" | "MANUAL_EXIT" | "ADJUSTMENT">("MANUAL_ENTRY");
 
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
   const [inputAdjustmentValue, setInputAdjustmentValue] = useState("");
   const [inputReason, setInputReason] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   if (!product) {
     return (
@@ -27,7 +28,7 @@ export default function StockAdjustmentScreen() {
 
   const currentStock = product.stock;
 
-  function handleStockAdjustment(): boolean {
+  async function handleStockAdjustment(): Promise<boolean> {
     if (!product) return false;
 
     if (inputAdjustmentValue.trim() === "") {
@@ -60,24 +61,29 @@ export default function StockAdjustmentScreen() {
         break;
     }
 
-    updateProduct({ ...product, stock: newStock });
-    // TODO: Update table of stock movements
     const newStockMovement: NewStockMovement = {
       type: movementType,
       productId: product.id,
       quantity: stockDifference,
       previousStock: currentStock,
-      newStock: newStock,
+      newStock,
       reason: inputReason.trim() !== "" ? inputReason.trim() : undefined,
     };
+
     try {
-      postStockMovement(newStockMovement);
+      setIsSaving(true);
+      await postStockMovement(newStockMovement);
+      await refreshProducts();
+      return true;
     } catch (error) {
       console.log("Error", error);
+      Alert.alert("Error", "No se pudo registrar el movimiento de stock.");
+      return false;
+    } finally {
+      setIsSaving(false);
     }
-
-    return true;
   }
+
   return (
     <>
       <Stack.Screen
@@ -159,10 +165,16 @@ export default function StockAdjustmentScreen() {
             <Text className="text-base font-semibold text-gray-800 dark:text-white">Cancelar</Text>
           </Pressable>
           <Pressable
-            onPress={() => {
-              if (handleStockAdjustment()) {
+            disabled={isSaving}
+            onPress={async () => {
+              const stockWasAdjusted = await handleStockAdjustment();
+
+              if (stockWasAdjusted) {
                 router.back();
-              } else {
+                return;
+              }
+
+              if (!isSaving) {
                 Alert.alert(
                   "Error",
                   "Por favor, ingrese un valor válido para el ajuste de stock. Debe ser un número entero no negativo.",
@@ -180,7 +192,7 @@ export default function StockAdjustmentScreen() {
               active:opacity-75 
               dark:bg-white 
               ">
-            <Text className="text-base font-semibold text-white dark:text-black">Guardar</Text>
+            <Text className="text-base font-semibold text-white dark:text-black">{isSaving ? "Guardando..." : "Guardar"}</Text>
           </Pressable>
         </View>
       </View>
