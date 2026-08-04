@@ -12,6 +12,8 @@ export type Product = {
 
 export type NewProduct = Omit<Product, "id">;
 
+export type UpdateProduct = Omit<Product, "id">;
+
 export type ProductWithCategory = Product & {
   category: Category;
 };
