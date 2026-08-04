@@ -57,7 +57,9 @@ export default function ProductsScreen() {
                     <View className="flex flex-row justify-between items-center p-4 mb-3 bg-white dark:bg-gray-900 border border-[#d4d4d4] dark:border-gray-600 rounded-xl ">
                       <View className="gap-1">
                         <Text className="text-[22px] font-semibold dark:text-white pb-2">{product.shortname}</Text>
-                        <Text className="font-semibold dark:text-white">{product.longname}</Text>
+                        <Text className="font-semibold dark:text-white">
+                          [{product.id}] {product.longname}
+                        </Text>
                         <Text className="text-base dark:text-white">
                           Precio: ${product.price.toLocaleString("es-AR")}
                         </Text>
