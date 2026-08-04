@@ -1,4 +1,4 @@
-import type { StockMovement, NewStockMovement } from "@/types/StockMovement";
+import type { StockMovement, NewStockMovement } from "@/types/stock-movement";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
