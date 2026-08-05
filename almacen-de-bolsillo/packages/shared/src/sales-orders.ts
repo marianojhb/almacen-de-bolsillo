@@ -10,6 +10,7 @@ export type SalesOrderDto = {
   total: number;
   updatedAt: string;
   paymentMethod: PaymentMethod;
+  transactionId: number;
 };
 
 export type SalesOrderItemDto = {
@@ -29,7 +30,7 @@ export type SalesOrderWithItemsDto = SalesOrderDto & {
   salesOrdersItems: SalesOrderItemDto[];
 };
 
-export type NewSalesOrderDto = Omit<SalesOrderDto, "id" | "createdAt" | "updatedAt" | "isActive">;
+export type NewSalesOrderDto = Omit<SalesOrderDto, "id" | "createdAt" | "updatedAt" | "isActive" | "transactionId">;
 
 export type NewSalesOrderItemDto = Omit<SalesOrderItemDto, "salesOrdersItemId" | "createdAt" | "updatedAt">;
 

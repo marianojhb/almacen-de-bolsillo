@@ -29,11 +29,113 @@ const getSalesOrdersWithItemsFromDatabase = async () =>
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({ where: { id: salesOrderId } });
 
+// const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
+//   const { salesOrdersItems, ...newSalesOrders } = salesOrderData;
+//   return prisma.salesOrder.create({
+//     data: {
+//       ...newSalesOrders,
+//       transaction: {
+//         create: {
+//           amount: newSalesOrders.total,
+//           paymentMethod: newSalesOrders.paymentMethod,
+//         },
+//       },
+//       salesOrdersItems: { create: salesOrdersItems },
+//     },
+//     include: { salesOrdersItems: true, transaction: true },
+//   });
+// };
+
+// This function creates a new sales order along with its items, updates the stock of the products involved, and creates stock movement records. It uses a transaction to ensure that all operations are atomic.
 const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
   const { salesOrdersItems, ...newSalesOrders } = salesOrderData;
-  return prisma.salesOrder.create({
-    data: { ...newSalesOrders, salesOrdersItems: { create: salesOrdersItems } },
-    include: { salesOrdersItems: true },
+
+  // Start a transaction to ensure atomicity
+  return prisma.$transaction(async (tx) => {
+    // Extract product IDs from sales order items
+    const productIds = salesOrdersItems.map((item) => item.productId);
+
+    // Fetch products and check stock availability
+    const products = await tx.product.findMany({
+      where: {
+        id: { in: productIds },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        stock: true,
+      },
+    });
+
+    // Create a map of products for easy access
+    const productsById = new Map(products.map((product) => [product.id, product]));
+
+    for (const item of salesOrdersItems) {
+      const product = productsById.get(item.productId);
+
+      if (!product) {
+        throw new Error(`Product ${item.productId} not found or inactive`);
+      }
+
+      if (product.stock < item.quantity) {
+        throw new Error(`Insufficient stock for product ${item.productId}`);
+      }
+    }
+
+    // Create the sales order and related records
+    const salesOrder = await tx.salesOrder.create({
+      data: {
+        ...newSalesOrders,
+        transaction: {
+          create: {
+            amount: newSalesOrders.total,
+            paymentMethod: newSalesOrders.paymentMethod,
+            direction: "INCOME",
+          },
+        },
+        salesOrdersItems: {
+          create: salesOrdersItems,
+        },
+      },
+      // Include related records in the response (salesOrdersItems and transaction)
+      include: {
+        salesOrdersItems: true,
+        transaction: true,
+      },
+    });
+
+    // Update stock and create stock movements
+    for (const item of salesOrdersItems) {
+      const product = productsById.get(item.productId);
+
+      if (!product) {
+        throw new Error(`Product ${item.productId} not found or inactive`);
+      }
+
+      const newStock = product.stock - item.quantity;
+
+      // Create stock movement record
+      await tx.stockMovements.create({
+        data: {
+          type: "SALE",
+          productId: item.productId,
+          quantity: item.quantity,
+          previousStock: product.stock,
+          newStock,
+          reason: `Sale order #${salesOrder.id}`,
+          salesOrderId: salesOrder.id,
+        },
+      });
+
+      // Update product stock
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stock: newStock },
+      });
+    }
+
+    // Return the created sales order with related records
+    return salesOrder;
   });
 };
 

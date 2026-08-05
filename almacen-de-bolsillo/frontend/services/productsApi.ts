@@ -1,4 +1,4 @@
-import type { NewProduct, Product, ProductWithCategory } from "@/types/product";
+import type { NewProduct, ProductWithCategory, UpdateProduct } from "@/types/product";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -28,7 +28,7 @@ export async function createProductRequest(product: NewProduct): Promise<Product
   return response.json();
 }
 
-export async function updateProductRequest(productId: number, product: Product): Promise<ProductWithCategory> {
+export async function updateProductRequest(productId: number, product: UpdateProduct): Promise<ProductWithCategory> {
   const response = await fetch(`${API_URL}/products/${productId}`, {
     method: "PUT",
     headers: {

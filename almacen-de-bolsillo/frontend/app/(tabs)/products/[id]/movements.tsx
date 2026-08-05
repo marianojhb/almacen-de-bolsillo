@@ -1,10 +1,9 @@
 import { useLocalSearchParams } from "expo-router";
 import { useProducts } from "@/contexts/products";
 import { View, Text, FlatList } from "react-native";
-// import { movements } from "@/data/movements";
 import { getStockMovements } from "@/services/movementsApi";
 import { useState, useEffect } from "react";
-import type { StockMovement } from "@/types/StockMovement";
+import type { StockMovement } from "@/types/stock-movement";
 
 export default function StockMovementsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
