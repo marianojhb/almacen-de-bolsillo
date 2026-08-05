@@ -7,3 +7,12 @@ export type {
   NewSalesOrderItemDto,
   NewSalesOrderWithItemsDto,
 } from "./sales-orders.js";
+
+export type {
+  PurchaseOrderDto,
+  PurchaseOrderItemDto,
+  PurchaseOrderWithItemsDto,
+  NewPurchaseOrderDto,
+  NewPurchaseOrderItemDto,
+  NewPurchaseOrderWithItemsDto,
+} from "./purchase-orders.js";
