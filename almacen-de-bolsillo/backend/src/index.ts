@@ -6,7 +6,7 @@ import purchaseOrdersRouter from "./modules/purchase-orders/purchase-orders.rout
 import purchaseOrdersItemsRouter from "./modules/purchase-orders-items/purchase-orders-items.routes.js";
 import usersRouter from "./modules/users/users.routes.js";
 import salesOrdersRouter from "./modules/sales-orders/sales-orders.routes.js";
-import salesOrdersItemsRouter from "./modules/sales-orders-items/sales-orders-items.routes.js";
+import salesOrderItemsRouter from "./modules/sales-orders-items/sales-orders-items.routes.js";
 import employeesRouter from "./modules/employees/employees.routes.js";
 import balancesRouter from "./modules/balances/balances.routes.js";
 import transactionsRouter from "./modules/transactions/transactions.routes.js";
@@ -33,7 +33,7 @@ app.use("/purchase-orders", purchaseOrdersRouter);
 app.use("/purchase-orders-items", purchaseOrdersItemsRouter);
 app.use("/users", usersRouter);
 app.use("/sales-orders", salesOrdersRouter);
-app.use("/sales-orders-items", salesOrdersItemsRouter);
+app.use("/sales-orders-items", salesOrderItemsRouter);
 app.use("/employees", employeesRouter);
 app.use("/balances", balancesRouter);
 app.use("/transactions", transactionsRouter);

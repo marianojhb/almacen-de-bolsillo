@@ -40,7 +40,7 @@ export const NewSaleScreen = () => {
       iva: iva,
       total: totalConIVA,
       paymentMethod: metodoDePago,
-      salesOrdersItems: items.map((item) => ({
+      salesOrderItems: items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
         shortname: item.shortname,
@@ -250,7 +250,7 @@ de models:
   total           Decimal            @default(0) @map("total_so") @db.Decimal(10, 2)
   updatedAt       DateTime           @updatedAt @map("updated_at")
   paymentMethod   PaymentMethod      @default(EFECTIVO) @map("payment_method_so")
-  salesOrdersItem SalesOrdersItems[]
+  salesOrderItems SalesOrderItem[]
   seller          User               @relation(fields: [sellerId], references: [id])
 
 

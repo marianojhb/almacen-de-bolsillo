@@ -15,7 +15,7 @@ export type SalesOrderDto = {
 
 export type SalesOrderItemDto = {
   productId: number;
-  salesOrdersItemId: number;
+  salesOrderItemId: number;
   quantity: number;
   shortname: string;
   longname: string | null;
@@ -27,13 +27,13 @@ export type SalesOrderItemDto = {
 };
 
 export type SalesOrderWithItemsDto = SalesOrderDto & {
-  salesOrdersItems: SalesOrderItemDto[];
+  salesOrderItems: SalesOrderItemDto[];
 };
 
 export type NewSalesOrderDto = Omit<SalesOrderDto, "id" | "createdAt" | "updatedAt" | "isActive" | "transactionId">;
 
-export type NewSalesOrderItemDto = Omit<SalesOrderItemDto, "salesOrdersItemId" | "createdAt" | "updatedAt">;
+export type NewSalesOrderItemDto = Omit<SalesOrderItemDto, "salesOrderItemId" | "createdAt" | "updatedAt">;
 
 export type NewSalesOrderWithItemsDto = NewSalesOrderDto & {
-  salesOrdersItems: NewSalesOrderItemDto[];
+  salesOrderItems: NewSalesOrderItemDto[];
 };

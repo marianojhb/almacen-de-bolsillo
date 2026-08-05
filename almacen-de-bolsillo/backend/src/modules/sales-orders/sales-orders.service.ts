@@ -4,7 +4,7 @@ import type { NewSalesOrderWithItemsDto } from "@almacen/shared";
 
 const salesOrderWithItemsQuery = {
   include: {
-    salesOrdersItems: {
+    salesOrderItems: {
       include: {
         product: {
           select: {
@@ -30,7 +30,7 @@ const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({ where: { id: salesOrderId } });
 
 // const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
-//   const { salesOrdersItems, ...newSalesOrders } = salesOrderData;
+//   const { salesOrderItems, ...newSalesOrders } = salesOrderData;
 //   return prisma.salesOrder.create({
 //     data: {
 //       ...newSalesOrders,
@@ -40,20 +40,20 @@ const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
 //           paymentMethod: newSalesOrders.paymentMethod,
 //         },
 //       },
-//       salesOrdersItems: { create: salesOrdersItems },
+//       salesOrderItems: { create: salesOrderItems },
 //     },
-//     include: { salesOrdersItems: true, transaction: true },
+//     include: { salesOrderItems: true, transaction: true },
 //   });
 // };
 
 // This function creates a new sales order along with its items, updates the stock of the products involved, and creates stock movement records. It uses a transaction to ensure that all operations are atomic.
 const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
-  const { salesOrdersItems, ...newSalesOrders } = salesOrderData;
+  const { salesOrderItems, ...newSalesOrders } = salesOrderData;
 
   // Start a transaction to ensure atomicity
   return prisma.$transaction(async (tx) => {
     // Extract product IDs from sales order items
-    const productIds = salesOrdersItems.map((item) => item.productId);
+    const productIds = salesOrderItems.map((item) => item.productId);
 
     // Fetch products and check stock availability
     const products = await tx.product.findMany({
@@ -70,7 +70,7 @@ const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDt
     // Create a map of products for easy access
     const productsById = new Map(products.map((product) => [product.id, product]));
 
-    for (const item of salesOrdersItems) {
+    for (const item of salesOrderItems) {
       const product = productsById.get(item.productId);
 
       if (!product) {
@@ -93,19 +93,19 @@ const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDt
             direction: "INCOME",
           },
         },
-        salesOrdersItems: {
-          create: salesOrdersItems,
+        salesOrderItems: {
+          create: salesOrderItems,
         },
       },
-      // Include related records in the response (salesOrdersItems and transaction)
+      // Include related records in the response (salesOrderItems and transaction)
       include: {
-        salesOrdersItems: true,
+        salesOrderItems: true,
         transaction: true,
       },
     });
 
     // Update stock and create stock movements
-    for (const item of salesOrdersItems) {
+    for (const item of salesOrderItems) {
       const product = productsById.get(item.productId);
 
       if (!product) {
@@ -115,7 +115,7 @@ const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDt
       const newStock = product.stock - item.quantity;
 
       // Create stock movement record
-      await tx.stockMovements.create({
+      await tx.stockMovement.create({
         data: {
           type: "SALE",
           productId: item.productId,
