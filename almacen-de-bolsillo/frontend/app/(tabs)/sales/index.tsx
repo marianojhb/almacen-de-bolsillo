@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { SalesOrderWithItemsDto } from "@almacen/shared";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
-import { useSales } from "@/contexts/sales";
 import { getSalesOrdersWithItems } from "@/services/salesApi";
 export default function SalesScreen() {
   const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
-  const { refreshSales } = useSales();
 
   useEffect(() => {
     async function fetchSales() {
@@ -17,8 +15,6 @@ export default function SalesScreen() {
     }
     fetchSales();
   }, []);
-
-  // await refreshSales();
 
   return (
     <View className="flex-1 p-4">
