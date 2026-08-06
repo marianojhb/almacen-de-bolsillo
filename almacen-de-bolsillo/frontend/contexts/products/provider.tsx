@@ -1,4 +1,5 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, useCallback } from "react";
+
 import { ProductsContext } from "@/contexts/products/context";
 import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/product";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
@@ -18,7 +19,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
-  async function refreshProducts(): Promise<void> {
+  const refreshProducts = useCallback(async () => {
     try {
       setIsLoadingProducts(true);
       setProductsError(null);
@@ -30,30 +31,28 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     } finally {
       setIsLoadingProducts(false);
     }
-  }
+  }, []);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      setIsLoadingCategories(true);
+      setCategoriesError(null);
+      const categories = await getCategories();
+      setCategories(categories);
+    } catch (error) {
+      console.error("Error cargando categorías:", error);
+      setCategoriesError("Error cargando categorías");
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, []);
 
   useEffect(() => {
+    // Obtener los productos desde la API y actualizar el estado
     refreshProducts();
-
     // Obtener las categorías desde la API y actualizar el estado
-    const fetchCategories = async () => {
-      try {
-        setIsLoadingCategories(true);
-        setCategoriesError(null);
-        const categories = await getCategories();
-        setCategories(categories);
-      } catch (error) {
-        console.error("Error cargando categorías:", error);
-        setCategoriesError("Error cargando categorías");
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
     fetchCategories();
-
-    // Actualizar el estado y el fetch con los productos obtenidos desde la API
-  }, []);
+  }, [refreshProducts, fetchCategories]);
 
   async function addProduct(product: NewProduct): Promise<boolean> {
     const normalizedSku = product.sku.trim().toUpperCase();

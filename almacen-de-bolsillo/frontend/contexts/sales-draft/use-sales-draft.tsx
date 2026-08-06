@@ -1,8 +1,8 @@
 import { useContext } from "react";
-import { SaleDraftContext } from "./context";
+import { SalesDraftContext } from "./context";
 
-export function useSaleDraft() {
-  const context = useContext(SaleDraftContext);
+export function useSalesDraft() {
+  const context = useContext(SalesDraftContext);
 
   if (!context) {
     throw new Error("useSaleDraft must be used within a SalesDraftProvider");

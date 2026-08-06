@@ -3,14 +3,21 @@ import { router } from "expo-router";
 import NewProductButton from "@/components/products/NewProductButton";
 import { useProducts } from "@/contexts/products";
 import ListAllProductsButton from "@/components/products/ListAllProductsButton";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ProductsScreen() {
-  const { products, isLoadingProducts, productsError } = useProducts();
+  const { products, isLoadingProducts, productsError, refreshProducts } = useProducts();
   const [showInactiveProducts, setShowInactiveProducts] = useState(true);
 
   const filteredProducts = products.filter((product) => product.isActive === true);
   let visibleProducts = showInactiveProducts ? products : filteredProducts;
+  
+  useFocusEffect(
+    useCallback(() => {
+      void refreshProducts();
+    }, [refreshProducts]),
+  );
 
   return (
     // container
