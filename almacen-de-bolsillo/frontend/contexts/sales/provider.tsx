@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { SalesContext } from "./context";
 import { SalesOrderWithItemsDto, NewSalesOrderWithItemsDto } from "@almacen/shared";
 import { getSalesOrders, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
@@ -10,29 +10,16 @@ interface SalesProviderProps {
 export function SalesProvider({ children }: SalesProviderProps) {
   const [totalSales, setTotalSales] = useState<number>(0);
   const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
+
+
+
+  // State to track loading and error states
   const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false);
   const [errorSaleOrdersItems, setErrorSaleOrdersItems] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchSales() {
-      try {
-        setIsLoadingSales(true);
-        setErrorSaleOrdersItems(null);
-        const salesFetched = await getSalesOrders();
-        setSales(salesFetched);
-        setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
-      } catch (error) {
-        console.error("Error fetching sales orders with items:", error);
-        setErrorSaleOrdersItems("Error fetching sales orders with items");
-      } finally {
-        setIsLoadingSales(false);
-      }
-    }
-
-    fetchSales();
-  }, []);
-
-  async function refreshSales() {
+  
+  
+  const refreshSales = useCallback(async () => {
     try {
       setIsLoadingSales(true);
       setErrorSaleOrdersItems(null);
@@ -40,20 +27,16 @@ export function SalesProvider({ children }: SalesProviderProps) {
       setSales(salesFetched);
       setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
     } catch (error) {
-      console.error("Error refreshing sales orders with items:", error);
-      setErrorSaleOrdersItems("Error refreshing sales orders with items");
+      console.error("Error fetching sales orders with items:", error);
+      setErrorSaleOrdersItems("Error fetching sales orders with items");
     } finally {
       setIsLoadingSales(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      refreshSales();
-    }, 60000); // Refresh every 60 seconds
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+    refreshSales();
+  }, [refreshSales]);
 
   async function addSale(sale: NewSalesOrderWithItemsDto): Promise<boolean> {
     try {

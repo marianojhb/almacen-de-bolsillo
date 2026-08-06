@@ -1,5 +1,5 @@
 import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
-import { useSaleDraft } from "@/contexts/sale-draft";
+import { useSaleDraft } from "@/contexts/sales-draft";
 import { useSales } from "@/contexts/sales";
 import { useState } from "react";
 import { router } from "expo-router";

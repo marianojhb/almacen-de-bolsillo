@@ -1,6 +1,6 @@
 // app/(tabs)/sales/_layout.tsx
 
-import { SalesDraftProvider } from "@/contexts/sale-draft/provider";
+import { SalesDraftProvider } from "@/contexts/sales-draft/provider";
 import { SalesProvider } from "@/contexts/sales/provider";
 import { Stack } from "expo-router";
 

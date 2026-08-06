@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { SaleDraftContext } from "./context";
+import { SalesDraftContext } from "./context";
 import type { NewSalesOrderItemDto } from "@almacen/shared";
 
 type SalesDraftProviderProps = {
@@ -29,20 +29,20 @@ export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
     setItems((currentItems) => currentItems.filter((item) => item.productId !== productId));
   }
 
-  function clearSale() {
+  function clearSales() {
     setItems([]);
   }
 
   return (
-    <SaleDraftContext.Provider
+    <SalesDraftContext.Provider
       value={{
         items,
         totalAmount,
         addItem,
         removeItem,
-        clearSale,
+        clearSales,
       }}>
       {children}
-    </SaleDraftContext.Provider>
+    </SalesDraftContext.Provider>
   );
 }
