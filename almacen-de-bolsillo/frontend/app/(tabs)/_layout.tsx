@@ -45,6 +45,13 @@ export default function TabScreen() {
         }}
       />
       <Tabs.Screen
+        name="suppliers"
+        options={{
+          title: "Proveedores",
+          tabBarIcon: ({ color, size }) => <Ionicons name="business-outline" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="more/index"
         options={{
           title: "Más",
