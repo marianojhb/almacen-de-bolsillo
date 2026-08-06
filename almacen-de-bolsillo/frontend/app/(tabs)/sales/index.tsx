@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import { SalesOrderWithItemsDto } from "@almacen/shared";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
-import { getSalesOrdersWithItems } from "@/services/salesApi";
+import { getSalesOrders } from "@/services/salesApi";
 export default function SalesScreen() {
   const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
 
   useEffect(() => {
     async function fetchSales() {
-      const data = await getSalesOrdersWithItems();
+      const data = await getSalesOrders();
       setSales(data);
       setTotalSales(data.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
     }
