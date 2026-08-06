@@ -1,6 +1,6 @@
 // Product Form
 import { useState } from "react";
-import type { Category, NewCategory } from "@/types/product";
+import type { Category, CreateCategoryDto } from "@almacen/shared";
 import {
   Text,
   TextInput,
@@ -23,6 +23,7 @@ export type ProductFormValues = {
   stockMin: string;
   categoryId: string;
   isActive: boolean;
+  supplierId?: string;
 };
 
 export type ParsedProductFormValues = {
@@ -39,7 +40,7 @@ export type ProductFormProps = {
   initialValues?: ProductFormValues;
   categories?: Category[];
   submitLabel?: string;
-  onCreateCategory?: (newCategory: NewCategory) => Promise<Category>;
+  onCreateCategory?: (newCategory: CreateCategoryDto) => Promise<Category>;
   onSubmit: (values: ParsedProductFormValues) => void;
   onCancel: () => void;
 };

@@ -12,7 +12,7 @@ export default function ProductsScreen() {
 
   const filteredProducts = products.filter((product) => product.isActive === true);
   let visibleProducts = showInactiveProducts ? products : filteredProducts;
-  
+
   useFocusEffect(
     useCallback(() => {
       void refreshProducts();

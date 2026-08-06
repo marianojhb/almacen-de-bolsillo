@@ -1,8 +1,14 @@
-import type { NewProduct, ProductWithCategory, UpdateProduct } from "@/types/product";
+import type {
+  Product,
+  CreateProductDto,
+  UpdateProductDto,
+  ProductWithCategory,
+  ProductWithRelations,
+} from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getProducts(includeInactive?: boolean): Promise<ProductWithCategory[]> {
+export async function getProducts(includeInactive?: boolean): Promise<ProductWithRelations[]> {
   const response = await fetch(`${API_URL}/products?includeInactive=${includeInactive}`);
 
   if (!response.ok) {
@@ -12,7 +18,7 @@ export async function getProducts(includeInactive?: boolean): Promise<ProductWit
   return response.json();
 }
 
-export async function createProductRequest(product: NewProduct): Promise<ProductWithCategory> {
+export async function createProductRequest(product: CreateProductDto): Promise<Product> {
   const response = await fetch(`${API_URL}/products`, {
     method: "POST",
     headers: {
@@ -28,7 +34,7 @@ export async function createProductRequest(product: NewProduct): Promise<Product
   return response.json();
 }
 
-export async function updateProductRequest(productId: number, product: UpdateProduct): Promise<ProductWithCategory> {
+export async function updateProductRequest(productId: number, product: UpdateProductDto): Promise<ProductWithCategory> {
   const response = await fetch(`${API_URL}/products/${productId}`, {
     method: "PUT",
     headers: {

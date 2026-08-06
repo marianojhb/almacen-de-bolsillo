@@ -1,12 +1,13 @@
 import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
-import { useSaleDraft } from "@/contexts/sales-draft";
+import { useSalesDraft } from "@/contexts/sales-draft";
 import { useSales } from "@/contexts/sales";
 import { useState } from "react";
 import { router } from "expo-router";
+import { CreateSalesOrderDto } from "@almacen/shared";
 
 export const NewSaleScreen = () => {
   // contexts
-  const { items, totalAmount, removeItem, clearSale } = useSaleDraft();
+  const { items, totalAmount, removeItem, clearSales } = useSalesDraft();
   const { addSale, refreshSales } = useSales();
 
   // estilos
@@ -31,20 +32,21 @@ export const NewSaleScreen = () => {
   const isDisabled: boolean = items.length === 0 || isSavingSale;
 
   async function handleAddSale() {
-    const saleData = {
+    const saleData: CreateSalesOrderDto = {
       invoice: numeroFactura,
+      sellerId: 3, // por ahora fijo
+      paymentMethod: metodoDePago,
       discount: discount,
       iva: iva,
       total: totalConIVA,
-      paymentMethod: metodoDePago,
       salesOrderItems: items.map((item) => ({
         productId: item.productId,
-        quantity: item.quantity,
         shortname: item.shortname,
         longname: item.longname,
+        quantity: item.quantity,
         price: item.price,
-        subtotal: item.quantity * item.price,
         discount: 0, // descuento por línea por ahora fijo
+        subtotal: item.quantity * item.price,
       })),
     };
 
@@ -53,7 +55,7 @@ export const NewSaleScreen = () => {
     await addSale(saleData);
 
     // 2. Clear the temporary draft
-    clearSale();
+    clearSales();
 
     // 3. Reload the sales list
     await refreshSales();
@@ -201,7 +203,7 @@ export const NewSaleScreen = () => {
           <Pressable
             className="bg-gray-500 rounded-lg p-4 items-center w-full mt-4"
             onPress={() => {
-              clearSale();
+              clearSales();
 
               router.back();
             }}>
