@@ -1,11 +1,14 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
 
 const getPurchaseOrdersFromDatabase = async () => prisma.purchaseOrder.findMany();
+
 const getPurchaseOrderByIdFromDatabase = async (purchaseOrderId: number) =>
   prisma.purchaseOrder.findUnique({ where: { id: purchaseOrderId } });
+
 const postPurchaseOrderToDatabase = async (purchaseOrderData: Prisma.PurchaseOrderCreateInput) =>
   prisma.purchaseOrder.create({ data: purchaseOrderData });
+
 const updatePurchaseOrderFromDatabase = async (
   purchaseOrderId: number,
   purchaseOrderData: Prisma.PurchaseOrderUpdateInput,

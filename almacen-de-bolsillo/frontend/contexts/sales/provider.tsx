@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { SalesContext } from "./context";
-import { SalesOrderWithItemsDto, NewSalesOrderWithItemsDto } from "@almacen/shared";
+import { SalesOrderWithItemsDto, CreateSalesOrderItemDto } from "@almacen/shared";
 import { getSalesOrders, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
@@ -11,14 +11,10 @@ export function SalesProvider({ children }: SalesProviderProps) {
   const [totalSales, setTotalSales] = useState<number>(0);
   const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
 
-
-
   // State to track loading and error states
   const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false);
   const [errorSaleOrdersItems, setErrorSaleOrdersItems] = useState<string | null>(null);
 
-  
-  
   const refreshSales = useCallback(async () => {
     try {
       setIsLoadingSales(true);
@@ -38,7 +34,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
     refreshSales();
   }, [refreshSales]);
 
-  async function addSale(sale: NewSalesOrderWithItemsDto): Promise<boolean> {
+  async function addSale(sale: CreateSalesOrderItemDto): Promise<boolean> {
     try {
       const newSale = await createSalesOrderRequest(sale);
       setSales((prevSales) => [...prevSales, newSale]);

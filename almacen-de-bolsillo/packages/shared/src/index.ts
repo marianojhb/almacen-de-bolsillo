@@ -1,18 +1,5 @@
-export type {
-  PaymentMethod,
-  SalesOrderDto,
-  SalesOrderItemDto,
-  SalesOrderWithItemsDto,
-  NewSalesOrderDto,
-  NewSalesOrderItemDto,
-  NewSalesOrderWithItemsDto,
-} from "./sales-orders.js";
-
-export type {
-  PurchaseOrderDto,
-  PurchaseOrderItemDto,
-  PurchaseOrderWithItemsDto,
-  NewPurchaseOrderDto,
-  NewPurchaseOrderItemDto,
-  NewPurchaseOrderWithItemsDto,
-} from "./purchase-orders.js";
+export * from "./products/product.types.js";
+export * from "./categories/category.types.js";
+export * from "./suppliers/supplier.types.js";
+export * from "./sales-orders/sales-order.types.js";
+export * from "./purchase-orders/purchase-order.types.js";
