@@ -25,6 +25,7 @@ model Product {
   purchaseOrdersItems PurchaseOrdersItem[]
   salesOrderItems     SalesOrderItem[]
   stockMovements      StockMovement[]
+  suppliers           Supplier[]
   isActive            Boolean              @default(true) @map("is_active_p")
 
   @@map("products_p")
@@ -54,6 +55,7 @@ model Supplier {
   updatedAt      DateTime        @updatedAt @map("updated_at")
   isActive       Boolean         @default(true) @map("is_active_s")
   purchaseOrders PurchaseOrder[]
+  products       Product[]
 
   @@map("suppliers_s")
 }
