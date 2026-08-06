@@ -2,49 +2,21 @@ import { prisma } from "@/config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
 import type { NewSalesOrderWithItemsDto } from "@almacen/shared";
 
-const salesOrderWithItemsQuery = {
-  include: {
-    salesOrderItems: {
-      include: {
-        product: {
-          select: {
-            id: true,
-            shortname: true,
-            longname: true,
-            price: true,
-            stock: true,
-            isActive: true,
-          },
-        },
-      },
+const getSalesOrdersFromDatabase = async () =>
+  prisma.salesOrder.findMany({
+    include: {
+      salesOrderItems: true,
     },
-  },
-} satisfies Prisma.SalesOrderDefaultArgs;
-
-const getSalesOrdersFromDatabase = async () => prisma.salesOrder.findMany();
-
-const getSalesOrdersWithItemsFromDatabase = async () =>
-  prisma.salesOrder.findMany({ ...salesOrderWithItemsQuery, orderBy: { createdAt: "desc" } });
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
-  prisma.salesOrder.findUnique({ where: { id: salesOrderId } });
-
-// const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
-//   const { salesOrderItems, ...newSalesOrders } = salesOrderData;
-//   return prisma.salesOrder.create({
-//     data: {
-//       ...newSalesOrders,
-//       transaction: {
-//         create: {
-//           amount: newSalesOrders.total,
-//           paymentMethod: newSalesOrders.paymentMethod,
-//         },
-//       },
-//       salesOrderItems: { create: salesOrderItems },
-//     },
-//     include: { salesOrderItems: true, transaction: true },
-//   });
-// };
+  prisma.salesOrder.findUnique({
+    where: { id: salesOrderId },
+    include: { salesOrderItems: true },
+  });
 
 // This function creates a new sales order along with its items, updates the stock of the products involved, and creates stock movement records. It uses a transaction to ensure that all operations are atomic.
 const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
@@ -147,7 +119,6 @@ const deleteSalesOrderFromDatabase = async (salesOrderId: number) =>
 
 export {
   getSalesOrdersFromDatabase,
-  getSalesOrdersWithItemsFromDatabase,
   getSalesOrderByIdFromDatabase,
   postSalesOrderToDatabase,
   updateSalesOrderFromDatabase,

@@ -31,9 +31,6 @@ export const NewSaleScreen = () => {
   const isDisabled: boolean = items.length === 0 || isSavingSale;
 
   async function handleAddSale() {
-    // desabilitar boton de guardar venta
-    // metodoDePago === "" ? setIsDisabled(true) : setIsDisabled(false);
-    console.log("apretado");
     const saleData = {
       invoice: numeroFactura,
       discount: discount,
@@ -50,7 +47,6 @@ export const NewSaleScreen = () => {
         discount: 0, // descuento por línea por ahora fijo
       })),
     };
-    // console.log("saleData:", saleData);
 
     setIsSavingSale(true);
     // 1. Create the sale successfully

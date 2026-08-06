@@ -6,7 +6,6 @@ import {
   postSalesOrderToDatabase,
   updateSalesOrderFromDatabase,
   deleteSalesOrderFromDatabase,
-  getSalesOrdersWithItemsFromDatabase,
 } from "./sales-orders.service.js";
 
 const getSalesOrders = async (req: Request, res: Response) => {
@@ -14,15 +13,6 @@ const getSalesOrders = async (req: Request, res: Response) => {
     res.json(await getSalesOrdersFromDatabase());
   } catch (error) {
     console.error("Error fetching sales orders:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const getSalesOrdersWithItems = async (req: Request, res: Response) => {
-  try {
-    res.json(await getSalesOrdersWithItemsFromDatabase());
-  } catch (error) {
-    console.error("Error fetching sales orders with items:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -71,4 +61,10 @@ const deleteSalesOrder = async (req: Request, res: Response) => {
   }
 };
 
-export { getSalesOrders, getSalesOrdersWithItems, getSalesOrderById, postSalesOrder, updateSalesOrder, deleteSalesOrder };
+export {
+  getSalesOrders,
+  getSalesOrderById,
+  postSalesOrder,
+  updateSalesOrder,
+  deleteSalesOrder,
+};

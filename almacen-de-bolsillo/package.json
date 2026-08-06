@@ -7,6 +7,7 @@
     "dev": "concurrently \"pnpm --filter @almacen/shared dev\" \"pnpm --filter backend dev\" \"pnpm --filter frontend start\"",
     "dev:backend": "pnpm --dir backend dev",
     "dev:frontend": "pnpm --dir frontend start",
+    "dev:shared": "pnpm --dir shared dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
