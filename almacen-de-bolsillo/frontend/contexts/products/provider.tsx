@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from "react";
 import { ProductsContext } from "@/contexts/products/context";
-import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/Product";
+import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/product";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
 
@@ -18,23 +18,22 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Obtener los productos desde la API y actualizar el estado
-    const fetchProducts = async () => {
-      try {
-        setIsLoadingProducts(true);
-        setProductsError(null);
-        const products = await getProducts(true);
-        setProducts(products);
-      } catch (error) {
-        console.error("Error cargando productos:", error);
-        setProductsError("Error cargando productos");
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
+  async function refreshProducts(): Promise<void> {
+    try {
+      setIsLoadingProducts(true);
+      setProductsError(null);
+      const products = await getProducts(true);
+      setProducts(products);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+      setProductsError("Error cargando productos");
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }
 
-    fetchProducts();
+  useEffect(() => {
+    refreshProducts();
 
     // Obtener las categorías desde la API y actualizar el estado
     const fetchCategories = async () => {
@@ -96,7 +95,17 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     };
 
     try {
-      const savedProduct = await updateProductRequest(productToUpdate.id, productToUpdate);
+      const productPayload = {
+        sku: productToUpdate.sku,
+        shortname: productToUpdate.shortname,
+        longname: productToUpdate.longname,
+        price: productToUpdate.price,
+        stock: productToUpdate.stock,
+        stockMin: productToUpdate.stockMin,
+        categoryId: productToUpdate.categoryId,
+        isActive: productToUpdate.isActive,
+      };
+      const savedProduct = await updateProductRequest(productToUpdate.id, productPayload);
 
       setProducts((currentProducts) =>
         currentProducts.map((currentProduct) =>
@@ -143,6 +152,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
         categoriesError,
         products,
         categories,
+        refreshProducts,
         addProduct,
         updateProduct,
         deleteProduct,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SalesContext } from "./context";
-import { SalesOrderWithItems } from "@/types/Sales-Order";
-import { getSalesOrdersWithItems, createSalesOrderRequest, deleteSalesOrderRequest} from "@/services/salesApi";
+import { SalesOrderWithItemsDto, NewSalesOrderWithItemsDto } from "@almacen/shared";
+import { getSalesOrdersWithItems, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface SalesProviderProps {
 
 export function SalesProvider({ children }: SalesProviderProps) {
   const [totalSales, setTotalSales] = useState<number>(0);
-  const [sales, setSales] = useState<SalesOrderWithItems[]>([]);
+  const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
   const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false);
   const [errorSaleOrdersItems, setErrorSaleOrdersItems] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
         setErrorSaleOrdersItems(null);
         const salesFetched = await getSalesOrdersWithItems();
         setSales(salesFetched);
-        setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItems) => acc + Number(sale.total), 0));
+        setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
       } catch (error) {
         console.error("Error fetching sales orders with items:", error);
         setErrorSaleOrdersItems("Error fetching sales orders with items");
@@ -38,7 +38,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
       setErrorSaleOrdersItems(null);
       const salesFetched = await getSalesOrdersWithItems();
       setSales(salesFetched);
-      setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItems) => acc + Number(sale.total), 0));
+      setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
     } catch (error) {
       console.error("Error refreshing sales orders with items:", error);
       setErrorSaleOrdersItems("Error refreshing sales orders with items");
@@ -55,7 +55,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
-  async function addSale(sale: Omit<SalesOrderWithItems, "id" | "createdAt">): Promise<boolean> {
+  async function addSale(sale: NewSalesOrderWithItemsDto): Promise<boolean> {
     try {
       const newSale = await createSalesOrderRequest(sale);
       setSales((prevSales) => [...prevSales, newSale]);
@@ -79,7 +79,8 @@ export function SalesProvider({ children }: SalesProviderProps) {
   }
 
   return (
-    <SalesContext.Provider value={{ sales, totalSales, isLoadingSales, errorSaleOrdersItems, addSale, refreshSales, deleteSale }}>
+    <SalesContext.Provider
+      value={{ sales, totalSales, isLoadingSales, errorSaleOrdersItems, addSale, refreshSales, deleteSale }}>
       {children}
     </SalesContext.Provider>
   );

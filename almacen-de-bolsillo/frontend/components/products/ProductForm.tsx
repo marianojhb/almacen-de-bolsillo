@@ -1,6 +1,6 @@
 // Product Form
 import { useState } from "react";
-import type { Category, NewCategory } from "@/types/Product";
+import type { Category, NewCategory } from "@/types/product";
 import {
   Text,
   TextInput,

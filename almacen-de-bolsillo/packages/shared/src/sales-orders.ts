@@ -1,0 +1,39 @@
+export type PaymentMethod = "EFECTIVO" | "MERCADOPAGO" | "UALA";
+
+export type SalesOrderDto = {
+  id: number;
+  invoice: string | null;
+  createdAt: string;
+  discount: number;
+  iva: number;
+  isActive: boolean;
+  total: number;
+  updatedAt: string;
+  paymentMethod: PaymentMethod;
+  transactionId: number;
+};
+
+export type SalesOrderItemDto = {
+  productId: number;
+  salesOrderItemId: number;
+  quantity: number;
+  shortname: string;
+  longname: string | null;
+  price: number;
+  subtotal: number;
+  discount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SalesOrderWithItemsDto = SalesOrderDto & {
+  salesOrderItems: SalesOrderItemDto[];
+};
+
+export type NewSalesOrderDto = Omit<SalesOrderDto, "id" | "createdAt" | "updatedAt" | "isActive" | "transactionId">;
+
+export type NewSalesOrderItemDto = Omit<SalesOrderItemDto, "salesOrderItemId" | "createdAt" | "updatedAt">;
+
+export type NewSalesOrderWithItemsDto = NewSalesOrderDto & {
+  salesOrderItems: NewSalesOrderItemDto[];
+};

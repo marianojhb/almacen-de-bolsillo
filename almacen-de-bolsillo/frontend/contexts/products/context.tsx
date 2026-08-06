@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/Product";
+import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/product";
 
 interface ProductsContextType {
   products: ProductWithCategory[];
@@ -8,6 +8,7 @@ interface ProductsContextType {
   isLoadingCategories: boolean;
   productsError: string | null;
   categoriesError: string | null;
+  refreshProducts: () => Promise<void>;
   addProduct: (product: NewProduct) => Promise<boolean>; // booleano, si el producto ya existe o no
   updateProduct: (updatedProduct: Product) => Promise<boolean>;
   deleteProduct: (updatedProduct: Product) => Promise<boolean>;

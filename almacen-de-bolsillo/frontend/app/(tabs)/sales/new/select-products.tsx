@@ -1,13 +1,15 @@
-import { View, Text, Modal, Pressable, FlatList, TextInput } from "react-native";
+import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import { useProducts } from "@/contexts/products";
-import { Product } from "@/types/Product";
+import { useSaleDraft } from "@/contexts/sale-draft";
 import { router } from "expo-router";
 import { useState, useMemo } from "react";
 
 export default function SelectProductsModal() {
   const { products, categories } = useProducts();
+  const { addItem } = useSaleDraft();
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   const filteredProducts = useMemo(() => {
     const normalizedSearchText = searchText.trim().toLowerCase();
@@ -26,7 +28,7 @@ export default function SelectProductsModal() {
       {/* Modal backdrop */}
       <View className="flex-1 justify-start px-2  bg-[rgba(0,0,0,0.6)]">
         {/* Modal content */}
-        <View className="w-full max-h-[100%] items-start rounded-2xl  flex-column   p-4 gap-4 overflow-hidden">
+        <View className="w-full max-h-[100%] justify-between rounded-2xl  flex-column   p-4 gap-4 overflow-hidden">
           <View className="flex-row items-center justify-between mb-4">
             <Text className="font-bold mr-2 text-white pt-2 text-2xl">Agregar productos al carrito</Text>
             <Pressable
@@ -76,8 +78,9 @@ export default function SelectProductsModal() {
           <FlatList
             data={filteredProducts}
             keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item: product }) => (
-              <View className="flex-row w-full justify-between p-1 py-8 border-b border-gray-300 dark:border-gray-700 items-center  ">
+              <View className="flex-row w-full justify-between p-1 py-6 border-b border-gray-300 dark:border-gray-700 items-center  ">
                 <Text numberOfLines={3} className="w-36 text-xl text-white dark:text-black">
                   {product.shortname}
                 </Text>
@@ -85,23 +88,34 @@ export default function SelectProductsModal() {
                 <TextInput
                   className="mx-3 border-2 border-white  rounded-lg h-10 w-16 text-center text-sm text-white dark:text-black"
                   placeholder="Cantidad"
+                  value={quantities[product.id]?.toString() || "1"}
+                  onChangeText={(text) => {
+                    const nextQuantity = Number.parseInt(text, 10) || 0;
+
+                    setQuantities((currentQuantities) => ({
+                      ...currentQuantities,
+                      [product.id]: nextQuantity,
+                    }));
+                  }}
                   keyboardType="numeric"></TextInput>
                 <Pressable
                   className="bg-green-500 rounded-lg p-4 items-center"
                   onPress={() => {
-                    // Aquí puedes manejar la acción de agregar el producto a la venta
+                    addItem({
+                      productId: product.id,
+                      quantity: quantities[product.id] ?? 1,
+                      shortname: product.shortname,
+                      longname: product.longname,
+                      price: product.price,
+                      discount: 0,
+                      subtotal: 0,
+                    });
                   }}>
                   <Text className="text-white">Agregar</Text>
                 </Pressable>
               </View>
             )}
           />
-          {/* <Pressable className="bg-green-500 rounded-lg p-4 items-center" onPress={() => {}}>
-                <Text className="text-white">Sí</Text>
-              </Pressable>
-              <Pressable className="bg-red-500 rounded-lg p-4 items-center" onPress={() => {}}>
-                <Text className="text-white">No</Text>
-              </Pressable> */}
         </View>
       </View>
     </>

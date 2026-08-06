@@ -1,48 +1,48 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
 
-const getSalesOrdersItemsFromDatabase = async () => prisma.salesOrdersItems.findMany();
+const getSalesOrderItemsFromDatabase = async () => prisma.salesOrderItem.findMany();
 
-const getSalesOrderItemByIdFromDatabase = async (salesOrdersItemId: number, productId: number) =>
-  prisma.salesOrdersItems.findUnique({
+const getSalesOrderItemByIdFromDatabase = async (salesOrderItemId: number, productId: number) =>
+  prisma.salesOrderItem.findUnique({
     where: {
-      salesOrdersItemId_productId: {
-        salesOrdersItemId,
+      salesOrderItemId_productId: {
+        salesOrderItemId,
         productId,
       },
     },
   });
 
-const postSalesOrderItemToDatabase = async (salesOrderItemData: Prisma.SalesOrdersItemsUncheckedCreateInput) =>
-  prisma.salesOrdersItems.create({ data: salesOrderItemData });
+const postSalesOrderItemToDatabase = async (salesOrderItemData: Prisma.SalesOrderItemUncheckedCreateInput) =>
+  prisma.salesOrderItem.create({ data: salesOrderItemData });
 
 const updateSalesOrderItemFromDatabase = async (
-  salesOrdersItemId: number,
+  salesOrderItemId: number,
   productId: number,
-  salesOrderItemData: Prisma.SalesOrdersItemsUpdateInput,
+  salesOrderItemData: Prisma.SalesOrderItemUpdateInput,
 ) =>
-  prisma.salesOrdersItems.update({
+  prisma.salesOrderItem.update({
     where: {
-      salesOrdersItemId_productId: {
-        salesOrdersItemId,
+      salesOrderItemId_productId: {
+        salesOrderItemId,
         productId,
       },
     },
     data: salesOrderItemData,
   });
 
-const deleteSalesOrderItemFromDatabase = async (salesOrdersItemId: number, productId: number) =>
-  prisma.salesOrdersItems.delete({
+const deleteSalesOrderItemFromDatabase = async (salesOrderItemId: number, productId: number) =>
+  prisma.salesOrderItem.delete({
     where: {
-      salesOrdersItemId_productId: {
-        salesOrdersItemId,
+      salesOrderItemId_productId: {
+        salesOrderItemId,
         productId,
       },
     },
   });
 
 export {
-  getSalesOrdersItemsFromDatabase,
+  getSalesOrderItemsFromDatabase,
   getSalesOrderItemByIdFromDatabase,
   postSalesOrderItemToDatabase,
   updateSalesOrderItemFromDatabase,

@@ -1,18 +1,18 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
-  getSalesOrdersItems,
+  getSalesOrderItems,
   getSalesOrderItemById,
   postSalesOrderItem,
   updateSalesOrderItem,
   deleteSalesOrderItem,
-} from './sales-orders-items.controller.js';
+} from "./sales-orders-items.controller.js";
 
-const salesOrdersItemsRouter: Router = Router();
+const salesOrderItemsRouter: Router = Router();
 
-salesOrdersItemsRouter.get('/', getSalesOrdersItems);
-salesOrdersItemsRouter.get('/:salesOrderId/:productId', getSalesOrderItemById);
-salesOrdersItemsRouter.post('/', postSalesOrderItem);
-salesOrdersItemsRouter.put('/:salesOrderId/:productId', updateSalesOrderItem);
-salesOrdersItemsRouter.delete('/:salesOrderId/:productId', deleteSalesOrderItem);
+salesOrderItemsRouter.get("/", getSalesOrderItems);
+salesOrderItemsRouter.get("/:salesOrderId/:productId", getSalesOrderItemById);
+salesOrderItemsRouter.post("/", postSalesOrderItem);
+salesOrderItemsRouter.put("/:salesOrderId/:productId", updateSalesOrderItem);
+salesOrderItemsRouter.delete("/:salesOrderId/:productId", deleteSalesOrderItem);
 
-export default salesOrdersItemsRouter;
+export default salesOrderItemsRouter;

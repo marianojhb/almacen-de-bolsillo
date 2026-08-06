@@ -37,6 +37,14 @@ export default function TabScreen() {
         }}
       />
       <Tabs.Screen
+        name="purchases"
+        options={{
+          title: "Compras",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="more/index"
         options={{
           title: "Más",

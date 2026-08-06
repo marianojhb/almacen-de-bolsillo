@@ -8,24 +8,24 @@ datasource db {
 }
 
 model Product {
-  id                  Int                   @id @default(autoincrement()) @map("id_product_p")
-  sku                 String?               @unique @map("sku_p")
-  shortname           String                @map("shortname_p")
-  longname            String                @map("longname_p")
-  description         String?               @map("description_p")
-  createdAt           DateTime              @default(now()) @map("created_at")
-  updatedAt           DateTime              @updatedAt @map("updated_at")
-  price               Decimal               @map("price_p") @db.Decimal(10, 2)
-  stock               Int                   @default(0) @map("stock_p")
-  stockMin            Int                   @default(0) @map("stock_min_p")
-  discount            Decimal               @default(0) @map("discount_p") @db.Decimal(10, 2)
-  categoryId          Int                   @map("id_category_p")
-  status              Boolean               @default(true) @map("status_p")
-  category            Category              @relation(fields: [categoryId], references: [id])
-  purchaseOrdersItems PurchaseOrdersItems[]
-  saleOrdersItems     SalesOrdersItems[]
-  stockMovements      StockMovements[]
-  isActive            Boolean               @default(true) @map("is_active_p")
+  id                  Int                  @id @default(autoincrement()) @map("id_product_p")
+  sku                 String?              @unique @map("sku_p")
+  shortname           String               @map("shortname_p")
+  longname            String               @map("longname_p")
+  description         String?              @map("description_p")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  price               Decimal              @map("price_p") @db.Decimal(10, 2)
+  stock               Int                  @default(0) @map("stock_p")
+  stockMin            Int                  @default(0) @map("stock_min_p")
+  discount            Decimal              @default(0) @map("discount_p") @db.Decimal(10, 2)
+  categoryId          Int                  @map("id_category_p")
+  status              Boolean              @default(true) @map("status_p")
+  category            Category             @relation(fields: [categoryId], references: [id])
+  purchaseOrdersItems PurchaseOrdersItem[]
+  salesOrderItems     SalesOrderItem[]
+  stockMovements      StockMovement[]
+  isActive            Boolean              @default(true) @map("is_active_p")
 
   @@map("products_p")
 }
@@ -59,15 +59,15 @@ model Supplier {
 }
 
 model PurchaseOrder {
-  id                  Int                   @id @unique @default(autoincrement()) @map("id_purchase_orders_po")
-  date                DateTime              @default(now()) @map("date_po")
-  total               Decimal               @default(0) @map("total_po") @db.Decimal(10, 2)
-  supplierId          Int                   @map("id_supplier_po")
-  createdAt           DateTime              @default(now()) @map("created_at")
-  updatedAt           DateTime              @updatedAt @map("updated_at")
-  purchaseOrdersItems PurchaseOrdersItems[]
-  userId              Int                   @default(3) @map("id_user_po")
-  isActive            Boolean               @default(true) @map("is_active_po")
+  id                  Int                  @id @unique @default(autoincrement()) @map("id_purchase_orders_po")
+  date                DateTime             @default(now()) @map("date_po")
+  total               Decimal              @default(0) @map("total_po") @db.Decimal(10, 2)
+  supplierId          Int                  @map("id_supplier_po")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  purchaseOrdersItems PurchaseOrdersItem[]
+  userId              Int                  @default(3) @map("id_user_po")
+  isActive            Boolean              @default(true) @map("is_active_po")
 
   supplier Supplier @relation(fields: [supplierId], references: [id])
   buyer    User     @relation(fields: [userId], references: [id])
@@ -75,17 +75,18 @@ model PurchaseOrder {
   @@map("purchase_orders_po")
 }
 
-model PurchaseOrdersItems {
-  productId       Int           @map("id_product_poi")
-  purchaseOrderId Int           @map("id_purchase_order_poi")
-  quantity        Int           @default(0) @map("quantity_poi")
-  price           Decimal       @default(0) @map("price_poi") @db.Decimal(10, 2)
-  discount        Decimal       @default(0) @map("discount_poi") @db.Decimal(10, 2)
-  subtotal        Decimal       @default(0) @map("subtotal_poi") @db.Decimal(10, 2)
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
-  product         Product       @relation(fields: [productId], references: [id])
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+model PurchaseOrdersItem {
+  productId       Int             @map("id_product_poi")
+  purchaseOrderId Int             @map("id_purchase_order_poi")
+  quantity        Int             @default(0) @map("quantity_poi")
+  price           Decimal         @default(0) @map("price_poi") @db.Decimal(10, 2)
+  discount        Decimal         @default(0) @map("discount_poi") @db.Decimal(10, 2)
+  subtotal        Decimal         @default(0) @map("subtotal_poi") @db.Decimal(10, 2)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  product         Product         @relation(fields: [productId], references: [id])
+  purchaseOrder   PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id])
+  stockMovements  StockMovement[]
 
   @@id([productId, purchaseOrderId])
   @@map("purchase_orders_items_poi")
@@ -98,6 +99,8 @@ model Transaction {
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
   paymentMethod PaymentMethod @default(EFECTIVO) @map("payment_method_t")
+  salesOrders   SalesOrder[]
+  direction     Direction?    @map("direction_t")
 
   @@map("transactions_t")
 }
@@ -134,38 +137,41 @@ model User {
 }
 
 model SalesOrder {
-  id              Int                @id @default(autoincrement()) @map("id_sales_orders_so")
-  invoice         String?            @map("invoice_so")
-  date            DateTime           @default(now()) @map("date_so")
-  sellerId        Int                @default(3) @map("id_user_so")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  discount        Decimal            @default(0) @map("discount_so") @db.Decimal(10, 2)
-  iva             Decimal            @default(0) @map("iva_so") @db.Decimal(10, 2)
-  isActive        Boolean            @default(true) @map("is_active_so")
-  total           Decimal            @default(0) @map("total_so") @db.Decimal(10, 2)
-  updatedAt       DateTime           @updatedAt @map("updated_at")
-  paymentMethod   PaymentMethod      @default(EFECTIVO) @map("payment_method_so")
-  salesOrdersItem SalesOrdersItems[]
-  seller          User               @relation(fields: [sellerId], references: [id])
+  id              Int              @id @default(autoincrement()) @map("id_sales_orders_so")
+  invoice         String?          @map("invoice_so")
+  date            DateTime         @default(now()) @map("date_so")
+  sellerId        Int              @default(3) @map("id_user_so")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  discount        Decimal          @default(0) @map("discount_so") @db.Decimal(10, 2)
+  iva             Decimal          @default(0) @map("iva_so") @db.Decimal(10, 2)
+  isActive        Boolean          @default(true) @map("is_active_so")
+  total           Decimal          @default(0) @map("total_so") @db.Decimal(10, 2)
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  paymentMethod   PaymentMethod    @default(EFECTIVO) @map("payment_method_so")
+  salesOrderItems SalesOrderItem[]
+  seller          User             @relation(fields: [sellerId], references: [id])
+  transaction     Transaction      @relation(fields: [transactionId], references: [id])
+  transactionId   Int              @map("id_transaction_so")
 
   @@map("sales_orders_so")
 }
 
-model SalesOrdersItems {
-  salesOrdersItemId Int        @map("id_sales_order_soi")
-  productId         Int        @map("id_product_soi")
-  quantity          Int        @default(0) @map("quantity_soi")
-  shortname         String     @map("shortname_soi")
-  longname          String?    @map("longname_soi")
-  price             Decimal    @default(0) @map("price_soi") @db.Decimal(10, 2)
-  subtotal          Decimal    @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
-  discount          Decimal    @default(0) @map("discount_soi") @db.Decimal(10, 2)
-  createdAt         DateTime   @default(now()) @map("created_at")
-  updatedAt         DateTime   @updatedAt @map("updated_at")
-  product           Product    @relation(fields: [productId], references: [id])
-  salesOrder        SalesOrder @relation(fields: [salesOrdersItemId], references: [id])
+model SalesOrderItem {
+  salesOrderItemId Int            @map("id_sales_order_soi")
+  productId        Int            @map("id_product_soi")
+  quantity         Int            @default(0) @map("quantity_soi")
+  shortname        String         @map("shortname_soi")
+  longname         String?        @map("longname_soi")
+  price            Decimal        @default(0) @map("price_soi") @db.Decimal(10, 2)
+  subtotal         Decimal        @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
+  discount         Decimal        @default(0) @map("discount_soi") @db.Decimal(10, 2)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  product          Product        @relation(fields: [productId], references: [id])
+  salesOrder       SalesOrder     @relation(fields: [salesOrderItemId], references: [id])
+  stockMovements   StockMovement?
 
-  @@id([salesOrdersItemId, productId])
+  @@id([salesOrderItemId, productId])
   @@map("sales_orders_items_soi")
 }
 
@@ -188,17 +194,23 @@ model Employee {
   @@map("employees_e")
 }
 
-model StockMovements {
-  id            Int               @id @default(autoincrement()) @map("id_stockmovement_sm")
-  type          StockMovementType @map("type_sm")
-  productId     Int               @map("product_id_sm")
-  quantity      Int               @map("quantity_sm")
-  previousStock Int               @map("previous_stock_sm")
-  newStock      Int               @map("new_stock_sm")
-  reason        String?           @map("reason_sm")
-  createdAt     DateTime          @default(now()) @map("created_at_sm")
-  product       Product           @relation(fields: [productId], references: [id])
+model StockMovement {
+  id                Int                 @id @default(autoincrement()) @map("id_stockmovement_sm")
+  type              StockMovementType   @map("type_sm")
+  productId         Int                 @map("product_id_sm")
+  quantity          Int                 @map("quantity_sm")
+  previousStock     Int                 @map("previous_stock_sm")
+  newStock          Int                 @map("new_stock_sm")
+  reason            String?             @map("reason_sm")
+  createdAt         DateTime            @default(now()) @map("created_at_sm")
+  product           Product             @relation(fields: [productId], references: [id])
+  salesOrderItem    SalesOrderItem?     @relation(fields: [salesOrderId, productId], references: [salesOrderItemId, productId])
+  salesOrderId      Int?                @map("id_sales_order_sm")
+  purchaseOrderItem PurchaseOrdersItem? @relation(fields: [productId, purchaseOrderId], references: [productId, purchaseOrderId])
+  purchaseOrderId   Int?                @map("id_purchase_order_sm")
 
+  @@unique([salesOrderId, productId])
+  @@unique([productId, purchaseOrderId])
   @@map("stock_movements_sm")
 }
 
@@ -227,4 +239,9 @@ enum Gender {
   M
   F
   OTHER
+}
+
+enum Direction {
+  INCOME
+  EXPENSE
 }

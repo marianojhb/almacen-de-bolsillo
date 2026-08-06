@@ -12,3 +12,5 @@ export type StockMovement = {
 };
 
 export type NewStockMovement = Omit<StockMovement, "id" | "createdAt">;
+
+// change test

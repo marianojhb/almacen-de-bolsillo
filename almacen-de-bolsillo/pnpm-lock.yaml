@@ -213,6 +213,9 @@ importers:
 
   backend:
     dependencies:
+      '@almacen/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
       '@prisma/adapter-pg':
         specifier: 7.8.0
         version: 7.8.0
@@ -259,6 +262,9 @@ importers:
 
   frontend:
     dependencies:
+      '@almacen/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
       '@expo/vector-icons':
         specifier: ^15.0.3
         version: 15.1.1(expo-font@14.0.12(expo@54.0.36)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -362,6 +368,12 @@ importers:
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
+
+  packages/shared:
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
 packages:
 

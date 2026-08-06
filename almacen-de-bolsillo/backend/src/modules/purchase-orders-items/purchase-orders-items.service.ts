@@ -1,10 +1,10 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
 
-const getPurchaseOrdersItemsFromDatabase = async () => prisma.purchaseOrdersItems.findMany();
+const getPurchaseOrdersItemsFromDatabase = async () => prisma.purchaseOrdersItem.findMany();
 
 const getPurchaseOrderItemByIdFromDatabase = async (productId: number, purchaseOrderId: number) =>
-  prisma.purchaseOrdersItems.findUnique({
+  prisma.purchaseOrdersItem.findUnique({
     where: {
       productId_purchaseOrderId: {
         productId,
@@ -13,15 +13,15 @@ const getPurchaseOrderItemByIdFromDatabase = async (productId: number, purchaseO
     },
   });
 
-const postPurchaseOrderItemToDatabase = async (purchaseOrderItemData: Prisma.PurchaseOrdersItemsUncheckedCreateInput) =>
-  prisma.purchaseOrdersItems.create({ data: purchaseOrderItemData });
+const postPurchaseOrderItemToDatabase = async (purchaseOrderItemData: Prisma.PurchaseOrdersItemUncheckedCreateInput) =>
+  prisma.purchaseOrdersItem.create({ data: purchaseOrderItemData });
 
 const updatePurchaseOrderItemFromDatabase = async (
   productId: number,
   purchaseOrderId: number,
-  purchaseOrderItemData: Prisma.PurchaseOrdersItemsUpdateInput,
+  purchaseOrderItemData: Prisma.PurchaseOrdersItemUpdateInput,
 ) =>
-  prisma.purchaseOrdersItems.update({
+  prisma.purchaseOrdersItem.update({
     where: {
       productId_purchaseOrderId: {
         productId,
@@ -32,7 +32,7 @@ const updatePurchaseOrderItemFromDatabase = async (
   });
 
 const deletePurchaseOrderItemFromDatabase = async (productId: number, purchaseOrderId: number) =>
-  prisma.purchaseOrdersItems.delete({
+  prisma.purchaseOrdersItem.delete({
     where: {
       productId_purchaseOrderId: {
         productId,

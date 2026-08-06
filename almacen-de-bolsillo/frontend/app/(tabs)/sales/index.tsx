@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import { SalesOrderWithItems } from "@/types/Sales-Order";
+import { SalesOrderWithItemsDto } from "@almacen/shared";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
+import { getSalesOrdersWithItems } from "@/services/salesApi";
 export default function SalesScreen() {
-  const [sales, setSales] = useState<SalesOrderWithItems[]>([]);
+  const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
   const [totalSales, setTotalSales] = useState<number>(0);
 
   useEffect(() => {
     async function fetchSales() {
-      const salesFetched = await fetch("http://192.168.0.158:3000/sales-orders/");
-      const data = await salesFetched.json();
+      const data = await getSalesOrdersWithItems();
       setSales(data);
-      setTotalSales(data.reduce((acc: number, sale: SalesOrderWithItems) => acc + Number(sale.total), 0));
+      setTotalSales(data.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
     }
     fetchSales();
   }, []);
@@ -19,17 +19,12 @@ export default function SalesScreen() {
   return (
     <View className="flex-1 p-4">
       <View className="flex-row items-center justify-between mb-4">
+        <Text className="text-3xl font-bold">Ventas totales: ${totalSales.toLocaleString("es-AR")}</Text>
+      </View>
+      <View className="flex-row items-center justify-between mb-4">
         <Text className="text-3xl font-bold">Listado de ventas</Text>
       </View>
-      <View className="flex-row items-center mb-4 justify-end">
-        <Pressable
-          className="items-center rounded-xl bg-[#111A1A] px-4 py-2 active:opacity-75"
-          onPress={() => {
-            router.push("/sales/new");
-          }}>
-          <Text className="text-base font-semibold text-white">Crear nueva venta</Text>
-        </Pressable>
-      </View>
+
       <View className="flex-1">
         <FlatList
           ItemSeparatorComponent={() => <View className="h-2" />}
@@ -58,6 +53,16 @@ export default function SalesScreen() {
             </Pressable>
           )}
         />
+      </View>
+
+      <View className="items-center mb-4 ">
+        <Pressable
+          className="w-full items-center rounded-xl bg-[#111A1A] p-4 active:opacity-75"
+          onPress={() => {
+            router.push("/sales/new");
+          }}>
+          <Text className="text-base font-semibold text-white">Crear nueva venta</Text>
+        </Pressable>
       </View>
     </View>
   );
