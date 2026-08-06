@@ -9,7 +9,7 @@ export default function SalesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      refreshSales();
+      void refreshSales();
     }, [refreshSales]),
   );
 

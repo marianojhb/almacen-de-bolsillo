@@ -31,13 +31,13 @@ export type SalesOrder = {
 // DTOs CRUD
 
 // Read
-export type SalesOrderWithItemsDto = SalesOrder & {
-  salesOrdersItems: SalesOrderItem[];
+export type SalesOrderDto = SalesOrder & {
+  salesOrderItems: SalesOrderItem[];
 };
 
 // Create
+
 export type CreateSalesOrderItemDto = {
-  // id: number; OMITTED because it is not needed for creation
   productId: number;
   shortname: string;
   longname: string;
@@ -45,9 +45,6 @@ export type CreateSalesOrderItemDto = {
   price: number;
   discount: number;
   subtotal: number;
-  //   isActive: boolean; OMITTED because it is not needed for creation
-  //   createdAt: string; OMITTED because it is not needed for creation
-  //   updatedAt: string; OMITTED because it is not needed for creation
 };
 
 export type CreateSalesOrderDto = {
@@ -57,7 +54,7 @@ export type CreateSalesOrderDto = {
   discount: number;
   iva: number;
   total: number;
-  salesOrdersItems: CreateSalesOrderItemDto[];
+  salesOrderItems: CreateSalesOrderItemDto[];
 };
 
 // Update

@@ -13,14 +13,13 @@ model Product {
   shortname           String               @map("shortname_p")
   longname            String               @map("longname_p")
   description         String?              @map("description_p")
+  price               Decimal              @map("price_p") @db.Decimal(10, 2)
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @updatedAt @map("updated_at")
-  price               Decimal              @map("price_p") @db.Decimal(10, 2)
   stock               Int                  @default(0) @map("stock_p")
   stockMin            Int                  @default(0) @map("stock_min_p")
   discount            Decimal              @default(0) @map("discount_p") @db.Decimal(10, 2)
   categoryId          Int                  @map("id_category_p")
-  status              Boolean              @default(true) @map("status_p")
   category            Category             @relation(fields: [categoryId], references: [id])
   purchaseOrdersItems PurchaseOrdersItem[]
   salesOrderItems     SalesOrderItem[]

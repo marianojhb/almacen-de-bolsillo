@@ -3,15 +3,19 @@ import type { Supplier } from "../suppliers/supplier.types.js";
 
 export type Product = {
   id: number;
+  sku: string;
   shortname: string;
   longname: string;
+  description: string | null;
   price: number;
+  createdAt: string;
+  updatedAt: string;
   stock: number;
+  stockMin: number;
+  discount: number | null;
   categoryId: number;
   supplierId: number | null;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 };
 
 export type CreateProductDto = {

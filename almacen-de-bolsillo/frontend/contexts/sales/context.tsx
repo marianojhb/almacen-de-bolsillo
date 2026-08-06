@@ -1,12 +1,12 @@
 import { createContext } from "react";
-import { CreateSalesOrderItemDto, SalesOrderWithItemsDto } from "@almacen/shared";
+import { SalesOrderDto, CreateSalesOrderDto } from "@almacen/shared";
 
 interface SalesContextType {
-  sales: SalesOrderWithItemsDto[];
+  sales: SalesOrderDto[];
   totalSales: number;
   isLoadingSales: boolean;
   errorSaleOrdersItems: string | null;
-  addSale: (sale: CreateSalesOrderItemDto) => Promise<boolean>;
+  addSale: (sale: CreateSalesOrderDto) => Promise<boolean>;
   deleteSale: (saleId: number) => Promise<boolean>;
   refreshSales: () => Promise<void>;
 }
