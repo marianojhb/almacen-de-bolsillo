@@ -1,4 +1,4 @@
-ma-- AlterTable
+-- AlterTable
 ALTER TABLE "employees_e" RENAME CONSTRAINT "employee_e_pkey" TO "employees_e_pkey";
 
 -- AlterTable
