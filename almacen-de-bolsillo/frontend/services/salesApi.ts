@@ -1,8 +1,8 @@
-import type { NewSalesOrderWithItemsDto, SalesOrderDto, SalesOrderWithItemsDto } from "@almacen/shared";
+import type { NewSalesOrderWithItemsDto, SalesOrderWithItemsDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getSalesOrders(): Promise<SalesOrderDto[]> {
+export async function getSalesOrders(): Promise<SalesOrderWithItemsDto[]> {
   const response = await fetch(`${API_URL}/sales-orders`, {
     method: "GET",
     headers: {
@@ -12,21 +12,6 @@ export async function getSalesOrders(): Promise<SalesOrderDto[]> {
 
   if (!response.ok) {
     throw new Error("Error fetching sales orders");
-  }
-
-  return response.json();
-}
-
-export async function getSalesOrdersWithItems(): Promise<SalesOrderWithItemsDto[]> {
-  const response = await fetch(`${API_URL}/sales-orders/with-items`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Error fetching sales orders with items");
   }
 
   return response.json();
@@ -50,7 +35,7 @@ export async function createSalesOrderRequest(salesOrder: NewSalesOrderWithItems
 
 export async function deleteSalesOrderRequest(salesOrderId: number): Promise<void> {
   const response = await fetch(`${API_URL}/sales-orders/${salesOrderId}`, {
-    method: "UPDATE",
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SalesContext } from "./context";
 import { SalesOrderWithItemsDto, NewSalesOrderWithItemsDto } from "@almacen/shared";
-import { getSalesOrdersWithItems, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
+import { getSalesOrders, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
       try {
         setIsLoadingSales(true);
         setErrorSaleOrdersItems(null);
-        const salesFetched = await getSalesOrdersWithItems();
+        const salesFetched = await getSalesOrders();
         setSales(salesFetched);
         setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
       } catch (error) {
@@ -36,7 +36,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
     try {
       setIsLoadingSales(true);
       setErrorSaleOrdersItems(null);
-      const salesFetched = await getSalesOrdersWithItems();
+      const salesFetched = await getSalesOrders();
       setSales(salesFetched);
       setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
     } catch (error) {
