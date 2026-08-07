@@ -1,17 +1,19 @@
-import type { Product } from "../index.js";
+import type { PurchaseOrderDto } from "../purchase-orders/purchase-order.types.js";
+import type { Product } from "../products/product.types.js";
 
 // Read
 export type Supplier = {
   id: number;
   name: string;
-  contactName: string | null;
+  cuit: string;
   phone: string | null;
   email: string | null;
   address: string | null;
-  cuit: string;
-  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  isActive: boolean;
+  purchaseOrders: PurchaseOrderDto[];
+  products: Product[];
 };
 
 // Read supplier with items

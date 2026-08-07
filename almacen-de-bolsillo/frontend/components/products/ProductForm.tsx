@@ -1,6 +1,8 @@
 // Product Form
-import { useState } from "react";
-import type { Category, CreateCategoryDto } from "@almacen/shared";
+import { useState, useEffect } from "react";
+// import { useSuppliers } from "@/contexts/suppliers";
+import * as SuppliersAPI from "@/services/suppliersApi";
+import type { Category, CreateCategoryDto, Supplier } from "@almacen/shared";
 import {
   Text,
   TextInput,
@@ -23,7 +25,7 @@ export type ProductFormValues = {
   stockMin: string;
   categoryId: string;
   isActive: boolean;
-  supplierId?: string;
+  supplierIds: string[];
 };
 
 export type ParsedProductFormValues = {
@@ -35,6 +37,7 @@ export type ParsedProductFormValues = {
   stockMin: number;
   categoryId: number;
   isActive: boolean;
+  supplierIds: number[];
 };
 export type ProductFormProps = {
   initialValues?: ProductFormValues;
@@ -66,6 +69,21 @@ export default function ProductForm({
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  // const { suppliers } = useSuppliers();
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [supplierIds, setSupplierIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    async function loadSuppliers() {
+      try {
+        const fetchedSuppliers: Supplier[] = await SuppliersAPI.getSuppliers(false);
+        setSuppliers(fetchedSuppliers);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    loadSuppliers();
+  }, []);
 
   const handleSubmit = () => {
     if (
@@ -75,8 +93,7 @@ export default function ProductForm({
       !price.trim() ||
       !stock.trim() ||
       !stockMin.trim() ||
-      !categoryId.toString().trim() ||
-      isActive === null
+      !categoryId
     ) {
       Alert.alert("Campos incompletos", "Todos los campos son obligatorios.");
       return;
@@ -101,6 +118,7 @@ export default function ProductForm({
     const numericStock = Number(stock.trim());
     const numericMinimumStock = Number(stockMin.trim());
     const numericCategoryId = Number(categoryId.trim());
+    const numericSupplierIds = supplierIds ? supplierIds.map((id) => Number(id)) : [];
 
     if (Number.isNaN(numericPrice) || Number.isNaN(numericStock) || Number.isNaN(numericMinimumStock)) {
       Alert.alert("Datos inválidos", "Precio y stock deben contener valores numéricos.");
@@ -119,7 +137,8 @@ export default function ProductForm({
       stock: numericStock,
       stockMin: numericMinimumStock,
       categoryId: numericCategoryId,
-      isActive: isActive,
+      supplierIds: numericSupplierIds,
+      isActive,
     });
   };
   const handleCreateCategory = async () => {
@@ -154,11 +173,17 @@ export default function ProductForm({
     }
   };
 
+  // const toggleSupplier = (id: number) => {
+  //   setSupplierIds((current) =>
+  //     current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id],
+  //   );
+  // };
+
   return (
     <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView
         className="flex-1 dark:bg-black"
-        contentContainerClassName="gap-5 p-2"
+        contentContainerClassName="flex-grow gap-5 p-2"
         keyboardShouldPersistTaps="handled">
         <View className="flex-1 p-1">
           <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-1">Nombre corto</Text>
@@ -194,24 +219,26 @@ export default function ProductForm({
             textAlignVertical="center"
             className={inputClassName}
           />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock actual</Text>
-          <TextInput
-            placeholder="Stock actual"
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="number-pad"
-            textAlignVertical="center"
-            className={inputClassName}
-          />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
-          <TextInput
-            placeholder="Stock mínimo"
-            value={stockMin}
-            onChangeText={setStockMin}
-            keyboardType="number-pad"
-            textAlignVertical="center"
-            className={inputClassName}
-          />
+          <View className="mt-3 flex-row justify-between gap-3">
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock actual</Text>
+            <TextInput
+              placeholder=""
+              value={stock}
+              onChangeText={setStock}
+              keyboardType="number-pad"
+              textAlignVertical="center"
+              className={inputClassName + " w-20"}
+            />
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
+            <TextInput
+              placeholder=""
+              value={stockMin}
+              onChangeText={setStockMin}
+              keyboardType="number-pad"
+              textAlignVertical="center"
+              className={inputClassName + " w-20"}
+            />
+          </View>
           <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
 
           <View className="flex-flow flex-wrap flex-row justify-start gap-4">
@@ -244,20 +271,29 @@ export default function ProductForm({
 
           <View className="flex flex-row justify-between py-4 ">
             <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
-            <Switch className="mb-2" value={isActive} onValueChange={setIsActive} />
+            <Switch className="" value={isActive} onValueChange={setIsActive} />
           </View>
 
-          <View className="w-full flex-row gap-3">
+          <View className="py-4">
+            <Text className="text-[14px] font-semibold dark:text-white pb-2">Proveedor</Text>
+            {suppliers.map((supplier, key) => (
+              <Text key={key}>{supplier.name}</Text>
+            ))}
+          </View>
+
+          {/* ------------------------- */}
+          {/* Botones Cancelar - Guardar */}
+          <View className="mt-auto w-full flex-row gap-3">
             <Pressable
               onPress={onCancel}
               className="
-                 w-[48%]
+              flex-1
               items-center 
               justify-center
               rounded-xl 
               border 
               border-gray-300 
-              px-4 py-4 
+              p-4
               active:opacity-60 
               ">
               <Text numberOfLines={1} className="text-base font-semibold text-gray-800 dark:text-white ">
@@ -267,12 +303,12 @@ export default function ProductForm({
             <Pressable
               onPress={handleSubmit}
               className="
-             w-[48%]
+              flex-1
               items-center 
               justify-center
               rounded-xl 
+              p-4
               bg-[#111A1A] 
-              px-4 py-4 
               active:opacity-75 
               dark:bg-white 
               ">

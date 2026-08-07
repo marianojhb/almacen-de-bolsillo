@@ -34,7 +34,7 @@ export default function ProductDetailScreen() {
         <Text className="text-[28px] font-bold mb-5 dark:text-white">{product.shortname}</Text>
       </View>
 
-      <View className="ml-auto flex-row gap-2 pb-4">
+      <View className="ml-auto mr-1 flex-row gap-2 pb-4">
         <DeleteProductButton id={id} />
         <EditProductButton id={id} />
       </View>
@@ -68,11 +68,20 @@ export default function ProductDetailScreen() {
           </View>
         </View>
 
+        {hasLowStock && (
+          <View className="mt-5 flex-row items-center justify-between gap-3 rounded-lg border border-red-500 bg-red-100 p-4 dark:bg-red-900">
+            <Text className="text-base font-bold text-red-500">Alerta de stock bajo!</Text>
+            <Pressable className="inline-block items-center w-24 rounded-lg border border-gray-300 px-2 py-2 bg-[#111A1A] active:opacity-75 ">
+              <Text className="font-semibold text-base text-white">Comprar</Text>
+            </Pressable>
+          </View>
+        )}
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Stock mínimo</Text>
         <Text className="text-[17px] dark:text-white">{product.stockMin}</Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Categoría</Text>
-        {hasLowStock && <Text className="mt-5 text-base font-bold text-red-500">Stock bajo</Text>}
         <Text className="text-[17px] dark:text-white">{product.category.name}</Text>
+        <Text className="mt-3 text-[14px] font-semibold dark:text-white">Proveedores</Text>
+        <Text className="text-[17px] dark:text-white">{product.suppliers?.map((s) => s.contactName).join(", ")?? "No hay proveedores"}</Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Estado</Text>
         <Text className="text-[17px] dark:text-white">{product.isActive ? "Activo" : "Inactivo"}</Text>
       </View>
