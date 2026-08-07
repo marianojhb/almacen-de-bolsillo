@@ -32,7 +32,7 @@ export const NewSaleScreen = () => {
   const isDisabled: boolean = items.length === 0 || isSavingSale;
 
   async function handleAddSale() {
-    const saleData: CreateSalesOrderDto = {
+    const payload: CreateSalesOrderDto = {
       invoice: numeroFactura,
       sellerId: 3, // por ahora fijo
       paymentMethod: metodoDePago,
@@ -52,7 +52,7 @@ export const NewSaleScreen = () => {
 
     setIsSavingSale(true);
     // 1. Create the sale successfully
-    await addSale(saleData);
+    await addSale(payload);
 
     // 2. Clear the temporary draft
     clearSales();

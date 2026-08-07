@@ -1,12 +1,12 @@
 import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import { useProducts } from "@/contexts/products";
-import { useSaleDraft } from "@/contexts/sales-draft";
+import { useSalesDraft } from "@/contexts/sales-draft";
 import { router } from "expo-router";
 import { useState, useMemo } from "react";
 
 export default function SelectProductsModal() {
   const { products, categories } = useProducts();
-  const { addItem } = useSaleDraft();
+  const { addItem } = useSalesDraft();
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
