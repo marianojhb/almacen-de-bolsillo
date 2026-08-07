@@ -1,4 +1,4 @@
-import type { NewSupplier, Supplier } from "@/types/Supplier";
+import type { CreateSupplierDto, UpdateSupplierDto, Supplier } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -12,7 +12,7 @@ export async function getSuppliers(includeInactive?: boolean): Promise<Supplier[
   return response.json();
 }
 
-export async function createSupplierRequest(supplier: NewSupplier): Promise<Supplier> {
+export async function createSupplierRequest(supplier: CreateSupplierDto): Promise<Supplier> {
   const response = await fetch(`${API_URL}/suppliers`, {
     method: "POST",
     headers: {
@@ -28,7 +28,7 @@ export async function createSupplierRequest(supplier: NewSupplier): Promise<Supp
   return response.json();
 }
 
-export async function updateSupplierRequest(supplierId: number, supplier: Supplier): Promise<Supplier> {
+export async function updateSupplierRequest(supplierId: number, supplier: UpdateSupplierDto): Promise<Supplier> {
   const response = await fetch(`${API_URL}/suppliers/${supplierId}`, {
     method: "PUT",
     headers: {

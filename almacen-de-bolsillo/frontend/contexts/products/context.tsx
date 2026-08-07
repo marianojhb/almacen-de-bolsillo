@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import type { Product, ProductWithCategory, CreateProductDto, Category, CreateCategoryDto } from "@almacen/shared";
+import type { CreateProductDto, Category, CreateCategoryDto, UpdateProductDto, ProductWithRelations, DeleteProductDto } from "@almacen/shared";
 
 interface ProductsContextType {
-  products: ProductWithCategory[];
+  products: ProductWithRelations[];
   categories: Category[];
   isLoadingProducts: boolean;
   isLoadingCategories: boolean;
@@ -10,8 +10,8 @@ interface ProductsContextType {
   categoriesError: string | null;
   refreshProducts: () => Promise<void>;
   addProduct: (product: CreateProductDto) => Promise<boolean>; // booleano, si el producto ya existe o no
-  updateProduct: (updatedProduct: Product) => Promise<boolean>;
-  deleteProduct: (updatedProduct: Product) => Promise<boolean>;
+  updateProduct: (updatedProduct: UpdateProductDto) => Promise<boolean>;
+  deleteProduct: (updatedProduct: DeleteProductDto) => Promise<boolean>;
   addCategory: (category: CreateCategoryDto) => Promise<Category>;
 }
 

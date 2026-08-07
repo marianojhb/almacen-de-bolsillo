@@ -14,7 +14,7 @@ export type Product = {
   stockMin: number;
   discount: number | null;
   categoryId: number;
-  supplierId: number | null;
+  suppliers: Supplier[];
   isActive: boolean;
 };
 
@@ -24,10 +24,10 @@ export type CreateProductDto = {
   price: number;
   stock: number;
   categoryId: number;
-  supplierId: number | null;
+  suppliers: Supplier[];
 };
 
-export type UpdateProductDto = Partial<CreateProductDto>; // se actualiza con PATCH, por lo que todos los campos son opcionales
+export type UpdateProductDto = Partial<Product>; // se actualiza con PATCH, por lo que todos los campos son opcionales
 
 export type ProductWithRelations = Product & {
   category: Category;
@@ -40,4 +40,9 @@ export type ProductWithCategory = Product & {
 
 export type ProductWithSupplier = Product & {
   suppliers: Supplier[] | null;
+};
+
+export type DeleteProductDto = {
+  id: number;
+  isActive: boolean; // se desactiva el producto en lugar de eliminarlo
 };
