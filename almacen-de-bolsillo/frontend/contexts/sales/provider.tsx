@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { SalesContext } from "./context";
-import { SalesOrderWithItemsDto, CreateSalesOrderItemDto } from "@almacen/shared";
+import { SalesOrderDto, CreateSalesOrderDto } from "@almacen/shared";
 import { getSalesOrders, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
@@ -9,7 +9,7 @@ interface SalesProviderProps {
 
 export function SalesProvider({ children }: SalesProviderProps) {
   const [totalSales, setTotalSales] = useState<number>(0);
-  const [sales, setSales] = useState<SalesOrderWithItemsDto[]>([]);
+  const [sales, setSales] = useState<SalesOrderDto[]>([]);
 
   // State to track loading and error states
   const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false);
@@ -21,7 +21,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
       setErrorSaleOrdersItems(null);
       const salesFetched = await getSalesOrders();
       setSales(salesFetched);
-      setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderWithItemsDto) => acc + Number(sale.total), 0));
+      setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderDto) => acc + Number(sale.total), 0));
     } catch (error) {
       console.error("Error fetching sales orders with items:", error);
       setErrorSaleOrdersItems("Error fetching sales orders with items");
@@ -34,7 +34,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
     refreshSales();
   }, [refreshSales]);
 
-  async function addSale(sale: CreateSalesOrderItemDto): Promise<boolean> {
+  async function addSale(sale: CreateSalesOrderDto): Promise<boolean> {
     try {
       const newSale = await createSalesOrderRequest(sale);
       setSales((prevSales) => [...prevSales, newSale]);

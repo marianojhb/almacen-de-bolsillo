@@ -1,6 +1,6 @@
 import { prisma } from "@/config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
-import type { NewSalesOrderWithItemsDto } from "@almacen/shared";
+import type { CreateSalesOrderDto } from "@almacen/shared";
 
 const getSalesOrdersFromDatabase = async () =>
   prisma.salesOrder.findMany({
@@ -19,8 +19,8 @@ const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   });
 
 // This function creates a new sales order along with its items, updates the stock of the products involved, and creates stock movement records. It uses a transaction to ensure that all operations are atomic.
-const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDto) => {
-  const { salesOrderItems, ...newSalesOrders } = salesOrderData;
+const postSalesOrderToDatabase = async (salesOrderData: CreateSalesOrderDto) => {
+  const { salesOrderItems, sellerId, ...newSalesOrders } = salesOrderData;
 
   // Start a transaction to ensure atomicity
   return prisma.$transaction(async (tx) => {
@@ -58,6 +58,9 @@ const postSalesOrderToDatabase = async (salesOrderData: NewSalesOrderWithItemsDt
     const salesOrder = await tx.salesOrder.create({
       data: {
         ...newSalesOrders,
+        seller: {
+          connect: { id: sellerId },
+        },
         transaction: {
           create: {
             amount: newSalesOrders.total,
