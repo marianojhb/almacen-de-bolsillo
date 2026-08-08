@@ -1,4 +1,3 @@
-import type { Product } from "@/types/product";
 import { router } from "expo-router";
 import { Alert, Pressable, Text } from "react-native";
 import { deleteProductRequest } from "@/services/productsApi";
@@ -20,8 +19,7 @@ export default function DeleteProductButton({ id }: { id: string }) {
           try {
             await deleteProductRequest(Number(id));
             if (!product) return;
-            const deletedProduct: Product = { ...product, isActive: false };
-            deleteProduct(deletedProduct);
+            await deleteProduct(product.id);
             router.replace("/(tabs)/products");
           } catch (error) {
             console.error("Error deleting product:", error);

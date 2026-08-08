@@ -27,7 +27,20 @@ export default function NewProductScreen() {
           submitLabel="Guardar"
           onCancel={() => router.back()}
           onSubmit={async (values) => {
-            const productWasAdded = await addProduct(values);
+            const productWasAdded = await addProduct({
+              sku: values.sku,
+              shortname: values.shortname,
+              longname: values.longname,
+              description: null,
+              price: values.price,
+              updatedAt: new Date().toISOString(),
+              stock: values.stock,
+              stockMin: values.stockMin,
+              discount: null,
+              categoryId: values.categoryId,
+              suppliers: values.supplierIds,
+              isActive: values.isActive,
+            });
 
             if (!productWasAdded) {
               Alert.alert("SKU duplicado", "Ya existe un producto registrado con ese SKU.");

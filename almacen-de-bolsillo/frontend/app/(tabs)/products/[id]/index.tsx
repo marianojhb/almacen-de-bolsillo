@@ -81,7 +81,9 @@ export default function ProductDetailScreen() {
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Categoría</Text>
         <Text className="text-[17px] dark:text-white">{product.category.name}</Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Proveedores</Text>
-        <Text className="text-[17px] dark:text-white">{product.suppliers?.map((s) => s.contactName).join(", ")?? "No hay proveedores"}</Text>
+        <Text className="text-[17px] dark:text-white">
+          {product.suppliers?.map((supplier) => supplier.name).join(", ") || "No hay proveedores"}
+        </Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Estado</Text>
         <Text className="text-[17px] dark:text-white">{product.isActive ? "Activo" : "Inactivo"}</Text>
       </View>

@@ -1,7 +1,13 @@
 import { useState, useEffect, ReactNode, useCallback } from "react";
 
 import { ProductsContext } from "@/contexts/products/context";
-import type { ProductWithRelations, CreateProductDto, Category, CreateCategoryDto } from "@almacen/shared";
+import type {
+  ProductWithRelations,
+  CreateProductDto,
+  Category,
+  CreateCategoryDto,
+  UpdateProductDto,
+} from "@almacen/shared";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
 
@@ -80,19 +86,19 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     }
   }
 
-  async function updateProduct(updatedProduct: CreateProductDto, id: number): Promise<boolean> {
-    const normalizedSku = updatedProduct.sku.trim().toUpperCase();
+  async function updateProduct(updatedProduct: UpdateProductDto, id: number): Promise<boolean> {
+    const normalizedSku = updatedProduct.sku?.trim().toUpperCase();
     const skuAlreadyExists = products.some(
-      (product) => product.id !== id && product.sku.toUpperCase() === normalizedSku,
+      (product) => normalizedSku && product.id !== id && product.sku.toUpperCase() === normalizedSku,
     );
 
     if (skuAlreadyExists) {
       return false;
     }
 
-    const productToUpdate: CreateProductDto = {
+    const productToUpdate: UpdateProductDto = {
       ...updatedProduct,
-      sku: normalizedSku,
+      ...(normalizedSku ? { sku: normalizedSku } : {}),
     };
 
     try {
@@ -106,13 +112,8 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
         categoryId: productToUpdate.categoryId,
         isActive: productToUpdate.isActive,
       };
-      const savedProduct = await updateProductRequest(id, productPayload);
-
-      setProducts((currentProducts) =>
-        currentProducts.map((currentProduct) =>
-          currentProduct.id === savedProduct.id ? savedProduct : currentProduct,
-        ),
-      );
+      await updateProductRequest(id, productPayload);
+      await refreshProducts();
 
       return true;
     } catch (error) {
