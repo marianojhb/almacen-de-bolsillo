@@ -71,7 +71,7 @@ export default function ProductEditScreen() {
             stockMin: product.stockMin.toString(),
             categoryId: product.categoryId.toString(),
             isActive: product.isActive,
-            supplierIds: product.suppliers?.map((supplier) => supplier.id.toString()) ?? [],
+            supplierIds: product.suppliers?.map((supplier) => supplier.toString()) ?? [],
           }}
           submitLabel="Guardar"
           onCancel={() => router.back()}
@@ -83,16 +83,16 @@ export default function ProductEditScreen() {
                 longname: values.longname.trim(),
                 description: product.description,
                 price: values.price,
-                updatedAt: new Date().toISOString(),
                 stock: values.stock,
                 stockMin: values.stockMin,
                 discount: product.discount,
                 categoryId: values.categoryId,
-                suppliers: values.supplierIds,
+                supplierIds: values.supplierIds,
                 isActive: values.isActive,
               },
               product.id,
             );
+            console.log(productWasUpdated);
 
             if (!productWasUpdated) {
               Alert.alert(

@@ -33,12 +33,11 @@ export default function NewProductScreen() {
               longname: values.longname,
               description: null,
               price: values.price,
-              updatedAt: new Date().toISOString(),
               stock: values.stock,
               stockMin: values.stockMin,
               discount: null,
               categoryId: values.categoryId,
-              suppliers: values.supplierIds,
+              supplierIds: values.supplierIds,
               isActive: values.isActive,
             });
 

@@ -40,6 +40,7 @@ export type ParsedProductFormValues = {
   isActive: boolean;
   supplierIds: number[];
 };
+
 export type ProductFormProps = {
   initialValues?: ProductFormValues;
   categories?: Category[];
@@ -86,10 +87,6 @@ export default function ProductForm({
     }
     loadSuppliers();
   }, []);
-
-  useEffect(() => {
-    console.log("supplierIds changed:", supplierIds);
-  }, [supplierIds]);
 
   const handleSubmit = () => {
     if (
@@ -183,10 +180,6 @@ export default function ProductForm({
     setSupplierIds((current) =>
       current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id],
     );
-  };
-
-  const handleToggle = () => {
-    console.log("Current supplierIds:", supplierIds);
   };
 
   return (
@@ -392,15 +385,7 @@ export default function ProductForm({
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item: supplier }) => (
                 <Pressable
-                  onPress={async () => {
-                    if (supplierIds.includes(supplier.id)) {
-                      toggleSupplier(supplier.id);
-                      setSupplierIds(supplierIds.filter((id) => id !== supplier.id));
-                    } else {
-                      toggleSupplier(supplier.id);
-                      setSupplierIds([...supplierIds, supplier.id]);
-                    }
-                  }}
+                  onPress={() => toggleSupplier(supplier.id)}
                   className={`mb-2 flex-row items-center justify-between rounded-lg border border-gray-300 px-4 py-3 active:opacity-60`}>
                   <Text
                     className={`text-black dark:text-white ${
