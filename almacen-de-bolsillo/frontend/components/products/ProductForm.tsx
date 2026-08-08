@@ -26,7 +26,7 @@ export type ProductFormValues = {
   stockMin: string;
   categoryId: string;
   isActive: boolean;
-  supplierIds: string[];
+  supplierIds: number[];
 };
 
 export type ParsedProductFormValues = {
@@ -71,9 +71,10 @@ export default function ProductForm({
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
-  // const { suppliers } = useSuppliers();
+  
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [supplierIds, setSupplierIds] = useState<number[]>([]);
+  const [supplierIds, setSupplierIds] = useState<number[]>([initialValues?.supplierIds ?? []].flat());
+  
   const [isSupplierModalVisible, setIsSupplierModalVisible] = useState(false);
 
   useEffect(() => {

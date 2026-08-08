@@ -71,7 +71,7 @@ export default function ProductEditScreen() {
             stockMin: product.stockMin.toString(),
             categoryId: product.categoryId.toString(),
             isActive: product.isActive,
-            supplierIds: product.suppliers?.map((supplier) => supplier.toString()) ?? [],
+            supplierIds: product.suppliers?.map((supplier) => supplier.id) ?? [],
           }}
           submitLabel="Guardar"
           onCancel={() => router.back()}
@@ -92,8 +92,7 @@ export default function ProductEditScreen() {
               },
               product.id,
             );
-            console.log(productWasUpdated);
-
+            
             if (!productWasUpdated) {
               Alert.alert(
                 "Error",

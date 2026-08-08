@@ -1,18 +1,21 @@
-import type {
-  Product,
-  CreateProductDto,
-  UpdateProductDto,
-  ProductWithCategory,
-  ProductWithRelations,
-} from "@almacen/shared";
+import type { Product, CreateProductDto, UpdateProductDto, ProductWithRelations } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+async function getErrorMessage(response: Response, fallback: string) {
+  try {
+    const error = await response.json();
+    return error?.message ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export async function getProducts(includeInactive?: boolean): Promise<ProductWithRelations[]> {
   const response = await fetch(`${API_URL}/products?includeInactive=${includeInactive}`);
 
   if (!response.ok) {
-    throw new Error("Error fetching products");
+    throw new Error(await getErrorMessage(response, "Error getting products"));
   }
 
   return response.json();
@@ -28,7 +31,7 @@ export async function createProductRequest(product: CreateProductDto): Promise<P
   });
 
   if (!response.ok) {
-    throw new Error("Error creating product");
+    throw new Error(await getErrorMessage(response, "Error creating product"));
   }
 
   return response.json();
@@ -38,7 +41,6 @@ export async function updateProductRequest(
   productId: number,
   product: UpdateProductDto,
 ): Promise<ProductWithRelations> {
-  console.log(product);
   const response = await fetch(`${API_URL}/products/${productId}`, {
     method: "PATCH",
     headers: {
@@ -48,7 +50,7 @@ export async function updateProductRequest(
   });
 
   if (!response.ok) {
-    throw new Error("Error updating product");
+    throw new Error(await getErrorMessage(response, "Error updating product"));
   }
 
   return response.json();
@@ -60,6 +62,6 @@ export async function deleteProductRequest(productId: number): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error("Error deleting product");
+    throw new Error(await getErrorMessage(response, "Error deleting product"));
   }
 }

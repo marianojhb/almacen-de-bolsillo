@@ -1,40 +1,14 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import EditProductButton from "@/components/products/EditProductButton";
 import DeleteProductButton from "@/components/products/DeleteProductButton";
-import { getSuppliers } from "@/services/suppliersApi";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { products } = useProducts();
-  const [supplierNames, setSupplierNames] = useState<Record<number, string>>({});
+  const { products, suppliers } = useProducts();
 
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadSuppliers() {
-      try {
-        const suppliers = await getSuppliers(true);
-
-        if (!isMounted) return;
-
-        setSupplierNames(Object.fromEntries(suppliers.map((supplier) => [supplier.id, supplier.name])));
-      } catch {
-        if (!isMounted) return;
-        setSupplierNames({});
-      }
-    }
-
-    loadSuppliers();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   if (!product) {
     return (
@@ -109,8 +83,8 @@ export default function ProductDetailScreen() {
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Proveedores</Text>
         <Text className="text-[17px] dark:text-white">
           {product.suppliers?.length
-            ? product.suppliers.map((supplierId) => supplierNames[supplierId] ?? `#${supplierId}`).join(", ")
-            : "No hay proveedores"}
+            ? product.suppliers.map((supplier) => supplier.name).join(", ")
+            : "No hay proveedores"}{" "}
         </Text>
         <Text className="mt-3 text-[14px] font-semibold dark:text-white">Estado</Text>
         <Text className="text-[17px] dark:text-white">{product.isActive ? "Activo" : "Inactivo"}</Text>

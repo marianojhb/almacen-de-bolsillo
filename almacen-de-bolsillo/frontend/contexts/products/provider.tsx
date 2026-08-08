@@ -7,9 +7,11 @@ import type {
   Category,
   CreateCategoryDto,
   UpdateProductDto,
+  Supplier,
 } from "@almacen/shared";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
+import { getSuppliers } from "@/services/suppliersApi";
 
 type ProductsProviderProps = {
   children: ReactNode;
@@ -18,12 +20,15 @@ type ProductsProviderProps = {
 export function ProductsProvider({ children }: ProductsProviderProps) {
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   // State to track loading and error states
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [suppliersError, setSuppliersError] = useState<string | null>(null);
 
   const refreshProducts = useCallback(async () => {
     try {
@@ -39,7 +44,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     }
   }, []);
 
-  const fetchCategories = useCallback(async () => {
+  const refreshCategories = useCallback(async () => {
     try {
       setIsLoadingCategories(true);
       setCategoriesError(null);
@@ -53,12 +58,28 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     }
   }, []);
 
+  const refreshSuppliers = useCallback(async () => {
+    try {
+      setIsLoadingSuppliers(true);
+      setSuppliersError(null);
+      const suppliers = await getSuppliers();
+      setSuppliers(suppliers);
+    } catch (error) {
+      console.error("Error cargando proveedores:", error);
+      setSuppliersError("Error cargando proveedores");
+    } finally {
+      setIsLoadingSuppliers(false);
+    }
+  }, []);
+
   useEffect(() => {
     // Obtener los productos desde la API y actualizar el estado
     refreshProducts();
     // Obtener las categorías desde la API y actualizar el estado
-    fetchCategories();
-  }, [refreshProducts, fetchCategories]);
+    refreshCategories();
+    // Obtener los proveedores desde la API y actualizar el estado
+    refreshSuppliers();
+  }, [refreshProducts, refreshCategories, refreshSuppliers]);
 
   async function addProduct(product: CreateProductDto): Promise<boolean> {
     const normalizedSku = product.sku.trim().toUpperCase();
@@ -76,8 +97,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       await createProductRequest(productToCreate);
       await refreshProducts();
-      // const savedProduct = await createProductRequest(productToCreate);
-      // setProducts((currentProducts) => [...currentProducts, savedProduct]);
+      await refreshSuppliers(); // Refresh suppliers after creating a product to ensure the latest data is available
 
       return true;
     } catch (error) {
@@ -143,6 +163,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
         categoriesError,
         products,
         categories,
+        suppliers,
         refreshProducts,
         addProduct,
         updateProduct,

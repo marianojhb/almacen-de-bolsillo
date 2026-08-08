@@ -14,7 +14,6 @@ export type Product = {
   stockMin: number;
   discount: number | null;
   categoryId: number;
-  suppliers: number[]; // no poner supplierIds, porque en la base de datos se llama suppliers
   isActive: boolean;
 };
 
