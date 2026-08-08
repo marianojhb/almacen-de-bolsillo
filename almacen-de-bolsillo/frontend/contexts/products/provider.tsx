@@ -1,7 +1,13 @@
 import { useState, useEffect, ReactNode, useCallback } from "react";
 
 import { ProductsContext } from "@/contexts/products/context";
-import type { Product, ProductWithCategory, NewProduct, Category, NewCategory } from "@/types/product";
+import type {
+  ProductWithRelations,
+  CreateProductDto,
+  Category,
+  CreateCategoryDto,
+  UpdateProductDto,
+} from "@almacen/shared";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
 
@@ -10,7 +16,7 @@ type ProductsProviderProps = {
 };
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
-  const [products, setProducts] = useState<ProductWithCategory[]>([]);
+  const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
   // State to track loading and error states
@@ -54,7 +60,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     fetchCategories();
   }, [refreshProducts, fetchCategories]);
 
-  async function addProduct(product: NewProduct): Promise<boolean> {
+  async function addProduct(product: CreateProductDto): Promise<boolean> {
     const normalizedSku = product.sku.trim().toUpperCase();
     const skuAlreadyExists = products.some((currentProduct) => currentProduct.sku.toUpperCase() === normalizedSku);
 
@@ -62,14 +68,16 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
       return false;
     }
 
-    const productToCreate: NewProduct = {
+    const productToCreate: CreateProductDto = {
       ...product,
       sku: normalizedSku,
     };
 
     try {
-      const savedProduct = await createProductRequest(productToCreate);
-      setProducts((currentProducts) => [...currentProducts, savedProduct]);
+      await createProductRequest(productToCreate);
+      await refreshProducts();
+      // const savedProduct = await createProductRequest(productToCreate);
+      // setProducts((currentProducts) => [...currentProducts, savedProduct]);
 
       return true;
     } catch (error) {
@@ -78,19 +86,19 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     }
   }
 
-  async function updateProduct(updatedProduct: Product): Promise<boolean> {
-    const normalizedSku = updatedProduct.sku.trim().toUpperCase();
+  async function updateProduct(updatedProduct: UpdateProductDto, id: number): Promise<boolean> {
+    const normalizedSku = updatedProduct.sku?.trim().toUpperCase();
     const skuAlreadyExists = products.some(
-      (product) => product.id !== updatedProduct.id && product.sku.toUpperCase() === normalizedSku,
+      (product) => normalizedSku && product.id !== id && product.sku.toUpperCase() === normalizedSku,
     );
 
     if (skuAlreadyExists) {
       return false;
     }
 
-    const productToUpdate: Product = {
+    const productToUpdate: UpdateProductDto = {
       ...updatedProduct,
-      sku: normalizedSku,
+      ...(normalizedSku ? { sku: normalizedSku } : {}),
     };
 
     try {
@@ -104,13 +112,8 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
         categoryId: productToUpdate.categoryId,
         isActive: productToUpdate.isActive,
       };
-      const savedProduct = await updateProductRequest(productToUpdate.id, productPayload);
-
-      setProducts((currentProducts) =>
-        currentProducts.map((currentProduct) =>
-          currentProduct.id === savedProduct.id ? savedProduct : currentProduct,
-        ),
-      );
+      await updateProductRequest(id, productPayload);
+      await refreshProducts();
 
       return true;
     } catch (error) {
@@ -119,8 +122,8 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     }
   }
 
-  async function deleteProduct(updatedProduct: Product): Promise<boolean> {
-    const productExists = products.some((product) => product.id === updatedProduct.id);
+  async function deleteProduct(id: number): Promise<boolean> {
+    const productExists = products.some((product) => product.id === id);
 
     if (!productExists) {
       return false;
@@ -128,15 +131,13 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
 
     setProducts((currentProducts) =>
       currentProducts.map((currentProduct) =>
-        currentProduct.id === updatedProduct.id
-          ? { ...currentProduct, ...updatedProduct, isActive: false }
-          : currentProduct,
+        currentProduct.id === id ? { ...currentProduct, isActive: false } : currentProduct,
       ),
     );
     return true;
   }
 
-  async function addCategory(category: NewCategory): Promise<Category> {
+  async function addCategory(category: CreateCategoryDto): Promise<Category> {
     const createdCategory = await createCategoryRequest(category);
     setCategories((currentCategories) => [...currentCategories, createdCategory]);
     return createdCategory;

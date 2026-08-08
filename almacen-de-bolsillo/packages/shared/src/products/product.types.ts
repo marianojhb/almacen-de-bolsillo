@@ -19,15 +19,21 @@ export type Product = {
 };
 
 export type CreateProductDto = {
+  sku: string;
   shortname: string;
   longname: string;
+  description: string | null;
   price: number;
+  updatedAt: string;
   stock: number;
+  stockMin: number;
+  discount: number | null;
   categoryId: number;
-  suppliers: Supplier[];
+  suppliers: number[];
+  isActive: boolean;
 };
 
-export type UpdateProductDto = Partial<Product>; // se actualiza con PATCH, por lo que todos los campos son opcionales
+export type UpdateProductDto = Partial<CreateProductDto>; // se actualiza con PATCH, por lo que todos los campos son opcionales
 
 export type ProductWithRelations = Product & {
   category: Category;
@@ -40,9 +46,4 @@ export type ProductWithCategory = Product & {
 
 export type ProductWithSupplier = Product & {
   suppliers: Supplier[] | null;
-};
-
-export type DeleteProductDto = {
-  id: number;
-  isActive: boolean; // se desactiva el producto en lugar de eliminarlo
 };

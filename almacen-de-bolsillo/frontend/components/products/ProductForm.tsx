@@ -14,6 +14,7 @@ import {
   Platform,
   Switch,
   Modal,
+  FlatList,
 } from "react-native";
 
 export type ProductFormValues = {
@@ -72,6 +73,7 @@ export default function ProductForm({
   // const { suppliers } = useSuppliers();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [supplierIds, setSupplierIds] = useState<number[]>([]);
+  const [isSupplierModalVisible, setIsSupplierModalVisible] = useState(false);
 
   useEffect(() => {
     async function loadSuppliers() {
@@ -84,6 +86,10 @@ export default function ProductForm({
     }
     loadSuppliers();
   }, []);
+
+  useEffect(() => {
+    console.log("supplierIds changed:", supplierIds);
+  }, [supplierIds]);
 
   const handleSubmit = () => {
     if (
@@ -173,11 +179,15 @@ export default function ProductForm({
     }
   };
 
-  // const toggleSupplier = (id: number) => {
-  //   setSupplierIds((current) =>
-  //     current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id],
-  //   );
-  // };
+  const toggleSupplier = (id: number) => {
+    setSupplierIds((current) =>
+      current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id],
+    );
+  };
+
+  const handleToggle = () => {
+    console.log("Current supplierIds:", supplierIds);
+  };
 
   return (
     <KeyboardAvoidingView className="flex-1 bg-white" behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -275,10 +285,18 @@ export default function ProductForm({
           </View>
 
           <View className="py-4">
-            <Text className="text-[14px] font-semibold dark:text-white pb-2">Proveedor</Text>
-            {suppliers.map((supplier, key) => (
-              <Text key={key}>{supplier.name}</Text>
-            ))}
+            <View className="flex flex-row justify-between">
+              <Text className="text-[14px] font-semibold dark:text-white pb-2">Proveedores (seleccionar)</Text>
+              <Pressable onPress={() => setIsSupplierModalVisible(true)}>
+                <Text className="underline text-black dark:text-white">
+                  {supplierIds.length === 0
+                    ? "No hay proveedores"
+                    : supplierIds.length === 1
+                      ? "1 proveedor"
+                      : `${supplierIds.length} proveedores`}
+                </Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* ------------------------- */}
@@ -358,6 +376,43 @@ export default function ProductForm({
             </View>
           </View>
         </View>
+      </Modal>
+
+      <Modal
+        visible={isSupplierModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsSupplierModalVisible(false)}>
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/50 px-4"
+          onPress={() => setIsSupplierModalVisible(false)}>
+          <Pressable className="w-full rounded-2xl bg-white p-6" onPress={(event) => event.stopPropagation()}>
+            <FlatList
+              data={suppliers}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item: supplier }) => (
+                <Pressable
+                  onPress={async () => {
+                    if (supplierIds.includes(supplier.id)) {
+                      toggleSupplier(supplier.id);
+                      setSupplierIds(supplierIds.filter((id) => id !== supplier.id));
+                    } else {
+                      toggleSupplier(supplier.id);
+                      setSupplierIds([...supplierIds, supplier.id]);
+                    }
+                  }}
+                  className={`mb-2 flex-row items-center justify-between rounded-lg border border-gray-300 px-4 py-3 active:opacity-60`}>
+                  <Text
+                    className={`text-black dark:text-white ${
+                      supplierIds.includes(supplier.id) ? "font-bold" : "font-normal"
+                    }`}>
+                    {supplierIds.includes(supplier.id) ? "✓" : ""} {supplier.name}
+                  </Text>
+                </Pressable>
+              )}
+            />
+          </Pressable>
+        </Pressable>
       </Modal>
     </KeyboardAvoidingView>
   );

@@ -1,13 +1,15 @@
 import { prisma } from "../../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
 
-type GetProductsOptions = {
-  includeInactive?: boolean;
-};
-
-const productWithCategoryQuery = {
+const ProductWithRelationsArgs = {
   include: {
     category: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
+    suppliers: {
       select: {
         id: true,
         name: true,
@@ -16,16 +18,16 @@ const productWithCategoryQuery = {
   },
 } satisfies Prisma.ProductDefaultArgs;
 
-const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsOptions = {}) => {
+const getProductsFromDatabase = async ({ includeInactive = true }: { includeInactive?: boolean } = {}) => {
   if (includeInactive) {
     return prisma.product.findMany({
-      ...productWithCategoryQuery,
+      ...ProductWithRelationsArgs,
       orderBy: { shortname: "asc" },
     });
   }
 
   return prisma.product.findMany({
-    ...productWithCategoryQuery,
+    ...ProductWithRelationsArgs,
     where: { isActive: true },
     orderBy: { shortname: "asc" },
   });
@@ -33,7 +35,7 @@ const getProductsFromDatabase = async ({ includeInactive = false }: GetProductsO
 
 const getProductByIdFromDatabase = async (productId: number) => {
   const product = await prisma.product.findUnique({
-    ...productWithCategoryQuery,
+    ...ProductWithRelationsArgs,
     where: { id: productId },
   });
   return product;
@@ -42,7 +44,7 @@ const getProductByIdFromDatabase = async (productId: number) => {
 const postProductToDatabase = async (productData: Prisma.ProductUncheckedCreateInput) => {
   const product = await prisma.product.create({
     data: productData,
-    ...productWithCategoryQuery,
+    ...ProductWithRelationsArgs,
   });
 
   return product;
@@ -52,7 +54,7 @@ const updateProductFromDatabase = async (productId: number, productData: Prisma.
   const product = await prisma.product.update({
     where: { id: productId },
     data: productData,
-    ...productWithCategoryQuery,
+    ...ProductWithRelationsArgs,
   });
   return product;
 };
@@ -61,7 +63,7 @@ const deleteProductFromDatabase = async (productId: number) => {
   const product = await prisma.product.update({
     where: { id: productId },
     data: { isActive: false },
-    ...productWithCategoryQuery,
+    ...ProductWithRelationsArgs,
   });
   return product;
 };

@@ -71,21 +71,28 @@ export default function ProductEditScreen() {
             stockMin: product.stockMin.toString(),
             categoryId: product.categoryId.toString(),
             isActive: product.isActive,
+            supplierIds: product.suppliers?.map((supplier) => supplier.id.toString()) ?? [],
           }}
           submitLabel="Guardar"
           onCancel={() => router.back()}
           onSubmit={async (values) => {
-            const productWasUpdated: boolean = await updateProduct({
-              id: product.id,
-              sku: values.sku.trim(),
-              shortname: values.shortname.trim(),
-              longname: values.longname.trim(),
-              price: values.price,
-              stock: values.stock,
-              stockMin: values.stockMin,
-              categoryId: values.categoryId,
-              isActive: values.isActive,
-            });
+            const productWasUpdated: boolean = await updateProduct(
+              {
+                sku: values.sku.trim(),
+                shortname: values.shortname.trim(),
+                longname: values.longname.trim(),
+                description: product.description,
+                price: values.price,
+                updatedAt: new Date().toISOString(),
+                stock: values.stock,
+                stockMin: values.stockMin,
+                discount: product.discount,
+                categoryId: values.categoryId,
+                suppliers: values.supplierIds,
+                isActive: values.isActive,
+              },
+              product.id,
+            );
 
             if (!productWasUpdated) {
               Alert.alert(
