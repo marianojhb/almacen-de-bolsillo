@@ -34,9 +34,13 @@ export async function createProductRequest(product: CreateProductDto): Promise<P
   return response.json();
 }
 
-export async function updateProductRequest(productId: number, product: UpdateProductDto): Promise<ProductWithCategory> {
+export async function updateProductRequest(
+  productId: number,
+  product: UpdateProductDto,
+): Promise<ProductWithRelations> {
+  console.log(product);
   const response = await fetch(`${API_URL}/products/${productId}`, {
-    method: "PUT",
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },

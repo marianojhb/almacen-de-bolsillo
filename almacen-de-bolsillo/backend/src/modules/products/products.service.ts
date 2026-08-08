@@ -50,12 +50,25 @@ const postProductToDatabase = async (productData: Prisma.ProductUncheckedCreateI
   return product;
 };
 
-const updateProductFromDatabase = async (productId: number, productData: Prisma.ProductUncheckedUpdateInput) => {
+const updateProductFromDatabase = async (
+  productId: number,
+  productData: Prisma.ProductUncheckedUpdateInput,
+  suppliers?: number[],
+) => {
   const product = await prisma.product.update({
     where: { id: productId },
-    data: productData,
+    data: {
+      ...productData,
+
+      ...(suppliers !== undefined && {
+        suppliers: {
+          set: suppliers.map((id) => ({ id })),
+        },
+      }),
+    },
     ...ProductWithRelationsArgs,
   });
+
   return product;
 };
 

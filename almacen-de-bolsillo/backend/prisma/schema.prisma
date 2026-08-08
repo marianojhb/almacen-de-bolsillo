@@ -48,7 +48,6 @@ model Supplier {
   cuit           String?         @unique @map("cuit_s")
   phone          String?         @map("phone_s")
   email          String?         @map("email_s")
-  address        String?         @map("address_s")
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
   isActive       Boolean         @default(true) @map("is_active_s")

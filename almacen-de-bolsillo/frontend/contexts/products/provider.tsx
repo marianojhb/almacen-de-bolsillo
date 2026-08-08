@@ -88,6 +88,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
 
   async function updateProduct(updatedProduct: UpdateProductDto, id: number): Promise<boolean> {
     const normalizedSku = updatedProduct.sku?.trim().toUpperCase();
+
     const skuAlreadyExists = products.some(
       (product) => normalizedSku && product.id !== id && product.sku.toUpperCase() === normalizedSku,
     );
@@ -102,17 +103,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     };
 
     try {
-      const productPayload = {
-        sku: productToUpdate.sku,
-        shortname: productToUpdate.shortname,
-        longname: productToUpdate.longname,
-        price: productToUpdate.price,
-        stock: productToUpdate.stock,
-        stockMin: productToUpdate.stockMin,
-        categoryId: productToUpdate.categoryId,
-        isActive: productToUpdate.isActive,
-      };
-      await updateProductRequest(id, productPayload);
+      await updateProductRequest(id, productToUpdate);
       await refreshProducts();
 
       return true;

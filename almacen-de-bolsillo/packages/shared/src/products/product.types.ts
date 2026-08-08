@@ -14,7 +14,7 @@ export type Product = {
   stockMin: number;
   discount: number | null;
   categoryId: number;
-  suppliers: Supplier[];
+  suppliers: number[]; // no poner supplierIds, porque en la base de datos se llama suppliers
   isActive: boolean;
 };
 
@@ -22,15 +22,14 @@ export type CreateProductDto = {
   sku: string;
   shortname: string;
   longname: string;
-  description: string | null;
   price: number;
-  updatedAt: string;
   stock: number;
   stockMin: number;
-  discount: number | null;
+  description: string | null;
   categoryId: number;
-  suppliers: number[];
+  supplierIds: number[];
   isActive: boolean;
+  discount: number | null;
 };
 
 export type UpdateProductDto = Partial<CreateProductDto>; // se actualiza con PATCH, por lo que todos los campos son opcionales
