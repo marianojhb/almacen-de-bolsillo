@@ -1,6 +1,5 @@
 // Product Form
 import { useState, useEffect } from "react";
-// import { useSuppliers } from "@/contexts/suppliers";
 import * as SuppliersAPI from "@/services/suppliersApi";
 import type { Category, CreateCategoryDto, Supplier } from "@almacen/shared";
 import {
@@ -18,6 +17,7 @@ import {
 } from "react-native";
 
 export type ProductFormValues = {
+  // Los valores del formulario se manejan como strings para facilitar la entrada de datos y la validación.
   sku: string;
   shortname: string;
   longname: string;
@@ -30,6 +30,7 @@ export type ProductFormValues = {
 };
 
 export type ParsedProductFormValues = {
+  // Los valores del formulario se convierten a los tipos correctos antes de enviarlos al backend.
   sku: string;
   shortname: string;
   longname: string;
@@ -42,11 +43,23 @@ export type ParsedProductFormValues = {
 };
 
 export type ProductFormProps = {
+  // Valores iniciales del formulario, si se está editando un producto existente.
   initialValues?: ProductFormValues;
+
+  // Lista de categorías disponibles para seleccionar en el formulario.
   categories?: Category[];
+
+  // Etiqueta del botón de envío del formulario. Por defecto es "Guardar".
   submitLabel?: string;
+
+  // Función para crear una nueva categoría.
   onCreateCategory?: (newCategory: CreateCategoryDto) => Promise<Category>;
+
+  // Función que se llama cuando se envía el formulario. Recibe los valores del formulario validados y
+  // convertidos a los tipos correctos.
   onSubmit: (values: ParsedProductFormValues) => void;
+
+  // Función que se llama cuando se cancela el formulario. Por defecto, cierra el formulario sin guardar cambios.
   onCancel: () => void;
 };
 
@@ -60,6 +73,8 @@ export default function ProductForm({
   onCancel,
   onCreateCategory,
 }: ProductFormProps) {
+  // Estados del formulario
+
   const [sku, setSku] = useState(initialValues?.sku ?? "");
   const [shortname, setShortname] = useState(initialValues?.shortname ?? "");
   const [longname, setLongname] = useState(initialValues?.longname ?? "");
@@ -68,16 +83,19 @@ export default function ProductForm({
   const [stockMin, setStockMin] = useState(initialValues?.stockMin ?? "");
   const [categoryId, setCategoryId] = useState(initialValues?.categoryId ?? "");
   const [isActive, setIsActive] = useState(initialValues?.isActive ?? true);
+
+  // Estados para manejar la creación de nuevas categorías
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
-  
+
+  // Estados para manejar proveedores
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [supplierIds, setSupplierIds] = useState<number[]>([initialValues?.supplierIds ?? []].flat());
-  
   const [isSupplierModalVisible, setIsSupplierModalVisible] = useState(false);
 
   useEffect(() => {
+    // Cargar proveedores al montar el componente
     async function loadSuppliers() {
       try {
         const fetchedSuppliers: Supplier[] = await SuppliersAPI.getSuppliers(false);
@@ -90,7 +108,11 @@ export default function ProductForm({
   }, []);
 
   const handleSubmit = () => {
+    // Función que maneja la validación y el envío del formulario. Valida los campos requeridos,
+    // verifica los límites de longitud
+
     if (
+      // Validación de campos requeridos
       !sku.trim() ||
       !shortname.trim() ||
       !longname.trim() ||
@@ -118,6 +140,7 @@ export default function ProductForm({
       return;
     }
 
+    // Validación de campos numéricos y conversión a números
     const numericPrice = Number(price.trim());
     const numericStock = Number(stock.trim());
     const numericMinimumStock = Number(stockMin.trim());
@@ -133,7 +156,12 @@ export default function ProductForm({
       Alert.alert("Datos inválidos", "El precio y las cantidades de stock no pueden ser negativas.");
       return;
     }
+
     onSubmit({
+      // Envío del formulario al componente padre con los valores validados y convertidos a los tipos correctos.
+      // Se envían los valores del formulario al componente padre, asegurando que los campos numéricos sean
+      // convertidos a números y que los campos de texto estén correctamente recortados.
+
       sku: trimmedSku,
       shortname: trimmedShortName,
       longname: trimmedLongName,
@@ -145,7 +173,12 @@ export default function ProductForm({
       isActive,
     });
   };
+
   const handleCreateCategory = async () => {
+    // Función que maneja la creación de una nueva categoría. Valida el nombre ingresado, verifica si ya existe
+    // una categoría con ese nombre y llama a la función onCreateCategory para crear la categoría.
+    // Si la creación es exitosa, actualiza el estado del formulario y cierra el modal de creación de categoría.
+
     const trimmedName = newCategoryName.trim();
 
     if (!trimmedName) {
@@ -178,6 +211,9 @@ export default function ProductForm({
   };
 
   const toggleSupplier = (id: number) => {
+    // Función que alterna la selección de un proveedor en la lista de IDs de proveedores seleccionados.
+    // Si el ID del proveedor ya está en la lista, se elimina; si no está, se agrega.
+
     setSupplierIds((current) =>
       current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id],
     );
@@ -190,110 +226,118 @@ export default function ProductForm({
         contentContainerClassName="flex-grow gap-5 p-2"
         keyboardShouldPersistTaps="handled">
         <View className="flex-1 p-1">
-          <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-1">Nombre corto</Text>
-          <TextInput
-            placeholder="Nombre corto"
-            value={shortname}
-            onChangeText={setShortname}
-            textAlignVertical="center"
-            className={inputClassName}
-          />
-          <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-2">Nombre largo</Text>
-          <TextInput
-            placeholder="Nombre largo"
-            value={longname}
-            onChangeText={setLongname}
-            textAlignVertical="center"
-            className={inputClassName}
-          />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">SKU</Text>
-          <TextInput
-            placeholder="SKU"
-            value={sku}
-            onChangeText={setSku}
-            textAlignVertical="center"
-            className={inputClassName}
-          />
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Precio</Text>
-          <TextInput
-            placeholder="Precio"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="decimal-pad"
-            textAlignVertical="center"
-            className={inputClassName}
-          />
-          <View className="mt-3 flex-row justify-between gap-3">
-            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock actual</Text>
+          {/* Campos de entrada del formulario */}
+          <>
+            <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-1">Nombre corto</Text>
             <TextInput
-              placeholder=""
-              value={stock}
-              onChangeText={setStock}
-              keyboardType="number-pad"
+              placeholder="Nombre corto"
+              value={shortname}
+              onChangeText={setShortname}
               textAlignVertical="center"
-              className={inputClassName + " w-20"}
+              className={inputClassName}
             />
-            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
+            <Text className="mt-1 text-[14px] font-semibold dark:text-white pb-2">Nombre largo</Text>
             <TextInput
-              placeholder=""
-              value={stockMin}
-              onChangeText={setStockMin}
-              keyboardType="number-pad"
+              placeholder="Nombre largo"
+              value={longname}
+              onChangeText={setLongname}
               textAlignVertical="center"
-              className={inputClassName + " w-20"}
+              className={inputClassName}
             />
-          </View>
-          <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">SKU</Text>
+            <TextInput
+              placeholder="SKU"
+              value={sku}
+              onChangeText={setSku}
+              textAlignVertical="center"
+              className={inputClassName}
+            />
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Precio</Text>
+            <TextInput
+              placeholder="Precio"
+              value={price}
+              onChangeText={setPrice}
+              keyboardType="decimal-pad"
+              textAlignVertical="center"
+              className={inputClassName}
+            />
+            <View className="mt-3 flex-row justify-between gap-3">
+              <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock actual</Text>
+              <TextInput
+                placeholder=""
+                value={stock}
+                onChangeText={setStock}
+                keyboardType="number-pad"
+                textAlignVertical="center"
+                className={inputClassName + " w-20"}
+              />
+              <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Stock mínimo</Text>
+              <TextInput
+                placeholder=""
+                value={stockMin}
+                onChangeText={setStockMin}
+                keyboardType="number-pad"
+                textAlignVertical="center"
+                className={inputClassName + " w-20"}
+              />
+            </View>
+          </>
+          {/* Fin campos de entrada del formulario */}
 
-          <View className="flex-flow flex-wrap flex-row justify-start gap-4">
-            {categories.map((category) => {
-              const isSelected = categoryId === category.id.toString();
+          {/* Sección de categorías y proveedores */}
+          <>
+            <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Categoría</Text>
 
-              return (
-                <Pressable
-                  key={category.id}
-                  onPress={() => setCategoryId(category.id.toString())}
-                  className={`w-22 px-2 py-1 border rounded-xl items-stretch ${
-                    isSelected
-                      ? "border-[#111A1A] bg-[#111A1A] dark:bg-white"
-                      : "border-gray-300 bg-white dark:bg-black"
-                  }`}>
-                  <Text
-                    className={`text-sm ${isSelected ? "text-white text-base dark:text-black" : "text-black dark:text-white"}`}>
-                    {category.name}
+            <View className="flex-flow flex-wrap flex-row justify-start gap-4">
+              {categories.map((category) => {
+                const isSelected = categoryId === category.id.toString();
+
+                return (
+                  <Pressable
+                    key={category.id}
+                    onPress={() => setCategoryId(category.id.toString())}
+                    className={`w-22 px-2 py-1 border rounded-xl items-stretch ${
+                      isSelected
+                        ? "border-[#111A1A] bg-[#111A1A] dark:bg-white"
+                        : "border-gray-300 bg-white dark:bg-black"
+                    }`}>
+                    <Text
+                      className={`text-sm ${isSelected ? "text-white text-base dark:text-black" : "text-black dark:text-white"}`}>
+                      {category.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+
+              <Pressable
+                className="w-22 px-2 py-1 border rounded-xl items-stretch border-gray-300"
+                onPress={() => setIsCategoryModalVisible(true)}>
+                <Text className="text-sm text-black dark:text-white">+ Agregar</Text>
+              </Pressable>
+            </View>
+
+            <View className="py-4">
+              <View className="flex flex-row justify-between">
+                <Text className="text-[14px] font-semibold dark:text-white pb-2">Proveedores (seleccionar)</Text>
+                <Pressable onPress={() => setIsSupplierModalVisible(true)}>
+                  <Text className="underline text-black dark:text-white">
+                    {supplierIds.length === 0
+                      ? "No hay proveedores"
+                      : supplierIds.length === 1
+                        ? "1 proveedor"
+                        : `${supplierIds.length} proveedores`}
                   </Text>
                 </Pressable>
-              );
-            })}
-
-            <Pressable
-              className="w-22 px-2 py-1 border rounded-xl items-stretch border-gray-300"
-              onPress={() => setIsCategoryModalVisible(true)}>
-              <Text className="text-sm text-black dark:text-white">+ Agregar</Text>
-            </Pressable>
-          </View>
+              </View>
+            </View>
+          </>
+          {/* Fin sección de categorías y proveedores */}
 
           <View className="flex flex-row justify-between py-4 ">
             <Text className="mt-3 text-[14px] font-semibold dark:text-white pb-2">Estado</Text>
             <Switch className="" value={isActive} onValueChange={setIsActive} />
           </View>
 
-          <View className="py-4">
-            <View className="flex flex-row justify-between">
-              <Text className="text-[14px] font-semibold dark:text-white pb-2">Proveedores (seleccionar)</Text>
-              <Pressable onPress={() => setIsSupplierModalVisible(true)}>
-                <Text className="underline text-black dark:text-white">
-                  {supplierIds.length === 0
-                    ? "No hay proveedores"
-                    : supplierIds.length === 1
-                      ? "1 proveedor"
-                      : `${supplierIds.length} proveedores`}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* ------------------------- */}
           {/* Botones Cancelar - Guardar */}
           <View className="mt-auto w-full flex-row gap-3">
             <Pressable
@@ -329,8 +373,11 @@ export default function ProductForm({
               </Text>
             </Pressable>
           </View>
+          {/* Fin sección de Botones Cancelar - Guardar */}
         </View>
       </ScrollView>
+
+      {/* Modal Nueva Categoría */}
       <Modal
         visible={isCategoryModalVisible}
         transparent
@@ -371,7 +418,9 @@ export default function ProductForm({
           </View>
         </View>
       </Modal>
+      {/* Fin Modal Nueva Categoría */}
 
+      {/* Modal Selección de Proveedores */}
       <Modal
         visible={isSupplierModalVisible}
         transparent
@@ -400,6 +449,7 @@ export default function ProductForm({
           </Pressable>
         </Pressable>
       </Modal>
+      {/* Fin Modal Selección de Proveedores */}
     </KeyboardAvoidingView>
   );
 }
