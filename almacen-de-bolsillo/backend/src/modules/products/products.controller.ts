@@ -50,10 +50,10 @@ const postProduct = async (req: Request, res: Response) => {
 
 const updateProduct = async (req: Request, res: Response) => {
   const productId = Number(req.params.id);
-  const productData = req.body;
+  const { supplierIds, ...productData } = req.body;
 
   try {
-    const updatedProduct = await updateProductFromDatabase(productId, productData);
+    const updatedProduct = await updateProductFromDatabase(productId, productData, supplierIds);
     res.json(updatedProduct);
   } catch (error) {
     console.error("Error updating product:", error);
