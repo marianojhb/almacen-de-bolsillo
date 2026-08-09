@@ -1,16 +1,30 @@
-import { FlatList, Text, View, Pressable } from "react-native";
+import { FlatList, Text, View, Pressable, TextInput } from "react-native";
 import { router } from "expo-router";
 import NewProductButton from "@/components/products/NewProductButton";
 import { useProducts } from "@/contexts/products";
 import ListAllProductsButton from "@/components/products/ListAllProductsButton";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function ProductsScreen() {
-  const { products, isLoadingProducts, productsError } = useProducts();
-  const [showInactiveProducts, setShowInactiveProducts] = useState(true);
+  const { products, isLoadingProducts, productsError, categories } = useProducts();
+  const [categoryId, setCategoryId] = useState<string | null>(null);
 
-  const filteredProducts = products.filter((product) => product.isActive === true);
-  let visibleProducts = showInactiveProducts ? products : filteredProducts;
+  const [searchText, setSearchText] = useState<string>("");
+  const [isSelected, setIsSelected] = useState(false);
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearchText = searchText.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const matchesCategory = !categoryId || product.categoryId === Number(categoryId);
+
+      const matchesSearchText =
+        normalizedSearchText.length === 0 || product.shortname.toLowerCase().includes(normalizedSearchText);
+
+      const activeProducts = !isSelected || product.isActive === false; // Si isSelected es true, solo mostrar productos inactivos
+      return matchesCategory && matchesSearchText && activeProducts;
+    });
+  }, [categoryId, products, searchText, isSelected]);
 
   return (
     // container
@@ -35,16 +49,56 @@ export default function ProductsScreen() {
           <View className="mb-4 flex-row items-center justify-end  px-2 py-1">
             <Text className="text-3xl font-bold dark:text-white">Productos</Text>
             <View className="ml-auto flex-row gap-2">
-              <ListAllProductsButton
-                showInactiveProducts={showInactiveProducts}
-                onPress={() => setShowInactiveProducts(!showInactiveProducts)}
-              />
               <NewProductButton />
             </View>
           </View>
+          {/* ------------- */}
+          <View className="flex-row gap-2 items-center">
+            <Text className="text-black dark:text-white">Buscar</Text>
+            <TextInput
+              className="flex-1 border border-black rounded-lg w-32 text-start p-2 text-sm  dark:text-white"
+              placeholder="Filtrar por nombre"
+              placeholderTextColor="#9ca3af"
+              keyboardType="default"
+              onChangeText={setSearchText}></TextInput>
+          </View>
+          <View className="flex-flow flex-wrap flex-row justify-start gap-4 gap-x-8">
+            <Pressable
+              key="all"
+              onPress={() => setIsSelected(!isSelected)}
+              className={`w-22 px-2 py-1 border rounded-xl items-stretch ${
+                isSelected ? "border-[#111A1A] bg-[#111A1A] dark:bg-white" : "border-gray-300 bg-white dark:bg-black"
+              }`}>
+              <Text
+                className={`text-sm ${isSelected ? "text-white text-base dark:text-black" : "text-black dark:text-white"}`}>
+                Inactivos
+              </Text>
+            </Pressable>
+
+            {categories.map((category) => {
+              const isSelected = categoryId === category.id.toString();
+
+              return (
+                <Pressable
+                  key={category.id}
+                  onPress={() => setCategoryId(category.id.toString())}
+                  className={`w-22 px-2 py-1 border rounded-xl items-stretch ${
+                    isSelected
+                      ? "border-[#111A1A] bg-[#111A1A] dark:bg-white"
+                      : "border-gray-300 bg-white dark:bg-black"
+                  }`}>
+                  <Text
+                    className={`text-sm ${isSelected ? "text-white text-base dark:text-black" : "text-black dark:text-white"}`}>
+                    {category.name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          {/* ------------- */}
 
           <FlatList
-            data={visibleProducts}
+            data={filteredProducts}
             keyExtractor={(product) => product.id.toString()}
             renderItem={({ item: product }) => {
               const hasLowStock = product.stock <= product.stockMin;

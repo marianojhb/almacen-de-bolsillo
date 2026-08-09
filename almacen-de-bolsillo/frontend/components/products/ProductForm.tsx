@@ -94,6 +94,10 @@ export default function ProductForm({
   const [supplierIds, setSupplierIds] = useState<number[]>([initialValues?.supplierIds ?? []].flat());
   const [isSupplierModalVisible, setIsSupplierModalVisible] = useState(false);
 
+  // Estados para manejar el envío del formulario y la validación de campos
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
   useEffect(() => {
     // Cargar proveedores al montar el componente
     async function loadSuppliers() {
