@@ -4,7 +4,13 @@ import { Stack } from "expo-router";
 
 export default function ProductsLayout() {
   return (
-    <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
+    <Stack
+      screenOptions={{
+        headerBackButtonDisplayMode: "minimal",
+        headerStyle: { backgroundColor: "#111A1A" },
+        headerTintColor: "#ffffff",
+        headerTitleStyle: { fontWeight: "900" },
+      }}>
       <Stack.Screen name="index" options={{ title: "Productos" }} />
 
       <Stack.Screen name="new" options={{ title: "Nuevo producto" }} />

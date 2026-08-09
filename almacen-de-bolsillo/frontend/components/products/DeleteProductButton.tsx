@@ -30,8 +30,8 @@ export default function DeleteProductButton({ id }: { id: string }) {
     ]);
   };
   return (
-    <Pressable onPress={handleDelete} className="items-center w-24 rounded-xl bg-red-500 px-4 py-2 active:opacity-75">
-      <Text className="text-base font-semibold text-white">Eliminar</Text>
+    <Pressable onPress={handleDelete} className="items-center rounded-2xl bg-red-500 px-5 py-3 active:opacity-75">
+      <Text className="text-sm font-black text-white">Eliminar</Text>
     </Pressable>
   );
 }

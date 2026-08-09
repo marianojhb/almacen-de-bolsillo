@@ -42,50 +42,77 @@ export default function StockMovementsScreen() {
   }, [id]);
 
   return (
-    <View>
-      <Text className="text-lg font-bold dark:text-white px-1 py-3 ">
-        Movimientos de Producto: {product?.shortname ?? "Producto"}
-      </Text>
+    <View className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]">
+      <View className="mb-4 rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
+        <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Historial</Text>
+        <Text className="mt-1 text-3xl font-black text-white">Movimientos</Text>
+        <Text className="mt-2 text-sm leading-5 text-slate-300">
+          {product?.shortname ?? "Producto"} · {movements.length} registros
+        </Text>
+      </View>
       {isLoadingMovements && (
-        <View className="flex-1 p-4">
-          <Text className="text-[20px] dark:text-white">Cargando movimientos...</Text>
+        <View className="flex-1 items-center justify-center pb-16">
+          <View className="w-full rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+            <Text className="text-center text-xl font-bold text-slate-950 dark:text-white">
+              Cargando movimientos...
+            </Text>
+            <Text className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+              Consultando el historial de stock.
+            </Text>
+          </View>
         </View>
       )}
       {movementsError && (
-        <View className="flex-1 p-4">
-          <Text className="text-[20px] dark:text-white">{movementsError}</Text>
+        <View className="flex-1 items-center justify-center pb-16">
+          <View className="w-full rounded-3xl border border-red-100 bg-red-50 p-6 dark:border-red-900/60 dark:bg-red-950/30">
+            <Text className="text-center text-xl font-bold text-red-700 dark:text-red-300">
+              No pudimos cargar movimientos
+            </Text>
+            <Text className="mt-2 text-center text-sm text-red-600 dark:text-red-200">{movementsError}</Text>
+          </View>
         </View>
       )}
       {!isLoadingMovements && !movementsError && movements.length === 0 && (
-        <View className="flex-1 p-4">
-          <Text className="text-[20px] dark:text-white">Sin movimientos.</Text>
+        <View className="flex-1 items-center justify-center pb-16">
+          <View className="w-full rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+            <Text className="text-center text-2xl font-black text-slate-950 dark:text-white">Sin movimientos</Text>
+            <Text className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+              Todavía no se registraron cambios de stock para este producto.
+            </Text>
+          </View>
         </View>
       )}
       {!isLoadingMovements && !movementsError && movements.length > 0 && (
         <FlatList
           data={movements}
           keyExtractor={(movement) => movement.id.toString()}
+          contentContainerClassName="gap-3 pb-8"
+          showsVerticalScrollIndicator={false}
           renderItem={({ item: movement }) => (
-            <View className="flex-row justify-between p-1 border-b border-gray-300 py-2 dark:border-gray-700 items-center  ">
-              <Text numberOfLines={1} className="w-24 shrink-0 text-sm dark:text-white">
-                {new Date(movement.createdAt).toLocaleDateString()}
-              </Text>
-              <Text numberOfLines={1} className="w-12 shrink-0 text-center text-sm dark:text-white">
-                {movement.quantity}
-              </Text>
-              <Text className="flex-1 min-w-0 px-2 text-sm dark:text-white">{movement.reason ?? "Sin motivo"}</Text>
-              <View className="w-20 shrink-0 items-end">
+            <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              <View className="flex-row items-start justify-between gap-3">
+                <View className="flex-1">
+                  <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
+                    {new Date(movement.createdAt).toLocaleDateString("es-AR")}
+                  </Text>
+                  <Text className="mt-1 text-lg font-black text-slate-950 dark:text-white">
+                    {movement.reason ?? "Sin motivo"}
+                  </Text>
+                  <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    Cantidad: {movement.quantity}
+                  </Text>
+                </View>
                 <Text
                   numberOfLines={1}
-                  className={`h-8 rounded-lg border border-gray-300 px-2 py-2 text-center text-xs font-bold text-white dark:border-gray-700 ${
+                  className={`rounded-full px-3 py-1.5 text-center text-xs font-black text-white ${
                     movement.type === "MANUAL_ENTRY"
-                      ? "bg-green-500"
+                      ? "bg-emerald-500"
                       : movement.type === "MANUAL_EXIT"
                         ? "bg-red-500"
                         : movement.type === "ADJUSTMENT"
                           ? "bg-blue-600"
                           : "bg-gray-600"
-                  }   w-20`}>
+                  }`}>
                   {movement.type === "MANUAL_ENTRY"
                     ? "ENTRADA"
                     : movement.type === "MANUAL_EXIT"

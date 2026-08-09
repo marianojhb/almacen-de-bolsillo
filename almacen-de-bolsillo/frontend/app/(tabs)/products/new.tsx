@@ -7,16 +7,26 @@ export default function NewProductScreen() {
   const { addProduct, categories, addCategory, isLoadingCategories, categoriesError } = useProducts();
 
   return (
-    <>
+    <View className="flex-1 bg-slate-50 dark:bg-[#071111]">
       {isLoadingCategories && (
-        <View className="flex-1 p-4">
-          <Text className="text-[20px] dark:text-white">Cargando categorías...</Text>
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="w-full rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+            <Text className="text-center text-xl font-bold text-slate-950 dark:text-white">Cargando categorías...</Text>
+            <Text className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+              Preparando el formulario del producto.
+            </Text>
+          </View>
         </View>
       )}
 
       {categoriesError && (
-        <View className="flex-1 p-4">
-          <Text className="text-[20px] dark:text-white">{categoriesError}</Text>
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="w-full rounded-3xl border border-red-100 bg-red-50 p-6 dark:border-red-900/60 dark:bg-red-950/30">
+            <Text className="text-center text-xl font-bold text-red-700 dark:text-red-300">
+              No pudimos cargar categorías
+            </Text>
+            <Text className="mt-2 text-center text-sm text-red-600 dark:text-red-200">{categoriesError}</Text>
+          </View>
         </View>
       )}
 
@@ -55,6 +65,6 @@ export default function NewProductScreen() {
           }}
         />
       )}
-    </>
+    </View>
   );
 }
