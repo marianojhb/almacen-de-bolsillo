@@ -12,27 +12,29 @@ export type Supplier = {
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
-  purchaseOrders: PurchaseOrderDto[];
-  products: Product[];
 };
 
 // Read supplier with items
 
 export type SupplierWithItems = Supplier & {
+  purchaseOrders: PurchaseOrderDto[];
   products: Product[];
 };
 
 // Create
 export type CreateSupplierDto = {
   name: string;
+  cuit: string;
   phone?: string | null;
   email?: string | null;
   address?: string | null;
-  cuit: string;
 };
 
 // Update
-export type UpdateSupplierDto = Partial<CreateSupplierDto>;
+export type UpdateSupplierDto = Partial<CreateSupplierDto> & {
+  isActive?: boolean;
+};
+
 
 // Delete
 export type DeleteSupplierDto = {

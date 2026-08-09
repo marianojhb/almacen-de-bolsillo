@@ -30,13 +30,6 @@ export default function TabScreen() {
         }}
       />
       <Tabs.Screen
-        name="suppliers"
-        options={{
-          title: "Proveedores",
-          tabBarIcon: ({ color, size }) => <Ionicons name="business-outline" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
         name="purchases"
         options={{
           title: "Compras",
@@ -45,12 +38,19 @@ export default function TabScreen() {
         }}
       />
       <Tabs.Screen
-        name="more/index"
+        name="more"
         options={{
           title: "Más",
-          tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
-        }}
-      />
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+          <Ionicons
+            name="ellipsis-horizontal"
+            color={color}
+            size={size}
+          />
+    ),
+  }}
+/>
     </Tabs>
   );
 }
