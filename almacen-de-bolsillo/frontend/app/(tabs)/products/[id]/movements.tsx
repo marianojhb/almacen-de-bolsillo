@@ -3,7 +3,7 @@ import { useProducts } from "@/contexts/products";
 import { View, Text, FlatList } from "react-native";
 import { getStockMovements } from "@/services/movementsApi";
 import { useState, useEffect } from "react";
-import type { StockMovement } from "@/types/stock-movement";
+import type { StockMovement } from "@almacen/shared";
 
 export default function StockMovementsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

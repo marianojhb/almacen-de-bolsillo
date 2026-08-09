@@ -2,7 +2,7 @@ import { useProducts } from "@/contexts/products";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import type { NewStockMovement } from "@/types/stock-movement";
+import type { CreateStockMovementDto } from "@almacen/shared";
 import { postStockMovement } from "@/services/movementsApi";
 
 const stockAdjustmentSignClassName = "w-8 text-center text-3xl font-black leading-8 text-slate-950 dark:text-white";
@@ -67,7 +67,7 @@ export default function StockAdjustmentScreen() {
         break;
     }
 
-    const newStockMovement: NewStockMovement = {
+    const newStockMovement: CreateStockMovementDto = {
       type: movementType,
       productId: product.id,
       quantity: stockDifference,
