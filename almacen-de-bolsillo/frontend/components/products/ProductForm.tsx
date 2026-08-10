@@ -82,7 +82,7 @@ export default function ProductForm({
   useEffect(() => {
     async function loadSuppliers() {
       try {
-        const fetchedSuppliers: Supplier[] = await SuppliersAPI.getSuppliers(false);
+        const fetchedSuppliers: Supplier[] = await SuppliersAPI.getSuppliers();
         setSuppliers(fetchedSuppliers);
       } catch (error) {
         console.log(error);

@@ -1,10 +1,35 @@
 import { prisma } from "../../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
 
-const getPurchaseOrdersFromDatabase = async () => prisma.purchaseOrder.findMany();
+const getPurchaseOrdersFromDatabase = async () =>
+  prisma.purchaseOrder.findMany({
+    include: {
+      supplier: true,
+      purchaseOrdersItems: {
+        include: {
+          product: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
 const getPurchaseOrderByIdFromDatabase = async (purchaseOrderId: number) =>
-  prisma.purchaseOrder.findUnique({ where: { id: purchaseOrderId } });
+  prisma.purchaseOrder.findUnique({
+    where: {
+      id: purchaseOrderId,
+    },
+    include: {
+      supplier: true,
+      purchaseOrdersItems: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
 
 const postPurchaseOrderToDatabase = async (purchaseOrderData: Prisma.PurchaseOrderCreateInput) =>
   prisma.purchaseOrder.create({ data: purchaseOrderData });

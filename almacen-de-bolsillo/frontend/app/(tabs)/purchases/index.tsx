@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { PurchaseOrderWithItemsDto } from "@almacen/shared";
+import { PurchaseOrderWithRelationsDto } from "@almacen/shared";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
 import { getPurchasesWithItems } from "@/services/purchasesApi";
 
 const PurchasesScreen = () => {
-  const [purchases, setPurchases] = useState<PurchaseOrderWithItemsDto[]>([]);
+  const [purchases, setPurchases] = useState<PurchaseOrderWithRelationsDto[]>([]);
   const [totalPurchases, setTotalPurchases] = useState<number>(0);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ const PurchasesScreen = () => {
       const data = await getPurchasesWithItems();
       setPurchases(data);
       setTotalPurchases(
-        data.reduce((acc: number, purchase: PurchaseOrderWithItemsDto) => acc + Number(purchase.total), 0),
+        data.reduce((acc: number, purchase: PurchaseOrderWithRelationsDto) => acc + Number(purchase.total), 0),
       );
     }
 
@@ -25,7 +25,7 @@ const PurchasesScreen = () => {
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-lg font-bold">Compras</Text>
         <Text className="text-lg font-bold">
-          Total: {totalPurchases.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+          Total: {Number(totalPurchases).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
         </Text>
       </View>
       <FlatList
@@ -37,7 +37,7 @@ const PurchasesScreen = () => {
             className="flex-row bg-blue-500 p-2 rounded-lg items-center"
             onPress={() =>
               router.push({
-                pathname: "/purchases/[id]",
+                pathname: "/(tabs)/purchases/[id]",
                 params: { id: String(purchase.id) },
               })
             }>
@@ -55,7 +55,7 @@ const PurchasesScreen = () => {
               {new Date(purchase.createdAt).toLocaleTimeString("es-AR", { hour: "numeric", minute: "numeric" })}
             </Text>
             <Text className="ms-3 text-white text-sm">
-              {purchase.total.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              {Number(purchase.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
             </Text>
           </Pressable>
         )}
@@ -63,7 +63,7 @@ const PurchasesScreen = () => {
       <View className="items-center mb-4 mt-4">
         <Pressable
           className="w-full items-center rounded-xl bg-[#111A1A] p-4 active:opacity-75"
-          onPress={() => router.push("/purchases/new")}>
+          onPress={() => router.push("/(tabs)/purchases/new")}>
           <Text className="text-base font-semibold text-white">Crear nueva compra</Text>
         </Pressable>
       </View>

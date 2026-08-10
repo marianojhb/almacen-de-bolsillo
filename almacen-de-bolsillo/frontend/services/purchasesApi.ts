@@ -1,8 +1,8 @@
-import type { NewPurchaseOrderItemDto, PurchaseOrderDto, PurchaseOrderWithItemsDto } from "@almacen/shared";
+import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getPurchasesWithItems(): Promise<PurchaseOrderWithItemsDto[]> {
+export async function getPurchasesWithItems(): Promise<PurchaseOrderWithRelationsDto[]> {
   const response = await fetch(`${API_URL}/purchase-orders`, {
     method: "GET",
     headers: {
@@ -17,7 +17,7 @@ export async function getPurchasesWithItems(): Promise<PurchaseOrderWithItemsDto
   return response.json();
 }
 
-export async function getPurchaseById(purchaseOrderId: number): Promise<PurchaseOrderWithItemsDto> {
+export async function getPurchaseById(purchaseOrderId: number): Promise<PurchaseOrderWithRelationsDto> {
   const response = await fetch(`${API_URL}/purchase-orders/${purchaseOrderId}`, {
     method: "GET",
     headers: {
@@ -32,13 +32,10 @@ export async function getPurchaseById(purchaseOrderId: number): Promise<Purchase
   return response.json();
 }
 
-type CreatePurchaseOrderPayload = {
-  total: number;
-  supplierId: number;
-  userId?: number;
-};
-
-export async function createPurchaseOrderRequest(purchaseOrder: CreatePurchaseOrderPayload): Promise<PurchaseOrderDto> {
+export async function createPurchaseOrderRequest(
+  purchaseOrder: CreatePurchaseOrderDto,
+  id: number,
+): Promise<PurchaseOrderWithRelationsDto> {
   const response = await fetch(`${API_URL}/purchase-orders`, {
     method: "POST",
     headers: {
@@ -52,18 +49,4 @@ export async function createPurchaseOrderRequest(purchaseOrder: CreatePurchaseOr
   }
 
   return response.json();
-}
-
-export async function createPurchaseOrderItemRequest(purchaseOrderItem: NewPurchaseOrderItemDto): Promise<void> {
-  const response = await fetch(`${API_URL}/purchase-orders-items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(purchaseOrderItem),
-  });
-
-  if (!response.ok) {
-    throw new Error("Error creating purchase order item");
-  }
 }

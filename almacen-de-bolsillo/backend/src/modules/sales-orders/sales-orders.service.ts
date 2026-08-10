@@ -5,7 +5,11 @@ import type { CreateSalesOrderDto } from "@almacen/shared";
 const getSalesOrdersFromDatabase = async () =>
   prisma.salesOrder.findMany({
     include: {
-      salesOrderItems: true,
+      salesOrderItems: {
+        include: {
+          product: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",

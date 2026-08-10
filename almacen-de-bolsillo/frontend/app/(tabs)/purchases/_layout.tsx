@@ -9,14 +9,19 @@ export default function PurchasesLayout() {
       <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
         <Stack.Screen name="index" options={{ title: "Compras" }} />
 
-        <Stack.Screen name="new/index" options={{ title: "Nueva compra" }} />
+        <Stack.Screen name="/(tabs)/purchases/new" options={{ title: "Nueva compra" }} />
 
         <Stack.Screen
           name="new/select-products"
           options={{ title: "Seleccionar productos", presentation: "modal", headerShown: false }}
         />
 
-        <Stack.Screen name="[id]/index" options={{ title: "Detalle de la compra" }} />
+        <Stack.Screen
+          name="(tabs)/purchases/[id]/index"
+          options={{
+            title: "Detalle de la compra",
+          }}
+        />
       </Stack>
     </PurchaseDraftProvider>
   );
