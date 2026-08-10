@@ -1,18 +1,40 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import type { CreateSupplierDto, UpdateSupplierDto } from "@almacen/shared";
 
-const getSuppliersFromDatabase = async () => prisma.supplier.findMany();
+import { prisma } from "../../config/prisma.js";
 
-const getSupplierByIdFromDatabase = async (supplierId: number) =>
-  prisma.supplier.findUnique({ where: { id: supplierId } });
+const getSuppliersFromDatabase = async () =>
+  prisma.supplier.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
 
-const postSupplierToDatabase = async (supplierData: Prisma.SupplierCreateInput) =>
-  prisma.supplier.create({ data: supplierData });
+const getSupplierByIdFromDatabase = async (supplierId: number,) =>
+  prisma.supplier.findUnique({
+    where: {
+      id: supplierId,
+    },
+  });
 
-const updateSupplierFromDatabase = async (supplierId: number, supplierData: Prisma.SupplierUpdateInput) =>
-  prisma.supplier.update({ where: { id: supplierId }, data: supplierData });
+const postSupplierToDatabase = async (supplierData: CreateSupplierDto,) =>
+  prisma.supplier.create({
+    data: supplierData,
+  });
 
-const deleteSupplierFromDatabase = async (supplierId: number) => prisma.supplier.delete({ where: { id: supplierId } });
+const updateSupplierFromDatabase = async (supplierId: number, supplierData: UpdateSupplierDto) =>
+  prisma.supplier.update({
+    where: {
+      id: supplierId,
+    },
+    data: supplierData,
+  });
+
+const deleteSupplierFromDatabase = async (supplierId: number,) =>
+  prisma.supplier.delete({
+    where: {
+      id: supplierId,
+    },
+  });
 
 export {
   getSuppliersFromDatabase,

@@ -1,97 +1,111 @@
-import { useEffect, useState, ReactNode } from "react";
-import { SuppliersContext } from "@/contexts/suppliers/context";
-import type { Supplier, NewSupplier } from "@/types/Supplier";
-import { getSuppliers, createSupplierRequest, updateSupplierRequest } from "@/services/suppliersApi";
+import type { CreateSupplierDto, Supplier, UpdateSupplierDto } from "@almacen/shared";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
+
+import { SuppliersContext } from "./context";
+import { createSupplierRequest, deleteSupplierRequest, getSuppliers, updateSupplierRequest } from "@/services/suppliersApi";
 
 type Props = {
   children: ReactNode;
 };
 
-export function SuppliersProvider({ children }: Props) {
+const sortSuppliers = (suppliers: Supplier[]) =>
+  [...suppliers].sort((first, second) =>
+    first.name.localeCompare(
+      second.name,
+      "es",
+    ),
+  );
+
+export function SuppliersProvider({children,}: Props) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
-  const [suppliersError, setSuppliersError] = useState<string | null>(null);
 
-  
-    useEffect(() => {
-      // Obtener los proveedores desde la API y actualizar el estado
-      const fetchSuppliers = async () => {
-        try {
-          setIsLoadingSuppliers(true);
-          setSuppliers(await getSuppliers());
-          setSuppliersError(null);
-        } catch (error) {
-          console.error(error);
+  const [ isLoadingSuppliers, setIsLoadingSuppliers ] = useState(true);
 
-          setSuppliersError("Error cargando proveedores");
-        } finally {
-          setIsLoadingSuppliers(false);
-        }
-      };
-  
-      fetchSuppliers();
+  const [ suppliersError, setSuppliersError ] = useState<string | null>(null);
 
-      // Actualizar el estado y el fetch con los proveedores obtenidos desde la API
-    }, []);
-  
+  const refreshSuppliers = useCallback(async () => {
+      try {
+        setIsLoadingSuppliers(true);
+        setSuppliersError(null);
 
-  async function addSupplier(newSupplier: NewSupplier): Promise<boolean> {
-    try {
-      const createdSupplier = await createSupplierRequest(newSupplier);
-      setSuppliers((current) => [...current, createdSupplier]);
+        const response =
+          await getSuppliers();
 
-      return true;
-    } catch (error) {
-      console.error("Error creating supplier:", error);
+        setSuppliers(
+          sortSuppliers(response),
+        );
+      } catch (error) {
+        console.error(
+          "Error loading suppliers:",
+          error,
+        );
 
-      return false;
-    }
-  }
+        setSuppliersError(
+          error instanceof Error
+            ? error.message
+            : "No se pudieron cargar los proveedores.",
+        );
+      } finally {
+        setIsLoadingSuppliers(false);
+      }
+  }, []);
 
-  async function updateSupplier(updatedSupplier: Supplier): Promise<boolean> {
-    try {
-      const supplier = await updateSupplierRequest(updatedSupplier.id, updatedSupplier);
+  useEffect(() => {
+    void refreshSuppliers();
+  }, [refreshSuppliers]);
 
-      setSuppliers((current) =>
+  const addSupplier = async (supplierData: CreateSupplierDto) => {
+    const supplier = await createSupplierRequest(supplierData);
+
+    setSuppliers((current) =>
+      sortSuppliers([
+        ...current,
+        supplier,
+      ]),
+    );
+
+    return supplier;
+  };
+
+  const updateSupplier = async (supplierId: number, supplierData: UpdateSupplierDto) => {
+    const supplier = await updateSupplierRequest(supplierId, supplierData);
+
+    setSuppliers((current) =>
+      sortSuppliers(
         current.map((item) =>
-          item.id === supplier.id ? supplier : item,
+          item.id === supplier.id
+            ? supplier
+            : item,
         ),
-      );
+      ),
+    );
 
-      return true;
-    } catch (error) {
-      console.error("Error updating supplier:", error);
+    return supplier;
+  };
 
-      return false;
-    }
-  }
+  const deleteSupplier = async (supplierId: number) => {
+    await deleteSupplierRequest(supplierId,);
 
-  async function deleteSupplier(updatedSupplier: Supplier): Promise<boolean> {
-    try {
-      setSuppliers((current) =>
-        current.map((item) =>
-          item.id === updatedSupplier.id ? updatedSupplier : item,
-        ),
-      );
-
-      return true;
-    } catch (error) {
-      console.error("Error deleting supplier:", error);
-
-      return false;
-    }
-  }
+    setSuppliers((current) =>
+      current.filter(
+        (supplier) =>
+          supplier.id !== supplierId,
+      ),
+    );
+  };
 
   return (
     <SuppliersContext.Provider
-      value={{ 
-        suppliers, 
-        isLoadingSuppliers, 
-        suppliersError, 
-        addSupplier, 
-        updateSupplier, 
-        deleteSupplier, 
-      }}>
+      value={{
+        suppliers,
+        isLoadingSuppliers,
+        suppliersError,
+        refreshSuppliers,
+        addSupplier,
+        updateSupplier,
+        deleteSupplier,
+      }}
+    >
       {children}
     </SuppliersContext.Provider>
   );

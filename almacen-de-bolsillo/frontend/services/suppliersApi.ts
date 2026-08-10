@@ -1,55 +1,96 @@
-import type { CreateSupplierDto, UpdateSupplierDto, Supplier } from "@almacen/shared";
+import type { CreateSupplierDto, Supplier, UpdateSupplierDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getSuppliers(includeInactive?: boolean): Promise<Supplier[]> {
-  const response = await fetch(`${API_URL}/suppliers?includeInactive=${includeInactive}`);
+async function getErrorMessage(response: Response, fallback: string) {
+  try {
+    const error = await response.json();
+
+    return error?.message ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export async function getSuppliers(): Promise<Supplier[]> {
+  const response = await fetch(
+    `${API_URL}/suppliers`,
+  );
 
   if (!response.ok) {
-    throw new Error("Error fetching suppliers");
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "No se pudieron obtener los proveedores.",
+      ),
+    );
   }
 
   return response.json();
 }
 
-export async function createSupplierRequest(supplier: CreateSupplierDto): Promise<Supplier> {
-  const response = await fetch(`${API_URL}/suppliers`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+export async function createSupplierRequest(supplier: CreateSupplierDto,): Promise<Supplier> {
+  const response = await fetch(
+    `${API_URL}/suppliers`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(supplier),
     },
-    body: JSON.stringify(supplier),
-  });
+  );
 
   if (!response.ok) {
-    throw new Error("Error creating supplier");
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "No se pudo crear el proveedor.",
+      ),
+    );
   }
 
   return response.json();
 }
 
 export async function updateSupplierRequest(supplierId: number, supplier: UpdateSupplierDto): Promise<Supplier> {
-  const response = await fetch(`${API_URL}/suppliers/${supplierId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${API_URL}/suppliers/${supplierId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(supplier),
     },
-    body: JSON.stringify(supplier),
-  });
+  );
 
   if (!response.ok) {
-    throw new Error("Error updating supplier");
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "No se pudo actualizar el proveedor.",
+      ),
+    );
   }
 
   return response.json();
 }
 
-export async function deleteSupplierRequest(supplierId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/suppliers/${supplierId}`, {
-    method: "DELETE",
-  });
+export async function deleteSupplierRequest(supplierId: number,): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/suppliers/${supplierId}`,
+    {
+      method: "DELETE",
+    },
+  );
 
   if (!response.ok) {
-    throw new Error("Error deleting supplier");
+    throw new Error(
+      await getErrorMessage(
+        response,
+        "No se pudo eliminar el proveedor.",
+      ),
+    );
   }
 }
