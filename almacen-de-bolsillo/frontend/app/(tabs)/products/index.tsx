@@ -1,4 +1,4 @@
-import { FlatList, Text, View, Pressable, TextInput } from "react-native";
+import { FlatList, Keyboard, Text, View, Pressable, TextInput } from "react-native";
 import { router } from "expo-router";
 import NewProductButton from "@/components/products/NewProductButton";
 import { useProducts } from "@/contexts/products";
@@ -9,6 +9,7 @@ export default function ProductsScreen() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const [searchText, setSearchText] = useState<string>("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
   const filteredProducts = useMemo(() => {
@@ -52,7 +53,15 @@ export default function ProductsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]">
+    <View
+      className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]"
+      onStartShouldSetResponderCapture={() => {
+        if (isSearchFocused) {
+          Keyboard.dismiss();
+        }
+
+        return false;
+      }}>
       <View className="mb-4 rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
@@ -68,23 +77,32 @@ export default function ProductsScreen() {
       </View>
 
       <View className="mb-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-        <Text className="mb-2 text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-          Buscar
-        </Text>
+        <View className="mb-2 flex-row items-center justify-between gap-3">
+          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
+            Buscar
+          </Text>
+        </View>
         <TextInput
           className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
           placeholder="Filtrar por nombre"
           placeholderTextColor="#94a3b8"
           keyboardType="default"
+          returnKeyType="search"
           value={searchText}
           onChangeText={setSearchText}
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={() => setIsSearchFocused(false)}
+          onSubmitEditing={Keyboard.dismiss}
         />
       </View>
 
       <View className="mb-4 flex-row flex-wrap gap-2">
         <Pressable
           key="inactive"
-          onPress={() => setIsSelected(!isSelected)}
+          onPress={() => {
+            Keyboard.dismiss();
+            setIsSelected(!isSelected);
+          }}
           className={`rounded-full border px-4 py-2 active:opacity-75 ${
             isSelected
               ? "border-amber-500 bg-amber-500 dark:border-amber-400 dark:bg-amber-400"
@@ -102,7 +120,10 @@ export default function ProductsScreen() {
           return (
             <Pressable
               key={category.id}
-              onPress={() => setCategoryId(isCategorySelected ? null : category.id.toString())}
+              onPress={() => {
+                Keyboard.dismiss();
+                setCategoryId(isCategorySelected ? null : category.id.toString());
+              }}
               className={`rounded-full border px-4 py-2 active:opacity-75 ${
                 isCategorySelected
                   ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
@@ -133,6 +154,8 @@ export default function ProductsScreen() {
           data={filteredProducts}
           keyExtractor={(product) => product.id.toString()}
           contentContainerClassName="gap-3 pb-8"
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white p-6 dark:border-slate-700 dark:bg-slate-950">
@@ -147,7 +170,10 @@ export default function ProductsScreen() {
 
             return (
               <Pressable
-                onPress={() => router.push(`/products/${product.id}`)}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  router.push(`/products/${product.id}`);
+                }}
                 className="rounded-3xl active:scale-[0.98] active:opacity-80">
                 <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
                   <View className="flex-row items-start justify-between gap-3">
