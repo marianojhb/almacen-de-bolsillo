@@ -8,33 +8,36 @@ interface SalesProviderProps {
 }
 
 export function SalesProvider({ children }: SalesProviderProps) {
-  const [totalSales, setTotalSales] = useState<number>(0);
   const [sales, setSales] = useState<SalesOrderDto[]>([]);
+  const [totalSales, setTotalSales] = useState<number>(0);
 
   // State to track loading and error states
   const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false);
-  const [errorSaleOrdersItems, setErrorSaleOrdersItems] = useState<string | null>(null);
+  const [errorSaleOrders, setErrorSaleOrders] = useState<string | null>(null);
 
   const refreshSales = useCallback(async () => {
     try {
       setIsLoadingSales(true);
-      setErrorSaleOrdersItems(null);
-      const salesFetched = await getSalesOrders();
-      setSales(salesFetched);
-      setTotalSales(salesFetched.reduce((acc: number, sale: SalesOrderDto) => acc + Number(sale.total), 0));
+      setErrorSaleOrders(null);
+
+      const data = await getSalesOrders();
+
+      setSales(data);
+      setTotalSales(data.reduce((accumulator: number, sale: SalesOrderDto) => accumulator + Number(sale.total), 0));
     } catch (error) {
       console.error("Error fetching sales orders with items:", error);
-      setErrorSaleOrdersItems("Error fetching sales orders with items");
+      setErrorSaleOrders("Error fetching sales orders with items");
     } finally {
       setIsLoadingSales(false);
     }
   }, []);
 
   useEffect(() => {
-    refreshSales();
+    void refreshSales();
   }, [refreshSales]);
 
   async function addSale(sale: CreateSalesOrderDto): Promise<boolean> {
+    // Implement the logic to add a sale
     try {
       const newSale = await createSalesOrderRequest(sale);
       setSales((prevSales) => [...prevSales, newSale]);
@@ -57,9 +60,15 @@ export function SalesProvider({ children }: SalesProviderProps) {
     }
   }
 
+  async function clearSales() {
+    // Implement the logic to clear all sales
+    setSales([]);
+    setTotalSales(0);
+  }
+
   return (
     <SalesContext.Provider
-      value={{ sales, totalSales, isLoadingSales, errorSaleOrdersItems, addSale, refreshSales, deleteSale }}>
+      value={{ sales, totalSales, isLoadingSales, errorSaleOrders, addSale, refreshSales, deleteSale, clearSales }}>
       {children}
     </SalesContext.Provider>
   );

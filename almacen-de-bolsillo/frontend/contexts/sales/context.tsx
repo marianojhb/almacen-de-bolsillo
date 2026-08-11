@@ -5,10 +5,11 @@ interface SalesContextType {
   sales: SalesOrderDto[];
   totalSales: number;
   isLoadingSales: boolean;
-  errorSaleOrdersItems: string | null;
+  errorSaleOrders: string | null;
   addSale: (sale: CreateSalesOrderDto) => Promise<boolean>;
   deleteSale: (saleId: number) => Promise<boolean>;
   refreshSales: () => Promise<void>;
+  clearSales: () => void;
 }
 
 export const SalesContext = createContext<SalesContextType | undefined>(undefined);

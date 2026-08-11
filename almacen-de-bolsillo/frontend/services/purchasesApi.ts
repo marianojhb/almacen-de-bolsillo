@@ -1,8 +1,8 @@
-import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto } from "@almacen/shared";
+import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto, PurchaseOrderDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getPurchasesWithItems(): Promise<PurchaseOrderWithRelationsDto[]> {
+export async function getPurchases(): Promise<PurchaseOrderDto[]> {
   const response = await fetch(`${API_URL}/purchase-orders`, {
     method: "GET",
     headers: {
@@ -32,10 +32,7 @@ export async function getPurchaseById(purchaseOrderId: number): Promise<Purchase
   return response.json();
 }
 
-export async function createPurchaseOrderRequest(
-  purchaseOrder: CreatePurchaseOrderDto,
-  id: number,
-): Promise<PurchaseOrderWithRelationsDto> {
+export async function createPurchaseOrderRequest(purchaseOrder: CreatePurchaseOrderDto): Promise<PurchaseOrderDto> {
   const response = await fetch(`${API_URL}/purchase-orders`, {
     method: "POST",
     headers: {
@@ -49,4 +46,16 @@ export async function createPurchaseOrderRequest(
   }
 
   return response.json();
+}
+export async function deletePurchaseOrderRequest(purchaseOrderId: number): Promise<void> {
+  const response = await fetch(`${API_URL}/purchase-orders/${purchaseOrderId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ isActive: false }),
+  });
+  if (!response.ok) {
+    throw new Error("Error deleting sales order");
+  }
 }
