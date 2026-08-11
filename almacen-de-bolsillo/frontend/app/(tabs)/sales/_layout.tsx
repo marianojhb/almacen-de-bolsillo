@@ -19,8 +19,6 @@ export default function SalesLayout() {
           />
 
           <Stack.Screen name="[id]/index" options={{ title: "Detalle de la venta" }} />
-
-          <Stack.Screen name="[id]/edit" options={{ title: "Editar venta" }} />
         </Stack>
       </SalesDraftProvider>
     </SalesProvider>
