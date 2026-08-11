@@ -1,8 +1,7 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
-import EditProductButton from "@/components/products/EditProductButton";
-import DeleteProductButton from "@/components/products/DeleteProductButton";
+import { EditProductButton, DeleteProductButton } from "@/components/products";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

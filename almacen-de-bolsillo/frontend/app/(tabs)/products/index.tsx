@@ -1,6 +1,6 @@
 import { FlatList, Keyboard, Text, View, Pressable, TextInput } from "react-native";
 import { router } from "expo-router";
-import NewProductButton from "@/components/products/NewProductButton";
+import { NewProductButton } from "@/components/products";
 import { useProducts } from "@/contexts/products";
 import { useState, useMemo } from "react";
 
