@@ -18,4 +18,4 @@ interface PurchaseDraftContextType {
   clearPurchase: () => void;
 }
 
-export const PurchaseDraftContext = createContext<PurchaseDraftContextType | null>(null);
+export const PurchaseDraftContext = createContext<PurchaseDraftContextType | undefined>(undefined);

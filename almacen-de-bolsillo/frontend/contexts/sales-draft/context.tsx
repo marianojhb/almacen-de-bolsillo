@@ -8,4 +8,4 @@ interface SalesDraftContextType {
   removeItem: (productId: number) => void;
   clearSales: () => void;
 }
-export const SalesDraftContext = createContext<SalesDraftContextType | null>(null);
+export const SalesDraftContext = createContext<SalesDraftContextType | undefined>(undefined);
