@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { Pressable, Text } from "react-native";
 
-export function NewProductButton() {
+export function NewButton() {
   return (
     <Pressable
       onPress={() => router.push("/products/new")}

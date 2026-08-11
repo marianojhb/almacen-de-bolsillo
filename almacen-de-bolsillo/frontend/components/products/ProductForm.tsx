@@ -54,7 +54,7 @@ const inputClassName =
   "h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-0 text-base font-medium leading-5 text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white";
 const labelClassName = "mb-2 text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500";
 
-export default function ProductForm({
+export function ProductForm({
   initialValues,
   categories = [],
   submitLabel,

@@ -3,7 +3,7 @@ import { Alert, Pressable, Text } from "react-native";
 import { deleteProductRequest } from "@/services/productsApi";
 import { useProducts } from "@/contexts/products";
 
-export default function DeleteProductButton({ id }: { id: string }) {
+export function DeleteProductButton({ id }: { id: string }) {
   const { products, deleteProduct } = useProducts();
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
   const handleDelete = () => {
