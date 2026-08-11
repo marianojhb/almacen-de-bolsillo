@@ -10,6 +10,7 @@ const getSalesOrdersFromDatabase = async () =>
           product: true,
         },
       },
+      seller: true,
     },
     orderBy: {
       createdAt: "desc",
@@ -19,7 +20,7 @@ const getSalesOrdersFromDatabase = async () =>
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({
     where: { id: salesOrderId },
-    include: { salesOrderItems: true },
+    include: { salesOrderItems: { include: { product: true, seller: true } } },
   });
 
 // This function creates a new sales order along with its items, updates the stock of the products involved, and creates stock movement records. It uses a transaction to ensure that all operations are atomic.

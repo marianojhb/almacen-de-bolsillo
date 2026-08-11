@@ -1,4 +1,7 @@
 // This file contains the types for sales orders and their related entities.
+import type { ProductWithRelations } from "../index.js";
+import type { User } from "../users/user.types.js";
+
 export type PaymentMethod = "EFECTIVO" | "MERCADOPAGO" | "UALA";
 
 // Sales Order Types
@@ -13,12 +16,14 @@ export type SalesOrderItem = {
   price: number;
   discount: number;
   subtotal: number;
+  product: ProductWithRelations;
 };
 
 export type SalesOrder = {
   id: number;
   invoice: string;
   sellerId: number;
+  date: string;
   paymentMethod: PaymentMethod;
   discount: number;
   iva: number;
@@ -26,6 +31,7 @@ export type SalesOrder = {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  seller: User;
 };
 
 // DTOs CRUD
@@ -63,4 +69,8 @@ export type UpdateSalesOrderDto = Partial<CreateSalesOrderDto>;
 // Delete
 export type DeleteSalesOrderDto = {
   id: number;
+};
+
+export type SalesOrderWithRelationsDto = SalesOrder & {
+  salesOrderItems: SalesOrderItem[];
 };

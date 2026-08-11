@@ -1,17 +1,15 @@
-import { useCallback } from "react";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
 import { useSales } from "@/contexts/sales";
 
 export default function SalesScreen() {
-  const { refreshSales, totalSales, sales, isLoadingSales } = useSales();
+  const { totalSales, sales, isLoadingSales } = useSales();
 
-  useFocusEffect(
-    useCallback(() => {
-      void refreshSales();
-    }, [refreshSales]),
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     void refreshSales();
+  //   }, [refreshSales]),
+  // );
 
   return (
     <>
@@ -40,7 +38,15 @@ export default function SalesScreen() {
               data={sales}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item: sale }) => (
-                <Pressable key={sale.id} className="flex-row bg-blue-500 p-2 rounded-lg items-center">
+                <Pressable
+                  key={sale.id}
+                  className="flex-row bg-blue-500 p-2 rounded-lg items-center"
+                  onPress={() => {
+                    router.push({
+                      pathname: "/(tabs)/sales/[id]",
+                      params: { id: String(sale.id) },
+                    });
+                  }}>
                   <Text className=" text-white text-sm me-3">Venta Nº{sale.id}</Text>
                   <Text className="flex-1  text-white text-sm" numberOfLines={1} ellipsizeMode="clip">
                     ..................................................................
