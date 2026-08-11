@@ -7,8 +7,9 @@ export default function ProductsLayout() {
     <Stack
       screenOptions={{
         headerBackButtonDisplayMode: "minimal",
+        statusBarBackgroundColor: "#111A1A",
         headerStyle: { backgroundColor: "#111A1A" },
-        headerTintColor: "#ffffff",
+        headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "900" },
       }}>
       <Stack.Screen name="index" options={{ title: "Productos" }} />

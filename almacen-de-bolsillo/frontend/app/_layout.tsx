@@ -27,7 +27,7 @@ export default function RootLayout() {
             }}
           />
 
-          <StatusBar style="auto" />
+          <StatusBar style="light"  />
         </ProductsProvider>
       </SuppliersProvider>
     </ThemeProvider>

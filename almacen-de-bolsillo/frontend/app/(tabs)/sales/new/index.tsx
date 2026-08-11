@@ -1,43 +1,33 @@
-import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
-import { useSalesDraft } from "@/contexts/sales-draft";
-import { useSales } from "@/contexts/sales";
-import { useState } from "react";
-import { router } from "expo-router";
 import { CreateSalesOrderDto } from "@almacen/shared";
+import { router } from "expo-router";
+import { useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSales } from "@/contexts/sales";
+import { useSalesDraft } from "@/contexts/sales-draft";
 
 export const NewSaleScreen = () => {
-  // contexts
   const { items, totalAmount, removeItem, clearSales } = useSalesDraft();
   const { addSale, refreshSales } = useSales();
 
-  // estilos
-  const viewStyle = "flex-row items-center justify-between mb-2";
-  const textStyle = "font-bold mr-2";
-  const inputStyle = "text-right  rounded-md p-2 w-1/2";
-
-  // form inputs states
   const [inputDiscount, setInputDiscount] = useState("");
   const [metodoDePago, setMetodoDePago] = useState<"EFECTIVO" | "MERCADOPAGO" | "UALA">("EFECTIVO");
   const [numeroFactura, setNumeroFactura] = useState("");
-
-  // buttons states
   const [isSavingSale, setIsSavingSale] = useState(false);
 
-  // pure calculations
-  const discount: number = Math.round(Number(totalAmount) * (Number(inputDiscount) / 100) * 100) / 100;
-  const baseImponible: number = Math.round((Number(totalAmount) - discount) * 100) / 100; // Significa "...) * 100 / 100": redondea a 2 decimales
-  const iva = Math.round(baseImponible * 0.21 * 100) / 100; // 21% de IVA
-  const totalConIVA: number = Math.round((baseImponible + iva) * 100) / 100; // sumar el IVA y redondear a 2 decimales
+  const discount = Math.round(Number(totalAmount) * (Number(inputDiscount || 0) / 100) * 100) / 100;
+  const baseImponible = Math.round((Number(totalAmount) - discount) * 100) / 100;
+  const iva = Math.round(baseImponible * 0.21 * 100) / 100;
+  const totalConIVA = Math.round((baseImponible + iva) * 100) / 100;
 
-  const isDisabled: boolean = items.length === 0 || isSavingSale;
+  const isDisabled = items.length === 0 || isSavingSale;
 
   async function handleAddSale() {
     const payload: CreateSalesOrderDto = {
       invoice: numeroFactura,
-      sellerId: 3, // por ahora fijo
+      sellerId: 3,
       paymentMethod: metodoDePago,
-      discount: discount,
-      iva: iva,
+      discount,
+      iva,
       total: totalConIVA,
       salesOrderItems: items.map((item) => ({
         productId: item.productId,
@@ -45,213 +35,235 @@ export const NewSaleScreen = () => {
         longname: item.longname,
         quantity: item.quantity,
         price: item.price,
-        discount: 0, // descuento por línea por ahora fijo
+        discount: 0,
         subtotal: item.quantity * item.price,
       })),
     };
 
     setIsSavingSale(true);
-    // 1. Create the sale successfully
     await addSale(payload);
-
-    // 2. Clear the temporary draft
     clearSales();
-
-    // 3. Reload the sales list
     await refreshSales();
-
-    //4. Navigate to the list
     router.replace("/sales");
-
     setIsSavingSale(false);
   }
+
   return (
-    <>
-      <View className="items-center justify-center">
-        <Text className="text-2xl font-bold pt-2">Nueva Venta</Text>
-      </View>
-      <ScrollView
-        className="flex-1 p-2"
-        alwaysBounceVertical={false}
-        bounces={true}
-        contentContainerClassName="flex-grow">
+    <View className="flex-1 bg-slate-50 dark:bg-[#071111]">
+      <ScrollView className="flex-1" contentContainerClassName="gap-4 px-4 pb-8 pt-4">
+        <View className="rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
+          <View className="flex-row items-start justify-between gap-4">
+            <View className="flex-1">
+              <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Comercial</Text>
+              <Text className="mt-1 text-4xl font-black text-white">Nueva venta</Text>
+              <Text className="mt-2 text-sm leading-5 text-slate-300">
+                {items.length} productos cargados · Total estimado{" "}
+                {Number(totalConIVA).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+            </View>
+
+            <Pressable
+              className="rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
+              onPress={() => router.push("/sales/new/select-products")}>
+              <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Agregar items</Text>
+            </Pressable>
+          </View>
+        </View>
+
         <Pressable
-          className="border rounded p-2 border-gray-300 w-full mb-2"
-          onPress={() => {
-            router.push("/sales/new/select-products");
-          }}>
-          <View className="flex-column items-start ">
-            <Text className="text-base font-bold pb-2">Items:</Text>
+          className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950"
+          onPress={() => router.push("/sales/new/select-products")}>
+          <View className="flex-row items-center justify-between gap-3">
+            <Text className="text-lg font-black text-slate-950 dark:text-white">Productos seleccionados</Text>
+            <Text className="text-xs font-bold uppercase tracking-[1px] text-emerald-600 dark:text-emerald-400">
+              Editar
+            </Text>
+          </View>
 
-            {items.length === 0 && (
-              <Text className="text-sm text-gray-500 dark:text-gray-400">No hay productos agregados </Text>
-            )}
+          {items.length === 0 ? (
+            <Text className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+              Todavía no agregaste productos. Tocá esta tarjeta para cargar artículos a la venta.
+            </Text>
+          ) : (
+            <View className="mt-4 gap-3">
+              {items.map((item) => (
+                <View
+                  key={item.productId}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+                  <View className="flex-row items-start justify-between gap-3">
+                    <View className="flex-1">
+                      <Text className="text-lg font-black text-slate-950 dark:text-white">{item.shortname}</Text>
+                      <Text className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                        {item.longname}
+                      </Text>
+                    </View>
 
-            {items.length > 0 &&
-              items.map((item) => (
-                <View key={item.productId}>
-                  <Text>{item.shortname}</Text>
-                  <View className="flex-row items-center justify-between w-full">
-                    <Text>
-                      Cantidad: {item.quantity} ${item.price} c/u
-                    </Text>
-                    <Text className="ms-auto">
-                      {(item.quantity * item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-                    </Text>
                     <Pressable
-                      className="border border-red-500 p-2 px-4 rounded ms-2"
-                      onPress={() => {
-                        removeItem(item.productId);
-                      }}>
-                      <Text className="text-red-500 font-bold">x</Text>
+                      className="rounded-full border border-red-200 bg-red-50 px-3 py-1.5 dark:border-red-900/60 dark:bg-red-950/30"
+                      onPress={() => removeItem(item.productId)}>
+                      <Text className="text-xs font-black uppercase tracking-[1px] text-red-600 dark:text-red-300">
+                        Quitar
+                      </Text>
                     </Pressable>
+                  </View>
+
+                  <View className="mt-4 flex-row flex-wrap gap-2">
+                    <View className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800">
+                      <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Cantidad: {item.quantity}</Text>
+                    </View>
+                    <View className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800">
+                      <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                        Unitario: {Number(item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      </Text>
+                    </View>
+                    <View className="rounded-full bg-emerald-50 px-3 py-1.5 dark:bg-emerald-950/60">
+                      <Text className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                        Subtotal: {Number(item.quantity * item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               ))}
 
-            <Text className="text-base font-bold pt-2 ms-auto">
-              Subtotal: {totalAmount.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-            </Text>
-          </View>
+              <View className="rounded-2xl bg-[#111A1A] p-4 dark:bg-slate-900">
+                <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400">Subtotal de productos</Text>
+                <Text className="mt-1 text-3xl font-black text-white">
+                  {Number(totalAmount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                </Text>
+              </View>
+            </View>
+          )}
         </Pressable>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>Número de factura</Text>
-          <TextInput
-            placeholder="Número de factura"
-            className={inputStyle + " border border-gray-300"}
-            onChangeText={setNumeroFactura}></TextInput>
-        </View>
+        <View className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+          <Text className="text-lg font-black text-slate-950 dark:text-white">Datos de facturación</Text>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>Descuento</Text>
-          <View className={viewStyle + " gap-[1px]"}>
-            <Pressable
-              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "0" ? "bg-slate-300" : "bg-slate-100"}`}
-              onPress={() => setInputDiscount("0")}>
-              <Text>0%</Text>
-            </Pressable>
-            <Pressable
-              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "5" ? "bg-slate-300" : "bg-slate-100"}`}
-              onPress={() => setInputDiscount("5")}>
-              <Text>5%</Text>
-            </Pressable>
-            <Pressable
-              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "10" ? "bg-slate-300" : "bg-slate-100"}`}
-              onPress={() => setInputDiscount("10")}>
-              <Text>10%</Text>
-            </Pressable>
-            <Pressable
-              className={`px-4 py-2 rounded-tl rounded-bl ${inputDiscount === "15" ? "bg-slate-300" : "bg-slate-100"}`}
-              onPress={() => setInputDiscount("15")}>
-              <Text>15%</Text>
-            </Pressable>
+          <View className="mt-4 gap-4">
+            <View>
+              <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
+                Número de factura
+              </Text>
+              <TextInput
+                className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                placeholder="Opcional"
+                placeholderTextColor="#94a3b8"
+                value={numeroFactura}
+                onChangeText={setNumeroFactura}
+              />
+            </View>
+
+            <View>
+              <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
+                Descuento aplicado
+              </Text>
+              <TextInput
+                className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                placeholder="0"
+                placeholderTextColor="#94a3b8"
+                value={inputDiscount}
+                onChangeText={setInputDiscount}
+                keyboardType="numeric"
+              />
+              <Text className="mt-2 text-sm text-slate-500 dark:text-slate-400">Ingresá el porcentaje de descuento total.</Text>
+            </View>
           </View>
         </View>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>Descuento total (-)</Text>
-          <Text className={inputStyle}>
-            - {discount.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-          </Text>
-        </View>
+        <View className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+          <Text className="text-lg font-black text-slate-950 dark:text-white">Resumen de importes</Text>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>Total (sin IVA)</Text>
-          <Text className={inputStyle}>
-            {baseImponible.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-          </Text>
-        </View>
+          <View className="mt-4 gap-4">
+            <View className="flex-row items-center justify-between gap-3">
+              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Subtotal</Text>
+              <Text className="text-base font-black text-slate-950 dark:text-white">
+                {Number(totalAmount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+            </View>
+            <View className="flex-row items-center justify-between gap-3">
+              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Descuento</Text>
+              <Text className="text-base font-black text-red-600 dark:text-red-300">
+                -{Number(discount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+            </View>
+            <View className="flex-row items-center justify-between gap-3">
+              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Base imponible</Text>
+              <Text className="text-base font-black text-slate-950 dark:text-white">
+                {Number(baseImponible).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+            </View>
+            <View className="flex-row items-center justify-between gap-3">
+              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">IVA 21%</Text>
+              <Text className="text-base font-black text-slate-950 dark:text-white">
+                {Number(iva).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+            </View>
 
-        <View className={viewStyle}>
-          <Text className={textStyle}>IVA</Text>
-          <Text className={inputStyle}>{iva.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}</Text>
-        </View>
-
-        <View className={viewStyle + " border-t border-gray-300 pt-2 mb-0"}>
-          <Text className={textStyle + " text-2xl"}>Total a pagar </Text>
-          <Text className={inputStyle + " text-2xl font-bold "}>
-            {totalConIVA.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-          </Text>
-        </View>
-        <Text className="text-sm text-gray-500">(IVA incluido)</Text>
-
-        <View className="mt-auto">
-          <View className="flex-row justify-center items-center gap-x-[1px] mb-2">
-            <Pressable
-              className={`px-4 py-4 w-26 rounded-tl rounded-bl ${metodoDePago === "EFECTIVO" ? "bg-green-500" : "bg-slate-200"}`}
-              onPress={() => setMetodoDePago("EFECTIVO")}>
-              <Text className={`${metodoDePago === "EFECTIVO" ? "text-white" : "text-black"}`}>EFECTIVO</Text>
-            </Pressable>
-            <Pressable
-              className={`px-4 py-4 w-26  ${metodoDePago === "MERCADOPAGO" ? "bg-yellow-300" : "bg-slate-200"}`}
-              onPress={() => setMetodoDePago("MERCADOPAGO")}>
-              <Text className={`${metodoDePago === "MERCADOPAGO" ? "font-bold" : "text-black"}`}>MERCADOPAGO</Text>
-            </Pressable>
-            <Pressable
-              className={` px-4 py-4 w-26 rounded-tr rounded-br ${metodoDePago === "UALA" ? "bg-blue-500" : "bg-slate-200"}`}
-              onPress={() => setMetodoDePago("UALA")}>
-              <Text className={`${metodoDePago === "UALA" ? "text-white font-bold" : "text-black"}`}>UALA</Text>
-            </Pressable>
+            <View className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-950/30">
+              <Text className="text-xs font-bold uppercase tracking-[1.5px] text-emerald-700 dark:text-emerald-300">
+                Total a pagar
+              </Text>
+              <Text className="mt-1 text-4xl font-black text-emerald-700 dark:text-emerald-300">
+                {Number(totalConIVA).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+              <Text className="mt-1 text-sm text-emerald-700/80 dark:text-emerald-200">IVA incluido.</Text>
+            </View>
           </View>
+        </View>
+
+        <View className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+          <Text className="text-lg font-black text-slate-950 dark:text-white">Método de pago</Text>
+
+          <View className="mt-4 flex-row flex-wrap gap-2">
+            {[
+              { value: "EFECTIVO", label: "Efectivo" },
+              { value: "MERCADOPAGO", label: "Mercado Pago" },
+              { value: "UALA", label: "Ualá" },
+            ].map((method) => {
+              const isSelected = metodoDePago === method.value;
+
+              return (
+                <Pressable
+                  key={method.value}
+                  className={`rounded-full border px-4 py-3 active:opacity-75 ${
+                    isSelected
+                      ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
+                      : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+                  }`}
+                  onPress={() => setMetodoDePago(method.value as "EFECTIVO" | "MERCADOPAGO" | "UALA")}>
+                  <Text
+                    className={`text-sm font-bold ${
+                      isSelected ? "text-white dark:text-[#111A1A]" : "text-slate-700 dark:text-slate-200"
+                    }`}>
+                    {method.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View className="gap-3 pb-2">
           <Pressable
-            className={`rounded-lg p-4 items-center mt-8 ${!isDisabled ? " bg-green-500" : " bg-gray-300"}`}
+            className={`items-center rounded-2xl p-4 active:opacity-80 ${isDisabled ? "bg-slate-300 dark:bg-slate-700" : "bg-[#111A1A] dark:bg-white"}`}
             onPress={handleAddSale}
             disabled={isDisabled}>
-            <Text className="text-white">{isSavingSale ? "Guardando venta..." : "Guardar venta"}</Text>
+            <Text className={`text-base font-black ${isDisabled ? "text-slate-500 dark:text-slate-300" : "text-white dark:text-[#111A1A]"}`}>
+              {isSavingSale ? "Guardando venta..." : "Guardar venta"}
+            </Text>
           </Pressable>
+
           <Pressable
-            className="bg-gray-500 rounded-lg p-4 items-center w-full mt-4"
+            className="items-center rounded-2xl border border-slate-300 bg-white p-4 active:opacity-80 dark:border-slate-700 dark:bg-slate-950"
             onPress={() => {
               clearSales();
-
               router.back();
             }}>
-            <Text className="text-white">Cancelar</Text>
+            <Text className="text-base font-bold text-slate-700 dark:text-slate-200">Cancelar</Text>
           </Pressable>
         </View>
       </ScrollView>
-    </>
+    </View>
   );
 };
 
 export default NewSaleScreen;
-
-/* NOTES
-
-campos que van en nueva venta:
-
-- id de la venta (autogenerado)
-- Número de factura opcional
-- fecha autogenerado
-- vendedor autogenerado (por ahora fijo en 3)
-- createdAt autogenerado
-- descuento opcional
-- iva opcional
-- isActive autogenerado true
-- Productos (con cantidad y precio unitario)
-- Total
-- Método de pago EFECTIVO /MERCADOPAGO / UALA
-
-
-
-
-de models:
-  id              Int                @id @default(autoincrement()) @map("id_sales_orders_so")
-  invoice         String?            @map("invoice_so")
-  date            DateTime           @default(now()) @map("date_so")
-  sellerId        Int                @default(3) @map("id_user_so")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  discount        Decimal            @default(0) @map("discount_so") @db.Decimal(10, 2)
-  iva             Decimal            @default(0) @map("iva_so") @db.Decimal(10, 2)
-  isActive        Boolean            @default(true) @map("is_active_so")
-  total           Decimal            @default(0) @map("total_so") @db.Decimal(10, 2)
-  updatedAt       DateTime           @updatedAt @map("updated_at")
-  paymentMethod   PaymentMethod      @default(EFECTIVO) @map("payment_method_so")
-  salesOrderItems SalesOrderItem[]
-  seller          User               @relation(fields: [sellerId], references: [id])
-
-
-
-
-*/

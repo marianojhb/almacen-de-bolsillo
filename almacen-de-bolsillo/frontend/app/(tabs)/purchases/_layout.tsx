@@ -6,7 +6,14 @@ import { PurchaseDraftProvider } from "@/contexts/purchase-draft";
 export default function PurchasesLayout() {
   return (
     <PurchaseDraftProvider>
-      <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
+      <Stack
+        screenOptions={{
+          headerBackButtonDisplayMode: "minimal",
+          statusBarBackgroundColor: "#111A1A",
+          headerStyle: { backgroundColor: "#111A1A" },
+          headerTintColor: "#fff",
+          headerTitleStyle: { fontWeight: "900" },
+        }}>
         <Stack.Screen name="index" options={{ title: "Compras" }} />
 
         <Stack.Screen name="/(tabs)/purchases/new" options={{ title: "Nueva compra" }} />
