@@ -2,7 +2,7 @@ import { useState, useEffect, ReactNode, useCallback } from "react";
 
 import { ProductsContext } from "@/contexts/products/context";
 import type {
-  ProductWithRelations,
+  Product,
   CreateProductDto,
   Category,
   CreateCategoryDto,
@@ -10,7 +10,7 @@ import type {
   Supplier,
 } from "@almacen/shared";
 import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
-import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
+import { createCategoryRequest, getCategoriesRequest } from "@/services/categoriesApi";
 import { getSuppliers } from "@/services/suppliersApi";
 
 type ProductsProviderProps = {
@@ -18,7 +18,7 @@ type ProductsProviderProps = {
 };
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
-  const [products, setProducts] = useState<ProductWithRelations[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
@@ -48,7 +48,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       setIsLoadingCategories(true);
       setCategoriesError(null);
-      const categories = await getCategories();
+      const categories = await getCategoriesRequest();
       setCategories(categories);
     } catch (error) {
       console.error("Error cargando categorías:", error);
@@ -159,8 +159,10 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
       value={{
         isLoadingProducts,
         isLoadingCategories,
+        isLoadingSuppliers,
         productsError,
         categoriesError,
+        suppliersError,
         products,
         categories,
         suppliers,

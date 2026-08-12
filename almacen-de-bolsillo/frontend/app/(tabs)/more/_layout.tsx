@@ -37,6 +37,13 @@ export default function MoreLayout() {
           title: "Editar proveedor",
         }}
       />
+
+      <Stack.Screen
+        name="transactions/index"
+        options={{
+          title: "Transacciones",
+        }}
+      />
     </Stack>
   );
 }
