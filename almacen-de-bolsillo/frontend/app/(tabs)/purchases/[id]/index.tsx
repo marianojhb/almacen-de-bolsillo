@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import type { PurchaseOrderWithRelationsDto } from "@almacen/shared";
 import { FlatList, Text, View, Pressable } from "react-native";
-import { getPurchaseById } from "@/services/purchasesApi";
+import { getPurchaseByIdRequest } from "@/services/purchasesApi";
 
 export default function PurchaseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -13,7 +13,7 @@ export default function PurchaseDetailScreen() {
     async function fetchPurchase() {
       try {
         setIsLoading(true);
-        setPurchase(await getPurchaseById(Number(id)));
+        setPurchase(await getPurchaseByIdRequest(Number(id)));
       } catch (error) {
         console.error("Error fetching purchase details:", error);
         setPurchase(null);

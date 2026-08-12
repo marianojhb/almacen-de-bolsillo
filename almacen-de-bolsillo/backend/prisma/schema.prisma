@@ -69,8 +69,10 @@ model PurchaseOrder {
   userId              Int                  @default(3) @map("id_user_po")
   isActive            Boolean              @default(true) @map("is_active_po")
 
-  supplier Supplier @relation(fields: [supplierId], references: [id])
-  buyer    User     @relation(fields: [userId], references: [id])
+  supplier      Supplier     @relation(fields: [supplierId], references: [id])
+  buyer         User         @relation(fields: [userId], references: [id])
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  transactionId Int?
 
   @@map("purchase_orders_po")
 }
@@ -93,14 +95,15 @@ model PurchaseOrdersItem {
 }
 
 model Transaction {
-  id            Int           @id @default(autoincrement()) @map("id_transaction_t")
-  date          DateTime      @default(now()) @map("date_t")
-  amount        Decimal       @map("amount_t") @db.Decimal(10, 2)
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  paymentMethod PaymentMethod @default(EFECTIVO) @map("payment_method_t")
-  salesOrders   SalesOrder[]
-  direction     Direction?    @map("direction_t")
+  id             Int             @id @default(autoincrement()) @map("id_transaction_t")
+  date           DateTime        @default(now()) @map("date_t")
+  amount         Decimal         @map("amount_t") @db.Decimal(10, 2)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  paymentMethod  PaymentMethod   @default(EFECTIVO) @map("payment_method_t")
+  salesOrders    SalesOrder[]
+  purchaseOrders PurchaseOrder[]
+  direction      Direction?      @map("direction_t")
 
   @@map("transactions_t")
 }

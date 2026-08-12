@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { SalesContext } from "./context";
 import { SalesOrderDto, CreateSalesOrderDto } from "@almacen/shared";
-import { getSalesOrders, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
+import { getSalesOrdersRequest, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
 
 interface SalesProviderProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
       setIsLoadingSales(true);
       setErrorSaleOrders(null);
 
-      const data = await getSalesOrders();
+      const data = await getSalesOrdersRequest();
 
       setSales(data);
       setTotalSales(data.reduce((accumulator: number, sale: SalesOrderDto) => accumulator + Number(sale.total), 0));

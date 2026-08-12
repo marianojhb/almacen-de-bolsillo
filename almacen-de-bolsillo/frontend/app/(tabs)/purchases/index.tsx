@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { PurchaseOrderWithRelationsDto } from "@almacen/shared";
 import { Pressable, Text, View, FlatList } from "react-native";
 import { router } from "expo-router";
-import { getPurchasesWithItems } from "@/services/purchasesApi";
+import { getPurchaseOrdersRequest } from "@/services/purchasesApi";
 
 const PurchasesScreen = () => {
   const [purchases, setPurchases] = useState<PurchaseOrderWithRelationsDto[]>([]);
@@ -10,7 +10,7 @@ const PurchasesScreen = () => {
 
   useEffect(() => {
     async function fetchPurchases() {
-      const data = await getPurchasesWithItems();
+      const data = await getPurchaseOrdersRequest();
       setPurchases(data);
       setTotalPurchases(
         data.reduce((acc: number, purchase: PurchaseOrderWithRelationsDto) => acc + Number(purchase.total), 0),

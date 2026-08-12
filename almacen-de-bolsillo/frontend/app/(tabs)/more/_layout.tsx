@@ -23,27 +23,6 @@ export default function MoreLayout() {
           title: "Proveedores",
         }}
       />
-
-      <Stack.Screen
-        name="suppliers/new"
-        options={{
-          title: "Nuevo proveedor",
-        }}
-      />
-
-      <Stack.Screen
-        name="suppliers/[id]/edit"
-        options={{
-          title: "Editar proveedor",
-        }}
-      />
-
-      <Stack.Screen
-        name="transactions/index"
-        options={{
-          title: "Transacciones",
-        }}
-      />
     </Stack>
   );
 }

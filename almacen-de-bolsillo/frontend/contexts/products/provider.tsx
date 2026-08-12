@@ -9,7 +9,7 @@ import type {
   UpdateProductDto,
   Supplier,
 } from "@almacen/shared";
-import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
+import { createProductRequest, getProductsRequest, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategoriesRequest } from "@/services/categoriesApi";
 import { getSuppliers } from "@/services/suppliersApi";
 
@@ -34,7 +34,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       setIsLoadingProducts(true);
       setProductsError(null);
-      const products = await getProducts(true);
+      const products = await getProductsRequest(true);
       setProducts(products);
     } catch (error) {
       console.error("Error cargando productos:", error);
