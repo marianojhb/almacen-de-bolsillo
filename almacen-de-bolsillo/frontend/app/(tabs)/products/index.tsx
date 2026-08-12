@@ -207,7 +207,7 @@ export default function ProductsScreen() {
                     </View>
                     <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
                       <Text className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
-                        {product.category.name}
+                        {product.category.name} sdafasf
                       </Text>
                     </View>
                     <View
