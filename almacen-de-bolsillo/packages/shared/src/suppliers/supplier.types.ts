@@ -21,6 +21,10 @@ export type SupplierWithItems = Supplier & {
   products: Product[];
 };
 
+export type UpdateSupplierProductsDto = {
+  productIds: number[];
+};
+
 // Create
 export type CreateSupplierDto = {
   name: string;
@@ -40,3 +44,5 @@ export type UpdateSupplierDto = Partial<CreateSupplierDto> & {
 export type DeleteSupplierDto = {
   id: number;
 };
+
+

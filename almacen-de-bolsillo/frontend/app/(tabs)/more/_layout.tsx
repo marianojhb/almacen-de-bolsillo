@@ -16,7 +16,8 @@ export default function MoreLayout() {
           title: "Más",
         }}
       />
-
+      
+      {/* Suppliers screens */}
       <Stack.Screen
         name="suppliers/index"
         options={{
@@ -37,6 +38,15 @@ export default function MoreLayout() {
           title: "Editar proveedor",
         }}
       />
+
+      <Stack.Screen
+        name="suppliers/[id]/products"
+        options={{
+          title: "Productos del proveedor",
+        }}
+      />
+
+      {/* Other screens */}
     </Stack>
   );
 }

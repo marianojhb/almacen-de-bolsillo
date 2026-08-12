@@ -83,16 +83,20 @@ export function SuppliersProvider({children,}: Props) {
     return supplier;
   };
 
-  const deleteSupplier = async (supplierId: number) => {
-    await deleteSupplierRequest(supplierId,);
+const deleteSupplier = async (supplierId: number) => {
+  await deleteSupplierRequest(supplierId);
 
-    setSuppliers((current) =>
-      current.filter(
-        (supplier) =>
-          supplier.id !== supplierId,
-      ),
-    );
-  };
+  setSuppliers((current) =>
+    current.map((supplier) =>
+      supplier.id === supplierId
+        ? {
+            ...supplier,
+            isActive: false,
+          }
+        : supplier,
+    ),
+  );
+};
 
   return (
     <SuppliersContext.Provider
