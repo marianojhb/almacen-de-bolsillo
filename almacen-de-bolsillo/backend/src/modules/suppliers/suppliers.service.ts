@@ -9,14 +9,15 @@ const getSuppliersFromDatabase = async () =>
     },
   });
 
-const getSupplierByIdFromDatabase = async (supplierId: number,) =>
-  prisma.supplier.findUnique({
+const getSupplierByIdFromDatabase = async (supplierId: number) =>
+  prisma.supplier.findFirst({
     where: {
       id: supplierId,
+      isActive: true,
     },
   });
 
-const postSupplierToDatabase = async (supplierData: CreateSupplierDto,) =>
+const postSupplierToDatabase = async (supplierData: CreateSupplierDto) =>
   prisma.supplier.create({
     data: supplierData,
   });
@@ -29,10 +30,61 @@ const updateSupplierFromDatabase = async (supplierId: number, supplierData: Upda
     data: supplierData,
   });
 
-const deleteSupplierFromDatabase = async (supplierId: number,) =>
-  prisma.supplier.delete({
+const deleteSupplierFromDatabase = async (supplierId: number) =>
+  prisma.supplier.update({
     where: {
       id: supplierId,
+    },
+    data: {
+      isActive: false,
+    },
+  });
+
+/*
+Baja Logica: Se comenta la función de eliminación física del proveedor para implementar la baja lógica
+
+const deleteSupplierFromDatabase = async (supplierId: number) =>
+   prisma.supplier.delete({
+     where: {
+       id: supplierId,
+     },
+   });
+*/
+  
+// Supplier with products
+
+const getSupplierWithProductsFromDatabase = async (supplierId: number) =>
+  prisma.supplier.findUnique({
+    where: {
+      id: supplierId,
+    },
+    include: {
+      products: {
+        orderBy: {
+          shortname: "asc",
+        },
+      },
+    },
+  });
+
+const updateSupplierProductsFromDatabase = async (supplierId: number, productIds: number[]) =>
+  prisma.supplier.update({
+    where: {
+      id: supplierId,
+    },
+    data: {
+      products: {
+        set: productIds.map((id) => ({
+          id,
+        })),
+      },
+    },
+    include: {
+      products: {
+        orderBy: {
+          shortname: "asc",
+        },
+      },
     },
   });
 
@@ -42,4 +94,7 @@ export {
   postSupplierToDatabase,
   updateSupplierFromDatabase,
   deleteSupplierFromDatabase,
+  getSupplierWithProductsFromDatabase,
+  updateSupplierProductsFromDatabase,
 };
+
