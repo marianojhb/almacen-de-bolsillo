@@ -2,7 +2,7 @@ import { useState, useEffect, ReactNode, useCallback } from "react";
 
 import { ProductsContext } from "@/contexts/products/context";
 import type {
-  Product,
+  ProductWithRelations,
   CreateProductDto,
   Category,
   CreateCategoryDto,
@@ -18,7 +18,7 @@ type ProductsProviderProps = {
 };
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
