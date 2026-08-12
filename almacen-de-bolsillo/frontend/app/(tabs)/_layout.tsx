@@ -10,6 +10,10 @@ export default function TabScreen() {
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
+          headerBackButtonDisplayMode: "minimal",
+          headerStyle: { backgroundColor: "#111A1A" },
+          headerTintColor: "#fff",
+          headerTitleStyle: { fontWeight: "900" },
         }}
       />
 
@@ -42,15 +46,9 @@ export default function TabScreen() {
         options={{
           title: "Más",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-          <Ionicons
-            name="ellipsis-horizontal"
-            color={color}
-            size={size}
-          />
-    ),
-  }}
-/>
+          tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
+        }}
+      />
     </Tabs>
   );
 }

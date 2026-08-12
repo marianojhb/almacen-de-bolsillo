@@ -9,6 +9,7 @@ export default function MoreLayout() {
         headerStyle: { backgroundColor: "#111A1A" },
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "900" },
+        title: "Más",
       }}>
       <Stack.Screen
         name="index"
@@ -17,12 +18,8 @@ export default function MoreLayout() {
         }}
       />
 
-      <Stack.Screen
-        name="suppliers/index"
-        options={{
-          title: "Proveedores",
-        }}
-      />
+      <Stack.Screen name="suppliers" options={{ headerShown: false }} />
+      <Stack.Screen name="transactions" options={{ headerShown: false }} />
     </Stack>
   );
 }

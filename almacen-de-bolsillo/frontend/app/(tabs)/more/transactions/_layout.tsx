@@ -15,21 +15,7 @@ export default function SuppliersLayout() {
         <Stack.Screen
           name="index"
           options={{
-            title: "Proveedores",
-          }}
-        />
-
-        <Stack.Screen
-          name="new"
-          options={{
-            title: "Nuevo proveedor",
-          }}
-        />
-
-        <Stack.Screen
-          name="[id]/edit"
-          options={{
-            title: "Editar proveedor",
+            title: "Movimientos",
           }}
         />
       </Stack>
