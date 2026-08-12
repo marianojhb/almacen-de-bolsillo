@@ -18,7 +18,7 @@ const getTransactionsFromDatabase = async (from?: string, to?: string) => {
   if (from || to) {
     where.date = dateFilter;
   }
-  return prisma.transaction.findMany({ where });
+  return prisma.transaction.findMany({ where, orderBy: { date: "desc" } });
 };
 
 const getTransactionByIdFromDatabase = async (transactionId: number) =>
