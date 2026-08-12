@@ -2,11 +2,11 @@
 
 import { Stack } from "expo-router";
 import { PurchaseDraftProvider } from "@/contexts/purchase-draft";
-import { SalesProvider } from "@/contexts/sales/provider";
+import { PurchasesProvider } from "@/contexts/purchases";
 
 export default function PurchasesLayout() {
   return (
-    <SalesProvider>
+    <PurchasesProvider>
       <PurchaseDraftProvider>
         <Stack
           screenOptions={{
@@ -33,6 +33,6 @@ export default function PurchasesLayout() {
           />
         </Stack>
       </PurchaseDraftProvider>
-    </SalesProvider>
+    </PurchasesProvider>
   );
 }
