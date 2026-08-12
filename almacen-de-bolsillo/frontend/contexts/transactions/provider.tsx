@@ -9,13 +9,20 @@ type TransactionsProviderProps = {
 
 export function TransactionsProvider(props: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<TransactionDto[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState<boolean>(false);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
 
   const refreshTransactions = useCallback(async () => {
     try {
+      setIsLoadingTransactions(true);
       const data = await getTransactionsRequest();
       setTransactions(data);
     } catch (error) {
+      setTransactionsError("Error fetching transactions");
       console.error("Error fetching transactions:", error);
+    } finally {
+      setIsLoadingTransactions(false);
+      setTransactionsError(null);
     }
   }, []);
 
@@ -33,7 +40,8 @@ export function TransactionsProvider(props: TransactionsProviderProps) {
   }
 
   return (
-    <TransactionsContext.Provider value={{ transactions, createTransaction, refreshTransactions }}>
+    <TransactionsContext.Provider
+      value={{ transactions, isLoadingTransactions, transactionsError, createTransaction, refreshTransactions }}>
       {props.children}
     </TransactionsContext.Provider>
   );

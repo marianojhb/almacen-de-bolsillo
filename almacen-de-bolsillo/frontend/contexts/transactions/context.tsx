@@ -3,6 +3,9 @@ import { CreateTransactionDto, TransactionDto } from "@almacen/shared";
 
 interface TransactionsContextType {
   transactions: TransactionDto[];
+  isLoadingTransactions: boolean;
+  transactionsError: string | null;
+
   createTransaction: (transaction: CreateTransactionDto) => Promise<void>;
   refreshTransactions: () => Promise<void>;
 }
