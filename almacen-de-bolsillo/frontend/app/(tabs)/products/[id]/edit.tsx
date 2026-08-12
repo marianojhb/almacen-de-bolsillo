@@ -1,7 +1,7 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Alert, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
-import ProductForm from "@/components/products/ProductForm";
+import { ProductForm } from "@/components/products";
 
 export default function ProductEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

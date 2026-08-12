@@ -2,7 +2,7 @@ import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto, PurchaseOrd
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getPurchases(): Promise<PurchaseOrderDto[]> {
+export async function getPurchaseOrdersRequest(): Promise<PurchaseOrderDto[]> {
   const response = await fetch(`${API_URL}/purchase-orders`, {
     method: "GET",
     headers: {
@@ -17,7 +17,7 @@ export async function getPurchases(): Promise<PurchaseOrderDto[]> {
   return response.json();
 }
 
-export async function getPurchaseById(purchaseOrderId: number): Promise<PurchaseOrderWithRelationsDto> {
+export async function getPurchaseByIdRequest(purchaseOrderId: number): Promise<PurchaseOrderWithRelationsDto> {
   const response = await fetch(`${API_URL}/purchase-orders/${purchaseOrderId}`, {
     method: "GET",
     headers: {

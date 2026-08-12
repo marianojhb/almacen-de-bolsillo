@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { useSales } from "@/contexts/sales";
 
 export default function SalesScreen() {
-  const { totalSales, sales, isLoadingSales, errorSaleOrdersItems } = useSales();
+  const { totalSales, sales, isLoadingSales, errorSaleOrders } = useSales();
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -19,13 +19,7 @@ export default function SalesScreen() {
       const formattedPaymentMethod =
         sale.paymentMethod === "EFECTIVO" ? "eft" : sale.paymentMethod === "MERCADOPAGO" ? "mp" : "ual";
 
-      return [
-        `venta ${sale.id}`,
-        `#${sale.id}`,
-        sale.invoice,
-        sale.paymentMethod,
-        formattedPaymentMethod,
-      ]
+      return [`venta ${sale.id}`, `#${sale.id}`, sale.invoice, sale.paymentMethod, formattedPaymentMethod]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(normalizedSearchText));
     });
@@ -44,14 +38,14 @@ export default function SalesScreen() {
     );
   }
 
-  if (errorSaleOrdersItems) {
+  if (errorSaleOrders) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50 px-6 dark:bg-[#071111]">
         <View className="w-full rounded-3xl border border-red-100 bg-red-50 p-6 dark:border-red-900/60 dark:bg-red-950/30">
           <Text className="text-center text-xl font-bold text-red-700 dark:text-red-300">
             No pudimos cargar las ventas
           </Text>
-          <Text className="mt-2 text-center text-sm text-red-600 dark:text-red-200">{errorSaleOrdersItems}</Text>
+          <Text className="mt-2 text-center text-sm text-red-600 dark:text-red-200">{errorSaleOrders}</Text>
         </View>
       </View>
     );
@@ -73,7 +67,7 @@ export default function SalesScreen() {
             <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Comercial</Text>
             <Text className="mt-1 text-4xl font-black text-white">Ventas</Text>
             <Text className="mt-2 text-sm leading-5 text-slate-300">
-              {filteredSales.length} de {sales.length} ventas visibles · Total {" "}
+              {filteredSales.length} de {sales.length} ventas visibles · Total{" "}
               {Number(totalSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
             </Text>
           </View>
@@ -206,10 +200,13 @@ export default function SalesScreen() {
                     <View className={`rounded-full px-3 py-1.5 ${paymentMethodBadgeClass}`}>
                       <Text className={`text-xs font-bold ${paymentMethodTextClass}`}>{paymentMethodLabel}</Text>
                     </View>
-                    <View className={`rounded-full px-3 py-1.5 ${sale.isActive ? "bg-emerald-50 dark:bg-emerald-950/60" : "bg-slate-100 dark:bg-slate-900"}`}>
+                    <View
+                      className={`rounded-full px-3 py-1.5 ${sale.isActive ? "bg-emerald-50 dark:bg-emerald-950/60" : "bg-slate-100 dark:bg-slate-900"}`}>
                       <Text
                         className={`text-xs font-bold ${
-                          sale.isActive ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"
+                          sale.isActive
+                            ? "text-emerald-700 dark:text-emerald-300"
+                            : "text-slate-500 dark:text-slate-400"
                         }`}>
                         {sale.isActive ? "Activa" : "Inactiva"}
                       </Text>

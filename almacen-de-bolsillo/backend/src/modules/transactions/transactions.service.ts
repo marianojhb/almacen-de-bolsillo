@@ -1,7 +1,25 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
 
-const getTransactionsFromDatabase = async () => prisma.transaction.findMany();
+const getTransactionsFromDatabase = async (from?: string, to?: string) => {
+  const dateFilter: Prisma.DateTimeFilter = {};
+  if (from) {
+    dateFilter.gte = new Date(from);
+  }
+
+  if (to) {
+    const nextDay = new Date(to);
+    nextDay.setDate(nextDay.getDate() + 1);
+    dateFilter.lt = nextDay;
+  }
+
+  const where: Prisma.TransactionWhereInput = {};
+
+  if (from || to) {
+    where.date = dateFilter;
+  }
+  return prisma.transaction.findMany({ where, orderBy: { date: "desc" } });
+};
 
 const getTransactionByIdFromDatabase = async (transactionId: number) =>
   prisma.transaction.findUnique({ where: { id: transactionId } });

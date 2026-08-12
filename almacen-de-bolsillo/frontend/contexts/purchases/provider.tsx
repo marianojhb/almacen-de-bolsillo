@@ -1,7 +1,11 @@
 import { ReactNode, useState, useEffect, useCallback } from "react";
 import { PurchasesContext } from "./context";
 import { CreatePurchaseOrderDto, PurchaseOrderDto } from "@almacen/shared";
-import { getPurchases, createPurchaseOrderRequest, deletePurchaseOrderRequest } from "@/services/purchasesApi";
+import {
+  getPurchaseOrdersRequest,
+  createPurchaseOrderRequest,
+  deletePurchaseOrderRequest,
+} from "@/services/purchasesApi";
 
 type PurchaseProviderProps = {
   children: ReactNode;
@@ -20,7 +24,7 @@ export function PurchasesProvider(props: PurchaseProviderProps) {
       setIsLoadingPurchases(true);
       setErrorPurchases(null);
 
-      const data = await getPurchases(); // Replace with your API endpoint
+      const data = await getPurchaseOrdersRequest(); // Replace with your API endpoint
 
       setPurchases(data);
       setTotalPurchases(

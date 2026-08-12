@@ -9,8 +9,8 @@ import type {
   UpdateProductDto,
   Supplier,
 } from "@almacen/shared";
-import { createProductRequest, getProducts, updateProductRequest } from "@/services/productsApi";
-import { createCategoryRequest, getCategories } from "@/services/categoriesApi";
+import { createProductRequest, getProductsRequest, updateProductRequest } from "@/services/productsApi";
+import { createCategoryRequest, getCategoriesRequest } from "@/services/categoriesApi";
 import { getSuppliers } from "@/services/suppliersApi";
 
 type ProductsProviderProps = {
@@ -34,7 +34,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       setIsLoadingProducts(true);
       setProductsError(null);
-      const products = await getProducts(true);
+      const products = await getProductsRequest(true);
       setProducts(products);
     } catch (error) {
       console.error("Error cargando productos:", error);
@@ -48,7 +48,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       setIsLoadingCategories(true);
       setCategoriesError(null);
-      const categories = await getCategories();
+      const categories = await getCategoriesRequest();
       setCategories(categories);
     } catch (error) {
       console.error("Error cargando categorías:", error);
@@ -159,8 +159,10 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
       value={{
         isLoadingProducts,
         isLoadingCategories,
+        isLoadingSuppliers,
         productsError,
         categoriesError,
+        suppliersError,
         products,
         categories,
         suppliers,

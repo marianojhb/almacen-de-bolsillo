@@ -2,7 +2,7 @@ import type { CreateSalesOrderDto, SalesOrderDto, SalesOrderWithRelationsDto } f
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getSalesOrders(): Promise<SalesOrderDto[]> {
+export async function getSalesOrdersRequest(): Promise<SalesOrderDto[]> {
   const response = await fetch(`${API_URL}/sales-orders`, {
     method: "GET",
     headers: {

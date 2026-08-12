@@ -2,7 +2,7 @@ import type { Category } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-export async function getCategories(): Promise<Category[]> {
+export async function getCategoriesRequest(): Promise<Category[]> {
   const response = await fetch(`${API_URL}/categories`);
 
   if (!response.ok) {

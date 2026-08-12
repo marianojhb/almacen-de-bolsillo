@@ -6,7 +6,6 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import "../global.css";
 
-import { ProductsProvider } from "@/contexts/products";
 import { SuppliersProvider } from "@/contexts/suppliers";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -20,15 +19,13 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <SuppliersProvider>
-        <ProductsProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
 
-          <StatusBar style="light"  />
-        </ProductsProvider>
+        <StatusBar style="light" />
       </SuppliersProvider>
     </ThemeProvider>
   );

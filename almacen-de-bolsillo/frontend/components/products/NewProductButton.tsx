@@ -5,8 +5,8 @@ export function NewProductButton() {
   return (
     <Pressable
       onPress={() => router.push("/products/new")}
-      className="items-center rounded-xl bg-[#111A1A] px-4 py-2 active:opacity-75">
-      <Text className="text-base font-semibold text-white">Agregar</Text>
+      className="min-w-[132px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80">
+      <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Agregar</Text>
     </Pressable>
   );
 }

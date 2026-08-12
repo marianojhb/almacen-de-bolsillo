@@ -5,3 +5,4 @@ export * from "./sales-orders/sales-order.types.js";
 export * from "./purchase-orders/purchase-order.types.js";
 export * from "./stock-movements/stock-movements.types.js";
 export * from "./users/user.types.js";
+export * from "./transactions/transaction.types.js";
