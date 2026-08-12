@@ -2,7 +2,13 @@ import type { Request, Response } from "express";
 
 // Supplier service
 
-import { deleteSupplierFromDatabase, getSupplierByIdFromDatabase, getSuppliersFromDatabase, postSupplierToDatabase, updateSupplierFromDatabase } from "./suppliers.service.js";
+import {
+  deleteSupplierFromDatabase,
+  getSupplierByIdFromDatabase,
+  getSuppliersFromDatabase,
+  postSupplierToDatabase,
+  updateSupplierFromDatabase,
+} from "./suppliers.service.js";
 
 // Supplier with products
 
@@ -10,14 +16,12 @@ import { updateSupplierProductsFromDatabase, getSupplierWithProductsFromDatabase
 
 // Manejo de errores de la base de datos
 
-  const sendDatabaseError = (res: Response, error: unknown, action: string,) => {
-
+const sendDatabaseError = (res: Response, error: unknown, action: string) => {
   const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : null;
 
   if (code === "P2002") {
     res.status(409).json({
-      message:
-        "Ya existe un proveedor con ese CUIT.",
+      message: "Ya existe un proveedor con ese CUIT.",
     });
     return;
   }
@@ -45,8 +49,7 @@ import { updateSupplierProductsFromDatabase, getSupplierWithProductsFromDatabase
 
 const getSuppliers = async (_req: Request, res: Response) => {
   try {
-    const suppliers =
-      await getSuppliersFromDatabase();
+    const suppliers = await getSuppliersFromDatabase();
 
     res.json(suppliers);
   } catch (error) {
@@ -64,10 +67,9 @@ const getSupplierById = async (req: Request, res: Response) => {
     });
     return;
   }
-  
+
   try {
-    const supplier =
-      await getSupplierByIdFromDatabase(supplierId);
+    const supplier = await getSupplierByIdFromDatabase(supplierId);
 
     if (!supplier) {
       res.status(404).json({
@@ -84,8 +86,7 @@ const getSupplierById = async (req: Request, res: Response) => {
 
 const postSupplier = async (req: Request, res: Response) => {
   try {
-    const supplier =
-      await postSupplierToDatabase(req.body);
+    const supplier = await postSupplierToDatabase(req.body);
 
     res.status(201).json(supplier);
   } catch (error) {
@@ -95,7 +96,7 @@ const postSupplier = async (req: Request, res: Response) => {
 
 const updateSupplier = async (req: Request, res: Response) => {
   const supplierId = Number(req.params.id);
-  
+
   // Validación del ID del proveedor
   if (!Number.isInteger(supplierId) || supplierId <= 0) {
     res.status(400).json({
@@ -105,8 +106,7 @@ const updateSupplier = async (req: Request, res: Response) => {
   }
 
   try {
-    const supplier =
-      await updateSupplierFromDatabase(supplierId, req.body);
+    const supplier = await updateSupplierFromDatabase(supplierId, req.body);
 
     res.json(supplier);
   } catch (error) {
@@ -116,7 +116,7 @@ const updateSupplier = async (req: Request, res: Response) => {
 
 const deleteSupplier = async (req: Request, res: Response) => {
   const supplierId = Number(req.params.id);
-  
+
   // Validación del ID del proveedor
   if (!Number.isInteger(supplierId) || supplierId <= 0) {
     res.status(400).json({
@@ -134,9 +134,10 @@ const deleteSupplier = async (req: Request, res: Response) => {
   }
 };
 
-  // Supplier with products
+// Supplier with products
 
 const getSupplierProducts = async (req: Request, res: Response) => {
+
   const supplierId = Number(req.params.id);
 
   if (!Number.isInteger(supplierId) || supplierId <= 0) {
@@ -147,8 +148,7 @@ const getSupplierProducts = async (req: Request, res: Response) => {
   }
 
   try {
-    const supplier =
-      await getSupplierWithProductsFromDatabase(supplierId);
+    const supplier = await getSupplierWithProductsFromDatabase(supplierId);
 
     if (!supplier) {
       res.status(404).json({
@@ -164,7 +164,6 @@ const getSupplierProducts = async (req: Request, res: Response) => {
 };
 
 const updateSupplierProducts = async (req: Request, res: Response) => {
-
   const supplierId = Number(req.params.id);
   const { productIds } = req.body;
 
@@ -175,9 +174,7 @@ const updateSupplierProducts = async (req: Request, res: Response) => {
     return;
   }
 
-  if (!Array.isArray(productIds) || !productIds.every(
-      (id) => Number.isInteger(id) && id > 0)
-  ) {
+  if (!Array.isArray(productIds) || !productIds.every((id) => Number.isInteger(id) && id > 0)) {
     res.status(400).json({
       message: "La lista de productos no es válida.",
     });

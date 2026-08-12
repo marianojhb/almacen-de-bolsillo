@@ -66,10 +66,6 @@ export default function SalesScreen() {
           <View className="flex-1">
             <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Comercial</Text>
             <Text className="mt-1 text-4xl font-black text-white">Ventas</Text>
-            <Text className="mt-2 text-sm leading-5 text-slate-300">
-              {filteredSales.length} de {sales.length} ventas visibles · Total{" "}
-              {Number(totalSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-            </Text>
           </View>
 
           <Pressable
@@ -80,6 +76,12 @@ export default function SalesScreen() {
             }}>
             <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Nueva venta</Text>
           </Pressable>
+        </View>
+        <View>
+          <Text className="mt-2 text-sm leading-5 text-slate-300">
+            {filteredSales.length} de {sales.length} ventas visibles · Total{" "}
+            {Number(totalSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+          </Text>
         </View>
       </View>
 

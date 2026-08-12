@@ -50,7 +50,7 @@ const deleteSupplierFromDatabase = async (supplierId: number) =>
      },
    });
 */
-  
+
 // Supplier with products
 
 const getSupplierWithProductsFromDatabase = async (supplierId: number) =>
@@ -97,4 +97,3 @@ export {
   getSupplierWithProductsFromDatabase,
   updateSupplierProductsFromDatabase,
 };
-

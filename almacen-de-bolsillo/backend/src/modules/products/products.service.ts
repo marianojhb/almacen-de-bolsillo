@@ -19,6 +19,7 @@ const ProductWithRelationsArgs = {
 } satisfies Prisma.ProductDefaultArgs;
 
 const getProductsFromDatabase = async ({ includeInactive = true }: { includeInactive?: boolean } = {}) => {
+
   if (includeInactive) {
     return prisma.product.findMany({
       ...ProductWithRelationsArgs,

@@ -5,10 +5,10 @@ import { Alert, FlatList, Pressable, Text, TextInput, View } from "react-native"
 
 import type { Product, SupplierWithItems } from "@almacen/shared";
 import { getSupplierProducts, updateSupplierProductsRequest } from "@/services/suppliersApi";
-import { getProducts } from "@/services/productsApi";
+import { getProductsRequest } from "@/services/productsApi";
 
 export default function SupplierProductsScreen() {
-  const { id } = useLocalSearchParams<{ id: string; }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const supplierId = Number(id);
 
@@ -26,10 +26,7 @@ export default function SupplierProductsScreen() {
 
   const loadData = useCallback(async () => {
     if (!Number.isInteger(supplierId) || supplierId <= 0) {
-      Alert.alert(
-        "Proveedor inválido",
-        "No se pudo identificar el proveedor.",
-      );
+      Alert.alert("Proveedor inválido", "No se pudo identificar el proveedor.");
       setIsLoading(false);
       return;
     }
@@ -37,18 +34,15 @@ export default function SupplierProductsScreen() {
     try {
       setIsLoading(true);
 
-      const [supplierResponse, productsResponse] = await Promise.all([getSupplierProducts(supplierId), getProducts(false)]);
+      const [supplierResponse, productsResponse] = await Promise.all([
+        getSupplierProducts(supplierId),
+        getProductsRequest(false),
+      ]);
 
       setSupplier(supplierResponse);
       setProducts(productsResponse);
 
-      setSelectedProductIds(
-        new Set(
-          supplierResponse.products.map(
-            (product) => product.id,
-          ),
-        ),
-      );
+      setSelectedProductIds(new Set(supplierResponse.products.map((product) => product.id)));
     } catch (error) {
       Alert.alert(
         "No se pudieron cargar los productos",
@@ -63,34 +57,25 @@ export default function SupplierProductsScreen() {
     void loadData();
   }, [loadData]);
 
-const visibleProducts = useMemo(() => {
-  const normalizedSearch = search.trim().toLowerCase();
+  const visibleProducts = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
 
-  const filteredProducts = products.filter(
-    (product) => {
+    const filteredProducts = products.filter((product) => {
       if (!normalizedSearch) {
         return true;
       }
 
       return (
-        product.shortname
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        product.longname
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        product.sku
-          ?.toLowerCase()
-          .includes(normalizedSearch)
+        product.shortname.toLowerCase().includes(normalizedSearch) ||
+        product.longname.toLowerCase().includes(normalizedSearch) ||
+        product.sku?.toLowerCase().includes(normalizedSearch)
       );
-    },
-  );
+    });
 
-  return filteredProducts.sort(
-    (firstProduct, secondProduct) => {
+    return filteredProducts.sort((firstProduct, secondProduct) => {
       const firstIsSelected = selectedProductIds.has(firstProduct.id);
 
-      const secondIsSelected =selectedProductIds.has(secondProduct.id);
+      const secondIsSelected = selectedProductIds.has(secondProduct.id);
 
       if (firstIsSelected && !secondIsSelected) {
         return -1;
@@ -101,9 +86,8 @@ const visibleProducts = useMemo(() => {
       }
 
       return firstProduct.shortname.localeCompare(secondProduct.shortname, "es");
-    },
-  );
-}, [products, search, selectedProductIds]);
+    });
+  }, [products, search, selectedProductIds]);
 
   const toggleProduct = (productId: number) => {
     setSelectedProductIds((current) => {
@@ -123,26 +107,15 @@ const visibleProducts = useMemo(() => {
     try {
       setIsSaving(true);
 
-      const updatedSupplier =
-        await updateSupplierProductsRequest(supplierId,
-          {
-            productIds: Array.from(
-              selectedProductIds,
-            ),
-          },
-        );
+      const updatedSupplier = await updateSupplierProductsRequest(supplierId, {
+        productIds: Array.from(selectedProductIds),
+      });
 
       setSupplier(updatedSupplier);
 
-      Alert.alert(
-        "Productos actualizados",
-        "Los productos vinculados se guardaron correctamente.",
-      );
+      Alert.alert("Productos actualizados", "Los productos vinculados se guardaron correctamente.");
     } catch (error) {
-      Alert.alert(
-        "No se pudieron guardar los cambios",
-        error instanceof Error ? error.message : "Intentá nuevamente.",
-      );
+      Alert.alert("No se pudieron guardar los cambios", error instanceof Error ? error.message : "Intentá nuevamente.");
     } finally {
       setIsSaving(false);
     }
@@ -164,16 +137,14 @@ const visibleProducts = useMemo(() => {
   if (!supplier) {
     return (
       <View className="flex-1 bg-gray-50 p-4 dark:bg-black">
-        <Text className="text-lg text-gray-900 dark:text-white">
-          Proveedor no encontrado.
-        </Text>
+        <Text className="text-lg text-gray-900 dark:text-white">Proveedor no encontrado.</Text>
       </View>
     );
   }
 
   return (
     <>
-        {/* Header */}
+      {/* Header */}
       <Stack.Screen
         options={{
           title: `Lista de Productos`,
@@ -181,16 +152,14 @@ const visibleProducts = useMemo(() => {
       />
 
       <View className="flex-1 bg-gray-50 px-4 pt-4 dark:bg-black">
-        <Text className="text-2xl font-bold text-gray-950 dark:text-white">
-          {supplier.name}
-        </Text>
+        <Text className="text-2xl font-bold text-gray-950 dark:text-white">{supplier.name}</Text>
 
         <Text className="mb-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
           Seleccioná los productos que pertenecen a este proveedor.
         </Text>
 
         <View className="mb-4 flex-row items-center rounded-xl border border-gray-200 bg-white px-3 dark:border-gray-700 dark:bg-gray-900">
-          <Ionicons name="search-outline" size={20} color="#9ca3af"/>
+          <Ionicons name="search-outline" size={20} color="#9ca3af" />
 
           <TextInput
             value={search}
@@ -202,87 +171,58 @@ const visibleProducts = useMemo(() => {
 
         <View className="mb-3 flex-row items-center justify-between">
           <Text className="font-semibold text-gray-700 dark:text-gray-200">
-            {selectedProductIds.size}{" "}Productos vinculados
+            {selectedProductIds.size} Productos vinculados
           </Text>
 
           <Pressable
             disabled={isSaving}
             onPress={saveProducts}
             className={`rounded-xl bg-[#111A1A] px-5 py-3 active:opacity-75 dark:bg-white ${
-              isSaving
-                ? "opacity-50"
-                : ""
-            }`}
-          >
-            <Text className="font-semibold text-white dark:text-black">
-              {isSaving
-                ? "Guardando..."
-                : "Guardar"}
-            </Text>
+              isSaving ? "opacity-50" : ""
+            }`}>
+            <Text className="font-semibold text-white dark:text-black">{isSaving ? "Guardando..." : "Guardar"}</Text>
           </Pressable>
         </View>
-        
+
         {/* Products list */}
         <FlatList
           data={visibleProducts}
           extraData={selectedProductIds}
-          keyExtractor={(product) =>
-            product.id.toString()
-          }
+          keyExtractor={(product) => product.id.toString()}
           contentContainerClassName="gap-3 pb-8"
           ListEmptyComponent={
             <View className="items-center py-16">
-              <Ionicons name="cube-outline" size={48} color="#9ca3af"/>
+              <Ionicons name="cube-outline" size={48} color="#9ca3af" />
 
-              <Text className="mt-4 text-gray-500 dark:text-gray-400">
-                No se encontraron productos.
-              </Text>
+              <Text className="mt-4 text-gray-500 dark:text-gray-400">No se encontraron productos.</Text>
             </View>
           }
           renderItem={({ item: product }) => {
             const isSelected = selectedProductIds.has(product.id);
 
             return (
-
-            //  Touch Product
+              //  Touch Product
               <Pressable
-                onPress={() =>
-                  toggleProduct(product.id)
-                }
+                onPress={() => toggleProduct(product.id)}
                 className={`flex-row items-center rounded-xl border p-4 active:opacity-70 ${
                   isSelected
                     ? "border-green-500 bg-green-50 dark:bg-green-950"
                     : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
-                }`}
-              >
+                }`}>
                 <View className="flex-1">
-                  <Text className="text-lg font-semibold text-gray-950 dark:text-white">
-                    {product.shortname}
-                  </Text>
+                  <Text className="text-lg font-semibold text-gray-950 dark:text-white">{product.shortname}</Text>
 
-                  <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {product.longname}
-                  </Text>
+                  <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">{product.longname}</Text>
 
                   {product.sku && (
-                    <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      SKU: {product.sku}
-                    </Text>
+                    <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">SKU: {product.sku}</Text>
                   )}
                 </View>
 
                 <Ionicons
-                  name={
-                    isSelected
-                      ? "checkmark-circle"
-                      : "add-circle-outline"
-                  }
+                  name={isSelected ? "checkmark-circle" : "add-circle-outline"}
                   size={27}
-                  color={
-                    isSelected
-                      ? "#16a34a"
-                      : "#9ca3af"
-                  }
+                  color={isSelected ? "#16a34a" : "#9ca3af"}
                 />
               </Pressable>
             );
