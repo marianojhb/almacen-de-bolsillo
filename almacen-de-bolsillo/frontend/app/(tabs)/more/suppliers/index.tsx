@@ -263,19 +263,17 @@ const visibleSuppliers = useMemo(() => {
           />
         }
         ListEmptyComponent={
-          !isLoadingSuppliers ? (
+          isLoadingSuppliers ? (
+            <Text className="text-center text-gray-500 dark:text-gray-400">Cargando proveedores...</Text>
+          ) : (
             <View className="items-center py-16">
-              <Ionicons
-                name="business-outline"
-                size={48}
-                color="#9ca3af"
-              />
+              <Ionicons name="business-outline" size={48} color="#9ca3af" />
 
               <Text className="mt-4 text-lg font-semibold text-gray-600 dark:text-gray-300">
                 No se encontraron proveedores
               </Text>
             </View>
-          ) : null
+          )
         }
 
         // Tarjeta Principal de Cada Proveedor
