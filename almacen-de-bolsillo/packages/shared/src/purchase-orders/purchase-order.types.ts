@@ -34,7 +34,7 @@ export type CreatePurchaseOrderItemDto = {
 export type CreatePurchaseOrderDto = {
   total: number;
   supplierId: number;
-  userId?: number;
+  userId: number;
   items: CreatePurchaseOrderItemDto[];
 };
 

@@ -1,4 +1,4 @@
-import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto, PurchaseOrderDto } from "@almacen/shared";
+import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto, PurchaseOrderDto, CreatePurchaseOrderItemDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -33,6 +33,22 @@ export async function getPurchaseByIdRequest(purchaseOrderId: number): Promise<P
 }
 
 export async function createPurchaseOrderRequest(purchaseOrder: CreatePurchaseOrderDto): Promise<PurchaseOrderDto> {
+  const response = await fetch(`${API_URL}/purchase-orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(purchaseOrder),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error creating purchase order");
+  }
+
+  return response.json();
+}
+
+export async function createPurchaseOrderItemRequest(purchaseOrder: CreatePurchaseOrderItemDto): Promise<PurchaseOrderDto> {
   const response = await fetch(`${API_URL}/purchase-orders`, {
     method: "POST",
     headers: {

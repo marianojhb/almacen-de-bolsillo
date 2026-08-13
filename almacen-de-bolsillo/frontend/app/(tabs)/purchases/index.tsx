@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Keyboard, Pressable, Text, TextInput, View, RefreshControl } from "react-native";
 import { usePurchases } from "@/contexts/purchases";
 
 const PurchasesScreen = () => {
@@ -143,7 +143,8 @@ const PurchasesScreen = () => {
                   <View className="flex-1">
                     <Text className="text-2xl font-black text-slate-950 dark:text-white">Compra Nº{purchase.id}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
-                      Orden registrada el {new Date(purchase.createdAt).toLocaleDateString("es-AR", {
+                      Orden registrada el{" "}
+                      {new Date(purchase.createdAt).toLocaleDateString("es-AR", {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric",
@@ -167,10 +168,13 @@ const PurchasesScreen = () => {
                       {new Date(purchase.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
                     </Text>
                   </View>
-                  <View className={`rounded-full px-3 py-1.5 ${purchase.isActive ? "bg-emerald-50 dark:bg-emerald-950/60" : "bg-slate-100 dark:bg-slate-900"}`}>
+                  <View
+                    className={`rounded-full px-3 py-1.5 ${purchase.isActive ? "bg-emerald-50 dark:bg-emerald-950/60" : "bg-slate-100 dark:bg-slate-900"}`}>
                     <Text
                       className={`text-xs font-bold ${
-                        purchase.isActive ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"
+                        purchase.isActive
+                          ? "text-emerald-700 dark:text-emerald-300"
+                          : "text-slate-500 dark:text-slate-400"
                       }`}>
                       {purchase.isActive ? "Activa" : "Inactiva"}
                     </Text>

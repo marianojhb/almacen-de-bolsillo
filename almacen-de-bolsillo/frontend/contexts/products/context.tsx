@@ -19,6 +19,11 @@ interface ProductsContextType {
   categoriesError: string | null;
   suppliersError: string | null;
   refreshProducts: () => Promise<void>;
+  refreshCategories: () => Promise<void>;
+  refreshSuppliers: () => Promise<void>;
+  clearProducts: () => void;
+  clearCategories: () => void;
+  clearSuppliers: () => void;
   addProduct: (product: CreateProductDto) => Promise<boolean>; // booleano, si el producto ya existe o no
   updateProduct: (updatedProduct: UpdateProductDto, id: number) => Promise<boolean>;
   deleteProduct: (id: number) => Promise<boolean>;

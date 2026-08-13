@@ -2,7 +2,7 @@ import { useState } from "react";
 import { router } from "expo-router";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
-import { createPurchaseOrderItemRequest, createPurchaseOrderRequest } from "@/services/purchasesApi";
+import { createPurchaseOrderRequest } from "@/services/purchasesApi";
 
 export default function NewPurchaseScreen() {
   const { items, totalAmount, removeItem, clearPurchase } = usePurchaseDraft();
@@ -14,27 +14,28 @@ export default function NewPurchaseScreen() {
   async function handleAddPurchase() {
     setIsSavingPurchase(true);
 
+      // Create the purchase order payload
+    const puchaseOrderPayload = {
+      total: totalAmount,
+      supplierId: Number(supplierId),
+      userId: 3, // Replace with the actual user ID
+      items: items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        subtotal: item.quantity * item.price,
+        discount: item.discount,
+      })),
+    };
+
+    // Send the purchase order to the backend
     try {
-      const purchaseOrder = await createPurchaseOrderRequest({
-        supplierId: Number(supplierId),
-        total: totalAmount,
-      });
-
-      await Promise.all(
-        items.map((item) =>
-          createPurchaseOrderItemRequest({
-            productId: item.productId,
-            purchaseOrderId: purchaseOrder.id,
-            quantity: item.quantity,
-            price: item.price,
-            subtotal: item.quantity * item.price,
-            discount: item.discount,
-          }),
-        ),
-      );
-
+      // Call the API to create the purchase order
+      const purchaseOrder = await createPurchaseOrderRequest(puchaseOrderPayload);
       clearPurchase();
       router.replace("/purchases");
+    } catch (error) {
+      console.error("Error creating purchase order:", error);
     } finally {
       setIsSavingPurchase(false);
     }
