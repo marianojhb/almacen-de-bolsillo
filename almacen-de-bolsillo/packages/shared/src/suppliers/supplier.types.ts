@@ -1,4 +1,4 @@
-import type { PurchaseOrderDto } from "../purchase-orders/purchase-order.types.js";
+import type { PurchaseOrderDto } from "../purchases/purchase.types.js";
 import type { Product } from "../products/product.types.js";
 
 // Read
@@ -39,10 +39,7 @@ export type UpdateSupplierDto = Partial<CreateSupplierDto> & {
   isActive?: boolean;
 };
 
-
 // Delete
 export type DeleteSupplierDto = {
   id: number;
 };
-
-
