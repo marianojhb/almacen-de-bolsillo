@@ -6,7 +6,7 @@ import {
   postSalesOrderToDatabase,
   updateSalesOrderFromDatabase,
   deleteSalesOrderFromDatabase,
-} from "./sales-orders.service.js";
+} from "./sales.service.js";
 
 const getSalesOrders = async (req: Request, res: Response) => {
   try {

@@ -6,7 +6,7 @@ import {
   postPurchaseOrderToDatabase,
   updatePurchaseOrderFromDatabase,
   deletePurchaseOrderFromDatabase,
-} from './purchase-orders.service.js';
+} from './purchase.service.js';
 
 const getPurchaseOrders = async (req: Request, res: Response) => {
   try {

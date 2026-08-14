@@ -5,7 +5,7 @@ import {
   postPurchaseOrder,
   updatePurchaseOrder,
   deletePurchaseOrder,
-} from './purchase-orders.controller.js';
+} from './purchases.controller.js';
 
 const purchaseOrdersRouter: Router = Router();
 
