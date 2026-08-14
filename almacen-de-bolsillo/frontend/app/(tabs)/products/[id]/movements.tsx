@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { useProducts } from "@/contexts/products";
 import { View, Text, FlatList } from "react-native";
-import { getStockMovements } from "@/services/movementsApi";
+import { getStockMovementsRequest } from "@/services/movementsApi";
 import { useState, useEffect } from "react";
 import type { StockMovement } from "@almacen/shared";
 
@@ -26,7 +26,7 @@ export default function StockMovementsScreen() {
       try {
         setIsLoadingMovements(true);
         setMovementsError(null);
-        const movements = await getStockMovements(productId);
+        const movements = await getStockMovementsRequest(productId);
         setMovements(movements);
       } catch (error) {
         console.error("Error fetching stock movements:", error);
