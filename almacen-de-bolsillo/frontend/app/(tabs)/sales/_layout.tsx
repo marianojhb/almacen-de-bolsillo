@@ -1,33 +1,30 @@
 // app/(tabs)/sales/_layout.tsx
 
 import { SalesDraftProvider } from "@/contexts/sales-draft/provider";
-import { SalesProvider } from "@/contexts/sales/provider";
 import { Stack } from "expo-router";
 
 export default function SalesLayout() {
   return (
-    <SalesProvider>
-      <SalesDraftProvider>
-        <Stack
-          screenOptions={{
-            headerBackButtonDisplayMode: "minimal",
-            statusBarBackgroundColor: "#111A1A",
-            headerStyle: { backgroundColor: "#111A1A" },
-            headerTintColor: "#fff",
-            headerTitleStyle: { fontWeight: "900" },
-          }}>
-          <Stack.Screen name="index" options={{ title: "Ventas" }} />
+    <SalesDraftProvider>
+      <Stack
+        screenOptions={{
+          headerBackButtonDisplayMode: "minimal",
+          statusBarBackgroundColor: "#111A1A",
+          headerStyle: { backgroundColor: "#111A1A" },
+          headerTintColor: "#fff",
+          headerTitleStyle: { fontWeight: "900" },
+        }}>
+        <Stack.Screen name="index" options={{ title: "Ventas" }} />
 
-          <Stack.Screen name="new/index" options={{ title: "Nueva venta" }} />
+        <Stack.Screen name="new/index" options={{ title: "Nueva venta" }} />
 
-          <Stack.Screen
-            name="new/select-products"
-            options={{ title: "Seleccionar productos", presentation: "modal", headerShown: false }}
-          />
+        <Stack.Screen
+          name="new/select-products"
+          options={{ title: "Seleccionar productos", presentation: "modal", headerShown: false }}
+        />
 
-          <Stack.Screen name="[id]/index" options={{ title: "Detalle de la venta" }} />
-        </Stack>
-      </SalesDraftProvider>
-    </SalesProvider>
+        <Stack.Screen name="[id]/index" options={{ title: "Detalle de la venta" }} />
+      </Stack>
+    </SalesDraftProvider>
   );
 }

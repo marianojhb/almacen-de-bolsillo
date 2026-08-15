@@ -1,54 +1,66 @@
 // @/app/(tabs)/_layout.tsx
 import { Tabs } from "expo-router/tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { SalesProvider } from "@/contexts/sales/provider";
+import { PurchasesProvider } from "@/contexts/purchases/provider";
+import { SuppliersProvider } from "@/contexts/suppliers/provider";
+import { ProductsProvider } from "@/contexts/products/provider";
 
 export default function TabScreen() {
   return (
-    <Tabs>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
-          headerBackButtonDisplayMode: "minimal",
-          headerStyle: { backgroundColor: "#111A1A" },
-          headerTintColor: "#fff",
-          headerTitleStyle: { fontWeight: "900" },
-        }}
-      />
+    <ProductsProvider>
+      <SuppliersProvider>
+        <PurchasesProvider>
+          <SalesProvider>
+            <Tabs>
+              <Tabs.Screen
+                name="index"
+                options={{
+                  title: "Dashboard",
+                  tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
+                  headerBackButtonDisplayMode: "minimal",
+                  headerStyle: { backgroundColor: "#111A1A" },
+                  headerTintColor: "#fff",
+                  headerTitleStyle: { fontWeight: "900" },
+                }}
+              />
 
-      <Tabs.Screen
-        name="sales"
-        options={{
-          title: "Ventas",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="products"
-        options={{
-          title: "Productos",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="purchases"
-        options={{
-          title: "Compras",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: "Más",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
-        }}
-      />
-    </Tabs>
+              <Tabs.Screen
+                name="sales"
+                options={{
+                  title: "Ventas",
+                  headerShown: false,
+                  tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
+                }}
+              />
+              <Tabs.Screen
+                name="products"
+                options={{
+                  title: "Productos",
+                  headerShown: false,
+                  tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
+                }}
+              />
+              <Tabs.Screen
+                name="purchases"
+                options={{
+                  title: "Compras",
+                  headerShown: false,
+                  tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
+                }}
+              />
+              <Tabs.Screen
+                name="more"
+                options={{
+                  title: "Más",
+                  headerShown: false,
+                  tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
+                }}
+              />
+            </Tabs>
+          </SalesProvider>
+        </PurchasesProvider>
+      </SuppliersProvider>
+    </ProductsProvider>
   );
 }
