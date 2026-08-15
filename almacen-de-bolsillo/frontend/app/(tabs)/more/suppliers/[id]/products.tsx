@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, FlatList, Pressable, Text, TextInput, View } from "react-native";
 
-import type { Product, SupplierWithItems } from "@almacen/shared";
-import { getSupplierProducts, updateSupplierProductsRequest } from "@/services/suppliersApi";
+import type { Product } from "@almacen/shared";
+import { useSuppliers } from "@/contexts/suppliers";
 import { getProductsRequest } from "@/services/productsApi";
 
 export default function SupplierProductsScreen() {
@@ -12,7 +12,15 @@ export default function SupplierProductsScreen() {
 
   const supplierId = Number(id);
 
-  const [supplier, setSupplier] = useState<SupplierWithItems | null>(null);
+  const { suppliers, isLoadingSuppliers, suppliersError, updateSupplier } = useSuppliers();
+
+  const supplier = useMemo(() =>
+      suppliers.find((currentSupplier) =>
+          currentSupplier.id ===
+          supplierId,
+      ) ?? null,
+    [supplierId, suppliers],
+  );
 
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -20,42 +28,69 @@ export default function SupplierProductsScreen() {
 
   const [search, setSearch] = useState("");
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const loadData = useCallback(async () => {
-    if (!Number.isInteger(supplierId) || supplierId <= 0) {
-      Alert.alert("Proveedor inválido", "No se pudo identificar el proveedor.");
-      setIsLoading(false);
+
+  useEffect(() => {
+    if (!supplier) {
       return;
     }
 
-    try {
-      setIsLoading(true);
-
-      const [supplierResponse, productsResponse] = await Promise.all([
-        getSupplierProducts(supplierId),
-        getProductsRequest(false),
-      ]);
-
-      setSupplier(supplierResponse);
-      setProducts(productsResponse);
-
-      setSelectedProductIds(new Set(supplierResponse.products.map((product) => product.id)));
-    } catch (error) {
-      Alert.alert(
-        "No se pudieron cargar los productos",
-        error instanceof Error ? error.message : "Intentá nuevamente.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [supplierId]);
+    setSelectedProductIds(
+      new Set(
+        supplier.products.map(
+          (product) => product.id,
+        ),
+      ),
+    );
+  }, [supplier]);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    if (!Number.isInteger(supplierId) || supplierId <= 0) {
+      Alert.alert(
+        "Proveedor inválido",
+        "No se pudo identificar el proveedor.",
+      );
+
+      setIsLoadingProducts(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadProducts() {
+      try {
+        setIsLoadingProducts(true);
+
+        const response = await getProductsRequest(false);
+
+        if (!cancelled) {
+          setProducts(response);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          Alert.alert(
+            "No se pudieron cargar los productos",
+            error instanceof Error
+              ? error.message
+              : "Intentá nuevamente.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingProducts(false);
+        }
+      }
+    }
+
+    void loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [supplierId]);
 
   const visibleProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -89,38 +124,51 @@ export default function SupplierProductsScreen() {
     });
   }, [products, search, selectedProductIds]);
 
+
   const toggleProduct = (productId: number) => {
     setSelectedProductIds((current) => {
-      const next = new Set(current);
+        const next = new Set(current);
 
-      if (next.has(productId)) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
+        if (next.has(productId)) {
+          next.delete(productId);
+        } else {
+          next.add(productId);
+        }
 
-      return next;
-    });
+        return next;
+      },
+    );
   };
 
   const saveProducts = async () => {
     try {
       setIsSaving(true);
 
-      const updatedSupplier = await updateSupplierProductsRequest(supplierId, {
-        productIds: Array.from(selectedProductIds),
-      });
+      await updateSupplier(supplierId,
+        {
+          productIds: Array.from(
+            selectedProductIds,
+          ),
+        },
+      );
 
-      setSupplier(updatedSupplier);
-
-      Alert.alert("Productos actualizados", "Los productos vinculados se guardaron correctamente.");
+      Alert.alert(
+        "Productos actualizados",
+        "Los productos vinculados se guardaron correctamente.",
+      );
     } catch (error) {
-      Alert.alert("No se pudieron guardar los cambios", error instanceof Error ? error.message : "Intentá nuevamente.");
+      Alert.alert(
+        "No se pudieron guardar los cambios",
+        error instanceof Error
+          ? error.message
+          : "Intentá nuevamente.",
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
+  const isLoading = isLoadingSuppliers || isLoadingProducts;
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50 px-6 dark:bg-[#071111]">
@@ -130,6 +178,16 @@ export default function SupplierProductsScreen() {
             Estamos cargando los productos del proveedor.
           </Text>
         </View>
+      </View>
+    );
+  }
+
+  if (suppliersError) {
+    return (
+      <View className="flex-1 bg-gray-50 p-4 dark:bg-black">
+        <Text className="text-lg text-red-700 dark:text-red-300">
+          {suppliersError}
+        </Text>
       </View>
     );
   }

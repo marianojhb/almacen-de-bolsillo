@@ -18,8 +18,14 @@ export default function MoreLayout() {
         }}
       />
 
-      <Stack.Screen name="suppliers" options={{ headerShown: false }} />
-      <Stack.Screen name="transactions" options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="suppliers" 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="transactions" 
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

@@ -14,15 +14,9 @@ export type Supplier = {
   isActive: boolean;
 };
 
-// Read supplier with items
-
-export type SupplierWithItems = Supplier & {
-  purchaseOrders: PurchaseOrderDto[];
+export type SupplierWithRelations = Supplier & {
   products: Product[];
-};
-
-export type UpdateSupplierProductsDto = {
-  productIds: number[];
+  purchaseOrders: PurchaseOrderDto[];
 };
 
 // Create
@@ -37,6 +31,7 @@ export type CreateSupplierDto = {
 // Update
 export type UpdateSupplierDto = Partial<CreateSupplierDto> & {
   isActive?: boolean;
+  productIds?: number[];
 };
 
 // Delete

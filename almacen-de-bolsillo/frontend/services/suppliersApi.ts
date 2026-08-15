@@ -1,8 +1,4 @@
-import type { CreateSupplierDto, Supplier, UpdateSupplierDto } from "@almacen/shared";
-
-// Supplier with products
-
-import type { SupplierWithItems, UpdateSupplierProductsDto } from "@almacen/shared";
+import type { CreateSupplierDto, UpdateSupplierDto, SupplierWithRelations } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -16,7 +12,7 @@ async function getErrorMessage(response: Response, fallback: string) {
   }
 }
 
-export async function getSuppliers(): Promise<Supplier[]> {
+export async function getSuppliers(): Promise<SupplierWithRelations[]> {
   const response = await fetch(
     `${API_URL}/suppliers`,
   );
@@ -33,7 +29,7 @@ export async function getSuppliers(): Promise<Supplier[]> {
   return response.json();
 }
 
-export async function createSupplierRequest(supplier: CreateSupplierDto,): Promise<Supplier> {
+export async function createSupplierRequest(supplier: CreateSupplierDto): Promise<SupplierWithRelations> {
   const response = await fetch(
     `${API_URL}/suppliers`,
     {
@@ -57,7 +53,7 @@ export async function createSupplierRequest(supplier: CreateSupplierDto,): Promi
   return response.json();
 }
 
-export async function updateSupplierRequest(supplierId: number, supplier: UpdateSupplierDto): Promise<Supplier> {
+export async function updateSupplierRequest(supplierId: number, supplier: UpdateSupplierDto): Promise<SupplierWithRelations> {
   const response = await fetch(
     `${API_URL}/suppliers/${supplierId}`,
     {
@@ -81,7 +77,7 @@ export async function updateSupplierRequest(supplierId: number, supplier: Update
   return response.json();
 }
 
-export async function deleteSupplierRequest(supplierId: number,): Promise<void> {
+export async function deleteSupplierRequest(supplierId: number): Promise<void> {
   const response = await fetch(
     `${API_URL}/suppliers/${supplierId}`,
     {
@@ -97,48 +93,4 @@ export async function deleteSupplierRequest(supplierId: number,): Promise<void> 
       ),
     );
   }
-}
-
-// Supplier with products
-
-export async function getSupplierProducts(supplierId: number): Promise<SupplierWithItems> {
-  const response = await fetch(
-    `${API_URL}/suppliers/${supplierId}/products`,
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        "No se pudieron obtener los productos del proveedor.",
-      ),
-    );
-  }
-
-  return response.json();
-}
-
-export async function updateSupplierProductsRequest(supplierId: number, data: UpdateSupplierProductsDto): Promise<SupplierWithItems> {
-  const response = await fetch(
-    `${API_URL}/suppliers/${supplierId}/products`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
-      body: JSON.stringify(data),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        "No se pudieron actualizar los productos del proveedor.",
-      ),
-    );
-  }
-
-  return response.json();
 }
