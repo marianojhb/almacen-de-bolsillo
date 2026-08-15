@@ -10,10 +10,6 @@ import {
   updateSupplierFromDatabase,
 } from "./suppliers.service.js";
 
-// Supplier with products
-
-import { updateSupplierProductsFromDatabase, getSupplierWithProductsFromDatabase } from "./suppliers.service.js";
-
 // Manejo de errores de la base de datos
 
 const sendDatabaseError = (res: Response, error: unknown, action: string) => {
@@ -47,6 +43,9 @@ const sendDatabaseError = (res: Response, error: unknown, action: string) => {
   });
 };
 
+// Validación de ID de proveedor 
+const isValidSupplierId = (supplierId: number) => Number.isInteger(supplierId) && supplierId > 0;
+
 const getSuppliers = async (_req: Request, res: Response) => {
   try {
     const suppliers = await getSuppliersFromDatabase();
@@ -61,7 +60,7 @@ const getSupplierById = async (req: Request, res: Response) => {
   const supplierId = Number(req.params.id);
 
   // Validación del ID del proveedor
-  if (!Number.isInteger(supplierId) || supplierId <= 0) {
+  if (!isValidSupplierId(supplierId)) {
     res.status(400).json({
       message: "El ID del proveedor no es válido.",
     });
@@ -97,20 +96,41 @@ const postSupplier = async (req: Request, res: Response) => {
 const updateSupplier = async (req: Request, res: Response) => {
   const supplierId = Number(req.params.id);
 
-  // Validación del ID del proveedor
-  if (!Number.isInteger(supplierId) || supplierId <= 0) {
+  if (!isValidSupplierId(supplierId)) {
     res.status(400).json({
-      message: "El ID del proveedor no es válido.",
+      message:
+        "El ID del proveedor no es válido.",
+    });
+    return;
+  }
+
+  const supplierData = req.body;
+
+  const { productIds } = supplierData;
+
+  if (productIds !== undefined && (!Array.isArray(productIds) || !productIds.every(
+        (productId) =>
+          Number.isInteger(productId) &&
+          productId > 0,
+      )
+    )
+  ) {
+    res.status(400).json({
+      message: "La lista de productos no es válida.",
     });
     return;
   }
 
   try {
-    const supplier = await updateSupplierFromDatabase(supplierId, req.body);
+    const supplier = await updateSupplierFromDatabase(supplierId, supplierData);
 
     res.json(supplier);
   } catch (error) {
-    sendDatabaseError(res, error, "updating");
+    sendDatabaseError(
+      res,
+      error,
+      "updating",
+    );
   }
 };
 
@@ -118,7 +138,7 @@ const deleteSupplier = async (req: Request, res: Response) => {
   const supplierId = Number(req.params.id);
 
   // Validación del ID del proveedor
-  if (!Number.isInteger(supplierId) || supplierId <= 0) {
+  if (!isValidSupplierId(supplierId)) {
     res.status(400).json({
       message: "El ID del proveedor no es válido.",
     });
@@ -134,61 +154,6 @@ const deleteSupplier = async (req: Request, res: Response) => {
   }
 };
 
-// Supplier with products
-
-const getSupplierProducts = async (req: Request, res: Response) => {
-
-  const supplierId = Number(req.params.id);
-
-  if (!Number.isInteger(supplierId) || supplierId <= 0) {
-    res.status(400).json({
-      message: "El ID del proveedor no es válido.",
-    });
-    return;
-  }
-
-  try {
-    const supplier = await getSupplierWithProductsFromDatabase(supplierId);
-
-    if (!supplier) {
-      res.status(404).json({
-        message: "Proveedor no encontrado.",
-      });
-      return;
-    }
-
-    res.json(supplier);
-  } catch (error) {
-    sendDatabaseError(res, error, "fetching products from");
-  }
-};
-
-const updateSupplierProducts = async (req: Request, res: Response) => {
-  const supplierId = Number(req.params.id);
-  const { productIds } = req.body;
-
-  if (!Number.isInteger(supplierId) || supplierId <= 0) {
-    res.status(400).json({
-      message: "El ID del proveedor no es válido.",
-    });
-    return;
-  }
-
-  if (!Array.isArray(productIds) || !productIds.every((id) => Number.isInteger(id) && id > 0)) {
-    res.status(400).json({
-      message: "La lista de productos no es válida.",
-    });
-    return;
-  }
-
-  try {
-    const supplier = await updateSupplierProductsFromDatabase(supplierId, productIds);
-
-    res.json(supplier);
-  } catch (error) {
-    sendDatabaseError(res, error, "updating products from");
-  }
-};
 
 export {
   getSuppliers,
@@ -196,6 +161,4 @@ export {
   postSupplier,
   updateSupplier,
   deleteSupplier,
-  getSupplierProducts,
-  updateSupplierProducts,
 };

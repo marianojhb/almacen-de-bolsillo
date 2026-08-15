@@ -1,4 +1,4 @@
-import type { CreateSupplierDto, Supplier, UpdateSupplierDto } from "@almacen/shared";
+import type { CreateSupplierDto, SupplierWithRelations, UpdateSupplierDto } from "@almacen/shared";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { SuppliersContext } from "./context";
@@ -8,7 +8,7 @@ type Props = {
   children: ReactNode;
 };
 
-const sortSuppliers = (suppliers: Supplier[]) =>
+const sortSuppliers = (suppliers: SupplierWithRelations[]) =>
   [...suppliers].sort((first, second) =>
     first.name.localeCompare(
       second.name,
@@ -17,7 +17,7 @@ const sortSuppliers = (suppliers: Supplier[]) =>
   );
 
 export function SuppliersProvider({children,}: Props) {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierWithRelations[]>([]);
 
   const [ isLoadingSuppliers, setIsLoadingSuppliers ] = useState(true);
 
@@ -28,22 +28,16 @@ export function SuppliersProvider({children,}: Props) {
         setIsLoadingSuppliers(true);
         setSuppliersError(null);
 
-        const response =
-          await getSuppliers();
+        const response = await getSuppliers();
 
-        setSuppliers(
-          sortSuppliers(response),
-        );
+        setSuppliers(sortSuppliers(response));
       } catch (error) {
-        console.error(
-          "Error loading suppliers:",
-          error,
-        );
+        console.error( "Error loading suppliers:", error);
 
         setSuppliersError(
           error instanceof Error
             ? error.message
-            : "No se pudieron cargar los proveedores.",
+            : "No se pudieron cargar los proveedores."
         );
       } finally {
         setIsLoadingSuppliers(false);
