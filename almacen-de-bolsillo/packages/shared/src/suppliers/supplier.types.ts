@@ -1,5 +1,18 @@
 import type { PurchaseOrderDto } from "../purchases/purchase.types.js";
-import type { Product } from "../products/product.types.js";
+import type { ProductWithRelations } from "../index.js";
+
+export type ProductOnSupplier = {
+  productId: number;
+  supplierId: number;
+  price?: number | null;
+  supplierCategory?: string | null;
+  unitsPerPaq?: number | null;
+  pricePerPaq: number;
+  minimumQuantity?: number | null;
+  salesTerms?: string | null;
+  leadTimeDays?: number | null;
+  product: ProductWithRelations;
+};
 
 // Read
 export type Supplier = {
@@ -15,8 +28,19 @@ export type Supplier = {
 };
 
 export type SupplierWithRelations = Supplier & {
-  products: Product[];
   purchaseOrders: PurchaseOrderDto[];
+  products: ProductOnSupplier[];
+};
+
+export type SupplierProductRelationInput = {
+  productId: number;
+  price?: number | null;
+  supplierCategory?: string | null;
+  unitsPerPaq?: number | null;
+  pricePerPaq: number;
+  minimumQuantity?: number | null;
+  salesTerms?: string | null;
+  leadTimeDays?: number | null;
 };
 
 // Create
@@ -31,7 +55,7 @@ export type CreateSupplierDto = {
 // Update
 export type UpdateSupplierDto = Partial<CreateSupplierDto> & {
   isActive?: boolean;
-  productIds?: number[];
+  productIds?: number[] | SupplierProductRelationInput[];
 };
 
 // Delete

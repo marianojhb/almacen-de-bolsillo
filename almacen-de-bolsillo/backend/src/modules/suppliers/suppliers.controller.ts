@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import type { SupplierProductRelationInput } from "@almacen/shared";
 
 // Supplier service
 
@@ -108,12 +109,19 @@ const updateSupplier = async (req: Request, res: Response) => {
 
   const { productIds } = supplierData;
 
-  if (productIds !== undefined && (!Array.isArray(productIds) || !productIds.every(
-        (productId) =>
-          Number.isInteger(productId) &&
-          productId > 0,
-      )
-    )
+  const isValidProductRelation = (product: SupplierProductRelationInput) =>
+    Number.isInteger(product.productId) &&
+    product.productId > 0 &&
+    typeof product.pricePerPaq === "number";
+
+  if (
+    productIds !== undefined &&
+    (!Array.isArray(productIds) ||
+      !productIds.every((product) =>
+        typeof product === "number"
+          ? Number.isInteger(product) && product > 0
+          : isValidProductRelation(product),
+      ))
   ) {
     res.status(400).json({
       message: "La lista de productos no es válida.",

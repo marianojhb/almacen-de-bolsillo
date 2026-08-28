@@ -10,15 +10,14 @@ import { getProductsRequest } from "@/services/productsApi";
 export default function SupplierProductsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
+  // Validate supplier ID
   const supplierId = Number(id);
 
   const { suppliers, isLoadingSuppliers, suppliersError, updateSupplier } = useSuppliers();
 
-  const supplier = useMemo(() =>
-      suppliers.find((currentSupplier) =>
-          currentSupplier.id ===
-          supplierId,
-      ) ?? null,
+  // Find the supplier by ID
+  const supplier = useMemo(
+    () => suppliers.find((currentSupplier) => currentSupplier.id === supplierId) ?? null,
     [supplierId, suppliers],
   );
 
@@ -32,27 +31,87 @@ export default function SupplierProductsScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
 
+  // Estados para manejar las propiedades de los productos
+  const [prices, setPrices] = useState<Record<number, string>>({});
+  const [supplierCategory, setSupplierCategory] = useState<Record<number, string>>({});
+  const [unitsPerPaq, setUnitsPerPaq] = useState<Record<number, string>>({});
+  const [pricePerPaq, setPricePerPaq] = useState<Record<number, string>>({});
+  const [minimumQuantity, setMinimumQuantity] = useState<Record<number, string>>({});
+  const [salesTerms, setSalesTerms] = useState<Record<number, string>>({});
+  const [leadTimeDays, setLeadTimeDays] = useState<Record<number, string>>({});
+
+  // Helpers:
+
+  const toNullableString = (value?: string) => {
+    const trimmedValue = value?.trim();
+
+    return trimmedValue ? trimmedValue : null;
+  };
+
+  const toNullableNumber = (value?: string) => {
+    const trimmedValue = value?.trim();
+
+    if (!trimmedValue) {
+      return null;
+    }
+
+    const numberValue = Number(trimmedValue);
+
+    return Number.isNaN(numberValue) ? null : numberValue;
+  };
+
+  const toRequiredNumber = (value?: string) => {
+    const trimmedValue = value?.trim();
+
+    if (!trimmedValue) {
+      return null;
+    }
+
+    const numberValue = Number(trimmedValue);
+
+    return Number.isNaN(numberValue) ? null : numberValue;
+  };
 
   useEffect(() => {
     if (!supplier) {
       return;
     }
+    // Initialize selectedProductIds with the products of the supplier
+    setSelectedProductIds(() => {
+      return new Set([...supplier.products.map((product) => product.productId)]);
+    });
+    const initialPrices: Record<number, string> = {};
+    const initialSupplierCategory: Record<number, string> = {};
+    const initialUnitsPerPaq: Record<number, string> = {};
+    const initialPricePerPaq: Record<number, string> = {};
+    const initialMinimumQuantity: Record<number, string> = {};
+    const initialSalesTerms: Record<number, string> = {};
+    const initialLeadTimeDays: Record<number, string> = {};
 
-    setSelectedProductIds(
-      new Set(
-        supplier.products.map(
-          (product) => product.id,
-        ),
-      ),
-    );
+    supplier.products.forEach((product) => {
+      initialPrices[product.productId] = product.price?.toString() ?? "";
+      initialSupplierCategory[product.productId] = product.supplierCategory ?? "";
+      initialUnitsPerPaq[product.productId] = product.unitsPerPaq?.toString() ?? "";
+      initialPricePerPaq[product.productId] = product.pricePerPaq.toString();
+      initialMinimumQuantity[product.productId] = product.minimumQuantity?.toString() ?? "";
+      initialSalesTerms[product.productId] = product.salesTerms ?? "";
+      initialLeadTimeDays[product.productId] = product.leadTimeDays?.toString() ?? "";
+    });
+
+    setPrices(initialPrices);
+    setSupplierCategory(initialSupplierCategory);
+    setUnitsPerPaq(initialUnitsPerPaq);
+    setPricePerPaq(initialPricePerPaq);
+    setMinimumQuantity(initialMinimumQuantity);
+    setSalesTerms(initialSalesTerms);
+    setLeadTimeDays(initialLeadTimeDays);
   }, [supplier]);
+
+  // Load products from the API
 
   useEffect(() => {
     if (!Number.isInteger(supplierId) || supplierId <= 0) {
-      Alert.alert(
-        "Proveedor inválido",
-        "No se pudo identificar el proveedor.",
-      );
+      Alert.alert("Proveedor inválido", "No se pudo identificar el proveedor.");
 
       setIsLoadingProducts(false);
       return;
@@ -73,9 +132,7 @@ export default function SupplierProductsScreen() {
         if (!cancelled) {
           Alert.alert(
             "No se pudieron cargar los productos",
-            error instanceof Error
-              ? error.message
-              : "Intentá nuevamente.",
+            error instanceof Error ? error.message : "Intentá nuevamente.",
           );
         }
       } finally {
@@ -92,6 +149,7 @@ export default function SupplierProductsScreen() {
     };
   }, [supplierId]);
 
+  // Filter and sort products based on search and selection
   const visibleProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
@@ -100,6 +158,7 @@ export default function SupplierProductsScreen() {
         return true;
       }
 
+      // Check if the product's shortname, longname, or SKU includes the search term
       return (
         product.shortname.toLowerCase().includes(normalizedSearch) ||
         product.longname.toLowerCase().includes(normalizedSearch) ||
@@ -124,45 +183,50 @@ export default function SupplierProductsScreen() {
     });
   }, [products, search, selectedProductIds]);
 
-
   const toggleProduct = (productId: number) => {
     setSelectedProductIds((current) => {
-        const next = new Set(current);
+      const next = new Set(current);
 
-        if (next.has(productId)) {
-          next.delete(productId);
-        } else {
-          next.add(productId);
-        }
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
 
-        return next;
-      },
-    );
+      return next;
+    });
   };
 
   const saveProducts = async () => {
     try {
       setIsSaving(true);
 
-      await updateSupplier(supplierId,
-        {
-          productIds: Array.from(
-            selectedProductIds,
-          ),
-        },
-      );
+      const updateOrCreateSupplierProducts = Array.from(selectedProductIds).map((productId) => {
+        const parsedPricePerPaq = toRequiredNumber(pricePerPaq[productId]);
 
-      Alert.alert(
-        "Productos actualizados",
-        "Los productos vinculados se guardaron correctamente.",
-      );
+        if (parsedPricePerPaq === null) {
+          throw new Error("Todos los productos seleccionados deben tener precio por paquete.");
+        }
+
+        return {
+          productId,
+          price: toNullableNumber(prices[productId]),
+          supplierCategory: toNullableString(supplierCategory[productId]),
+          unitsPerPaq: toNullableNumber(unitsPerPaq[productId]),
+          pricePerPaq: parsedPricePerPaq,
+          minimumQuantity: toNullableNumber(minimumQuantity[productId]),
+          salesTerms: toNullableString(salesTerms[productId]),
+          leadTimeDays: toNullableNumber(leadTimeDays[productId]),
+        };
+      });
+
+      await updateSupplier(supplierId, {
+        productIds: updateOrCreateSupplierProducts,
+      });
+
+      Alert.alert("Productos actualizados", "Los productos vinculados se guardaron correctamente.");
     } catch (error) {
-      Alert.alert(
-        "No se pudieron guardar los cambios",
-        error instanceof Error
-          ? error.message
-          : "Intentá nuevamente.",
-      );
+      Alert.alert("No se pudieron guardar los cambios", error instanceof Error ? error.message : "Intentá nuevamente.");
     } finally {
       setIsSaving(false);
     }
@@ -185,9 +249,7 @@ export default function SupplierProductsScreen() {
   if (suppliersError) {
     return (
       <View className="flex-1 bg-gray-50 p-4 dark:bg-black">
-        <Text className="text-lg text-red-700 dark:text-red-300">
-          {suppliersError}
-        </Text>
+        <Text className="text-lg text-red-700 dark:text-red-300">{suppliersError}</Text>
       </View>
     );
   }
@@ -199,6 +261,14 @@ export default function SupplierProductsScreen() {
       </View>
     );
   }
+
+  const styles = {
+    inputField: {
+      label: "mt-2 p-2 text-sm font-medium text-gray-700 dark:text-gray-300",
+      input:
+        "mt-1 h-12 p-3 border border-green-500 rounded-xl align-center text-sm font-semibold text-green-700 dark:text-green-400",
+    },
+  };
 
   return (
     <>
@@ -274,6 +344,119 @@ export default function SupplierProductsScreen() {
 
                   {product.sku && (
                     <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">SKU: {product.sku}</Text>
+                  )}
+
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Precio de compra</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese el precio"
+                        value={prices[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setPrices((prevPrices) => ({
+                            ...prevPrices,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Categoría del proveedor</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese la categoría"
+                        value={supplierCategory[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setSupplierCategory((prevCategory) => ({
+                            ...prevCategory,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Unidades por paquete</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese las unidades por paquete"
+                        value={unitsPerPaq[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setUnitsPerPaq((prevUnitsPerPaq) => ({
+                            ...prevUnitsPerPaq,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Precio por paquete</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese el precio por paquete"
+                        value={pricePerPaq[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setPricePerPaq((prevPricePerPaq) => ({
+                            ...prevPricePerPaq,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Cantidad mínima</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese la cantidad mínima"
+                        value={minimumQuantity[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setMinimumQuantity((prevMinimumQuantity) => ({
+                            ...prevMinimumQuantity,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Condiciones de venta</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese las condiciones de venta"
+                        value={salesTerms[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setSalesTerms((prevSalesTerms) => ({
+                            ...prevSalesTerms,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
+                  )}
+                  {isSelected && (
+                    <View>
+                      <Text className={styles.inputField.label}>Tiempo de entrega (días)</Text>
+                      <TextInput
+                        className={styles.inputField.input}
+                        placeholder="Ingrese el tiempo de entrega (días)"
+                        value={leadTimeDays[product.id] ?? ""}
+                        onChangeText={(text) => {
+                          setLeadTimeDays((prevLeadTimeDays) => ({
+                            ...prevLeadTimeDays,
+                            [product.id]: text,
+                          }));
+                        }}
+                      />
+                    </View>
                   )}
                 </View>
 
