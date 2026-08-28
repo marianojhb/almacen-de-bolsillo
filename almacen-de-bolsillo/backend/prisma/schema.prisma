@@ -24,7 +24,7 @@ model Product {
   purchaseOrdersItems PurchaseOrdersItem[]
   salesOrderItems     SalesOrderItem[]
   stockMovements      StockMovement[]
-  suppliers           Supplier[]
+  suppliers           ProductOnSupplier[]
   isActive            Boolean              @default(true) @map("is_active_p")
 
   @@map("products_p")
@@ -43,19 +43,36 @@ model Category {
 }
 
 model Supplier {
-  id             Int             @id @default(autoincrement()) @map("id_supplier_s")
-  name           String          @map("name_s")
-  cuit           String?         @unique @map("cuit_s")
-  phone          String?         @map("phone_s")
-  email          String?         @map("email_s")
-  address        String?         @map("address_s")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  isActive       Boolean         @default(true) @map("is_active_s")
+  id             Int                  @id @default(autoincrement()) @map("id_supplier_s")
+  name           String               @map("name_s")
+  cuit           String?              @unique @map("cuit_s")
+  phone          String?              @map("phone_s")
+  email          String?              @map("email_s")
+  address        String?              @map("address_s")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+  isActive       Boolean              @default(true) @map("is_active_s")
   purchaseOrders PurchaseOrder[]
-  products       Product[]
+  products       ProductOnSupplier[]
 
   @@map("suppliers_s")
+}
+
+model ProductOnSupplier {
+  price            Decimal? @map("price_pos")
+  supplier         Supplier @relation(fields: [supplierId], references: [id])
+  supplierId       Int
+  product          Product  @relation(fields: [productId], references: [id])
+  productId        Int
+  supplierCategory String?  @map("supplier_category_pos")
+  unitsPerPaq      Int?     @default(1) @map("units_per_paq_pos")
+  pricePerPaq      Decimal  @map("price_per_paq_pos")
+  minimumQuantity  Decimal? @default(1) @map("minimum_quantity_pos")
+  salesTerms       String?  @map("sales_terms_pos")
+  leadTimeDays     Int?     @map("lead_time_days_pos")
+
+  @@id([supplierId, productId])
+  @@map("products_on_suppliers_pos")
 }
 
 model PurchaseOrder {
@@ -160,21 +177,21 @@ model SalesOrder {
 }
 
 model SalesOrderItem {
-  salesOrderItemId Int            @map("id_sales_order_soi")
-  productId        Int            @map("id_product_soi")
-  quantity         Int            @default(0) @map("quantity_soi")
-  shortname        String         @map("shortname_soi")
-  longname         String?        @map("longname_soi")
-  price            Decimal        @default(0) @map("price_soi") @db.Decimal(10, 2)
-  subtotal         Decimal        @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
-  discount         Decimal        @default(0) @map("discount_soi") @db.Decimal(10, 2)
-  createdAt        DateTime       @default(now()) @map("created_at")
-  updatedAt        DateTime       @updatedAt @map("updated_at")
-  product          Product        @relation(fields: [productId], references: [id])
-  salesOrder       SalesOrder     @relation(fields: [salesOrderItemId], references: [id])
-  stockMovements   StockMovement?
+  salesOrderId   Int            @map("id_sales_order_soi")
+  productId      Int            @map("id_product_soi")
+  quantity       Int            @default(0) @map("quantity_soi")
+  shortname      String         @map("shortname_soi")
+  longname       String?        @map("longname_soi")
+  price          Decimal        @default(0) @map("price_soi") @db.Decimal(10, 2)
+  subtotal       Decimal        @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
+  discount       Decimal        @default(0) @map("discount_soi") @db.Decimal(10, 2)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  product        Product        @relation(fields: [productId], references: [id])
+  salesOrder     SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  stockMovements StockMovement?
 
-  @@id([salesOrderItemId, productId])
+  @@id([salesOrderId, productId])
   @@map("sales_orders_items_soi")
 }
 
@@ -207,7 +224,7 @@ model StockMovement {
   reason            String?             @map("reason_sm")
   createdAt         DateTime            @default(now()) @map("created_at_sm")
   product           Product             @relation(fields: [productId], references: [id])
-  salesOrderItem    SalesOrderItem?     @relation(fields: [salesOrderId, productId], references: [salesOrderItemId, productId])
+  salesOrderItem    SalesOrderItem?     @relation(fields: [salesOrderId, productId], references: [salesOrderId, productId])
   salesOrderId      Int?                @map("id_sales_order_sm")
   purchaseOrderItem PurchaseOrdersItem? @relation(fields: [productId, purchaseOrderId], references: [productId, purchaseOrderId])
   purchaseOrderId   Int?                @map("id_purchase_order_sm")
