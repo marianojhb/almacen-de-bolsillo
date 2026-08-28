@@ -10,16 +10,12 @@ const ProductWithRelationsArgs = {
       },
     },
     suppliers: {
-      select: {
-        id: true,
-        name: true,
-      },
+      include: { supplier: true },
     },
   },
 } satisfies Prisma.ProductDefaultArgs;
 
 const getProductsFromDatabase = async ({ includeInactive = true }: { includeInactive?: boolean } = {}) => {
-
   if (includeInactive) {
     return prisma.product.findMany({
       ...ProductWithRelationsArgs,
@@ -58,12 +54,19 @@ const updateProductFromDatabase = async (
 ) => {
   const product = await prisma.product.update({
     where: { id: productId },
+
     data: {
       ...productData,
 
       ...(suppliers !== undefined && {
         suppliers: {
-          set: suppliers.map((id) => ({ id })),
+          deleteMany: {},
+
+          create: suppliers.map((supplierId) => ({
+            supplier: {
+              connect: { id: supplierId },
+            },
+          })),
         },
       }),
     },
