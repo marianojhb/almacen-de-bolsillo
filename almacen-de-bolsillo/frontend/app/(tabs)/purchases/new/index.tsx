@@ -1,10 +1,27 @@
 import { useState } from "react";
 import { router } from "expo-router";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { usePurchaseDraft } from "@/contexts/purchase-draft";
-import { createPurchaseOrderRequest } from "@/services/purchasesApi";
+import {
+  FlatList,
+  Pressable,
+  // ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  useColorScheme,
+  View,
+} from "react-native";
+
+// import { usePurchaseDraft } from "@/contexts/purchase-draft";
+// import { createPurchaseOrderRequest } from "@/services/purchasesApi";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function NewPurchaseScreen() {
+  const colorScheme = useColorScheme();
+  const [isOnlyMissingProducts, setIsOnlyMissingProducts] = useState(false);
+  const [search, setSearch] = useState("");
+
+  /*  previously commented out code
+
   const { items, totalAmount, removeItem, clearPurchase } = usePurchaseDraft();
   const [supplierId, setSupplierId] = useState("1");
   const [isSavingPurchase, setIsSavingPurchase] = useState(false);
@@ -39,15 +56,59 @@ export default function NewPurchaseScreen() {
     } finally {
       setIsSavingPurchase(false);
     }
-  }
+
+    */
 
   return (
     <>
-      <View className="items-center justify-center">
-        <Text className="text-2xl font-bold pt-2">Nueva Compra</Text>
+      <View className="flex-1 p-4">
+        <View className="flex-row items-start">
+          <Pressable onPress={() => router.back()} className="mr-3 pt-2">
+            <Ionicons name="arrow-back" size={24} color={colorScheme === "dark" ? "#9ca3af" : "black"} />
+          </Pressable>
+
+          <View className="flex-1">
+            <Text className="text-base font-bold dark:text-white ">1. Elegir productos</Text>
+            <Text className="mt-1 text-sm text-gray-600">Seleccioná los productos que querés comprar</Text>
+          </View>
+        </View>
+
+        <View className="mt-3 flex-row items-center justify-between">
+          <Text className="text-base">
+            <Ionicons name="cart" size={18} color={colorScheme === "dark" ? "#9ca3af" : "black"} /> Solo faltantes
+          </Text>
+          <Switch value={isOnlyMissingProducts} onValueChange={setIsOnlyMissingProducts} />
+        </View>
+
+        <View className="mt-3 flex-row items-center rounded-lg border border-gray-300 p-4">
+          <Ionicons name="search" size={18} color="#9ca3af" />
+
+          <TextInput
+            className="ms-2 flex-1 text-sm text-gray-600"
+            placeholder="Buscar productos"
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+
+        <View className="mt-auto flex-row">
+          <View className="flex-column">
+            <Text>3 productos seleccionados</Text>
+            <Text>Total sugerido: 15 unidades</Text>
+          </View>
+          <View className="flex-column ms-auto items-center justify-center">
+            <Pressable
+              className="w-44 ms-auto mt-4 rounded-lg bg-green-800 p-3 items-center"
+              onPress={() => router.push("/(tabs)/purchases/new/select-suppliers")}>
+              <Text className="text-white font-bold">
+                Continuar <Ionicons name="arrow-forward" size={18} color="white" />
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
 
-      <ScrollView className="flex-1 p-2" alwaysBounceVertical={false} bounces contentContainerClassName="flex-grow">
+      {/* <ScrollView className="flex-1 p-2" alwaysBounceVertical={false} bounces contentContainerClassName="flex-grow">
         <Pressable
           className="border rounded p-2 border-gray-300 w-full mb-2"
           onPress={() => router.push("/purchases/new/select-products")}>
@@ -111,7 +172,7 @@ export default function NewPurchaseScreen() {
             <Text className="text-white">Cancelar</Text>
           </Pressable>
         </View>
-      </ScrollView>
+      </ScrollView> */}
     </>
   );
 }

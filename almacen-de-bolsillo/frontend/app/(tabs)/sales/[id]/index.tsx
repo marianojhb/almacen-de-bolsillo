@@ -1,6 +1,6 @@
 import { useSales } from "@/contexts/sales";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { Text, View, ScrollView, FlatList } from "react-native";
+import { Text, View, ScrollView } from "react-native";
 import { DeleteButton } from "@/components/sales/DeleteButton";
 
 export default function SalesDetailScreen() {
@@ -80,10 +80,10 @@ export default function SalesDetailScreen() {
             <View className="gap-4">
               <View>
                 <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                  Total
+                  Subtotal
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.total - sale.iva).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {Number(sale.subtotal).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                 </Text>
               </View>
 
@@ -101,7 +101,7 @@ export default function SalesDetailScreen() {
                   Total sin IVA
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.total / 1.21).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {Number(sale.taxableBase).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                 </Text>
               </View>
 
@@ -110,13 +110,13 @@ export default function SalesDetailScreen() {
                   IVA
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.iva).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {Number(sale.ivaSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                 </Text>
               </View>
 
               <View>
                 <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                  Total con IVA
+                  Total
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
                   {Number(sale.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}

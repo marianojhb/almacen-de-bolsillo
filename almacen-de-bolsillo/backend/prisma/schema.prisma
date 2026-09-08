@@ -43,15 +43,15 @@ model Category {
 }
 
 model Supplier {
-  id             Int                  @id @default(autoincrement()) @map("id_supplier_s")
-  name           String               @map("name_s")
-  cuit           String?              @unique @map("cuit_s")
-  phone          String?              @map("phone_s")
-  email          String?              @map("email_s")
-  address        String?              @map("address_s")
-  createdAt      DateTime             @default(now()) @map("created_at")
-  updatedAt      DateTime             @updatedAt @map("updated_at")
-  isActive       Boolean              @default(true) @map("is_active_s")
+  id             Int                 @id @default(autoincrement()) @map("id_supplier_s")
+  name           String              @map("name_s")
+  cuit           String?             @unique @map("cuit_s")
+  phone          String?             @map("phone_s")
+  email          String?             @map("email_s")
+  address        String?             @map("address_s")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
+  isActive       Boolean             @default(true) @map("is_active_s")
   purchaseOrders PurchaseOrder[]
   products       ProductOnSupplier[]
 
@@ -76,7 +76,7 @@ model ProductOnSupplier {
 }
 
 model PurchaseOrder {
-  id                  Int                  @id @unique @default(autoincrement()) @map("id_purchase_orders_po")
+  id                  Int                  @id @default(autoincrement()) @map("id_purchase_order_po")
   date                DateTime             @default(now()) @map("date_po")
   total               Decimal              @default(0) @map("total_po") @db.Decimal(10, 2)
   supplierId          Int                  @map("id_supplier_po")
@@ -89,7 +89,8 @@ model PurchaseOrder {
   supplier      Supplier     @relation(fields: [supplierId], references: [id])
   buyer         User         @relation(fields: [userId], references: [id])
   transaction   Transaction? @relation(fields: [transactionId], references: [id])
-  transactionId Int?
+  transactionId Int          @map("id_transaction_po")
+  ivaPurchase   Decimal      @default(0) @map("iva_purchase_order_po") @db.Decimal(10, 2)
 
   @@map("purchase_orders_po")
 }
@@ -157,14 +158,16 @@ model User {
 }
 
 model SalesOrder {
-  id              Int              @id @default(autoincrement()) @map("id_sales_orders_so")
+  id              Int              @id @default(autoincrement()) @map("id_sales_order_so")
   invoice         String?          @map("invoice_so")
   date            DateTime         @default(now()) @map("date_so")
   sellerId        Int              @default(3) @map("id_user_so")
   createdAt       DateTime         @default(now()) @map("created_at")
   discount        Decimal          @default(0) @map("discount_so") @db.Decimal(10, 2)
-  iva             Decimal          @default(0) @map("iva_so") @db.Decimal(10, 2)
+  ivaSales        Decimal          @default(0) @map("iva_sales_order_so") @db.Decimal(10, 2)
   isActive        Boolean          @default(true) @map("is_active_so")
+  taxableBase     Decimal          @default(0) @map("taxable_base_so")
+  subtotal        Decimal          @default(0) @map("subtotal_so") @db.Decimal(10, 2)
   total           Decimal          @default(0) @map("total_so") @db.Decimal(10, 2)
   updatedAt       DateTime         @updatedAt @map("updated_at")
   paymentMethod   PaymentMethod    @default(EFECTIVO) @map("payment_method_so")

@@ -7,7 +7,6 @@ export type PaymentMethod = "EFECTIVO" | "MERCADOPAGO" | "UALA";
 // Sales Order Types
 
 export type SalesOrderItem = {
-  id: number;
   salesOrderId: number;
   productId: number;
   shortname: string;
@@ -26,7 +25,9 @@ export type SalesOrder = {
   date: string;
   paymentMethod: PaymentMethod;
   discount: number;
-  iva: number;
+  taxableBase: number;
+  subtotal: number;
+  ivaSales: number;
   total: number;
   isActive: boolean;
   createdAt: string;
@@ -58,8 +59,10 @@ export type CreateSalesOrderDto = {
   sellerId: number;
   paymentMethod: PaymentMethod;
   discount: number;
-  iva: number;
+  ivaSales: number;
+  taxableBase: number;
   total: number;
+  subtotal: number;
   salesOrderItems: CreateSalesOrderItemDto[];
 };
 

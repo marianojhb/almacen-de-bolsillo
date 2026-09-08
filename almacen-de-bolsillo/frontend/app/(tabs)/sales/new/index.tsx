@@ -14,10 +14,11 @@ export const NewSaleScreen = () => {
   const [numeroFactura, setNumeroFactura] = useState("");
   const [isSavingSale, setIsSavingSale] = useState(false);
 
-  const discount = Math.round(Number(totalAmount) * (Number(inputDiscount || 0) / 100) * 100) / 100;
-  const baseImponible = Math.round((Number(totalAmount) - discount) * 100) / 100;
-  const iva = Math.round(baseImponible * 0.21 * 100) / 100;
-  const totalConIVA = Math.round((baseImponible + iva) * 100) / 100;
+  const subtotal = Math.round(Number(totalAmount) * 100) / 100;
+  const discount = (Number(inputDiscount || 0) / 100) * 100;
+  const total = Math.round((Number(totalAmount) - discount) * 100) / 100;
+  const taxableBase = Math.round((subtotal - discount)/1.21 * 100) / 100;
+  const ivaSales = Math.round(taxableBase * 0.21 * 100) / 100;
 
   const isDisabled = items.length === 0 || isSavingSale;
 
@@ -26,9 +27,11 @@ export const NewSaleScreen = () => {
       invoice: numeroFactura,
       sellerId: 3,
       paymentMethod: metodoDePago,
-      discount,
-      iva,
-      total: totalConIVA,
+      subtotal: subtotal,
+      discount: discount,
+      taxableBase: taxableBase,
+      ivaSales: ivaSales,
+      total: total,
       salesOrderItems: items.map((item) => ({
         productId: item.productId,
         shortname: item.shortname,
@@ -58,7 +61,7 @@ export const NewSaleScreen = () => {
               <Text className="mt-1 text-4xl font-black text-white">Nueva venta</Text>
               <Text className="mt-2 text-sm leading-5 text-slate-300">
                 {items.length} productos cargados · Total estimado{" "}
-                {Number(totalConIVA).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {Number(total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
               </Text>
             </View>
 
@@ -109,7 +112,9 @@ export const NewSaleScreen = () => {
 
                   <View className="mt-4 flex-row flex-wrap gap-2">
                     <View className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800">
-                      <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Cantidad: {item.quantity}</Text>
+                      <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                        Cantidad: {item.quantity}
+                      </Text>
                     </View>
                     <View className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800">
                       <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -118,7 +123,11 @@ export const NewSaleScreen = () => {
                     </View>
                     <View className="rounded-full bg-emerald-50 px-3 py-1.5 dark:bg-emerald-950/60">
                       <Text className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                        Subtotal: {Number(item.quantity * item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                        Subtotal:{" "}
+                        {Number(item.quantity * item.price).toLocaleString("es-AR", {
+                          style: "currency",
+                          currency: "ARS",
+                        })}
                       </Text>
                     </View>
                   </View>
@@ -126,7 +135,9 @@ export const NewSaleScreen = () => {
               ))}
 
               <View className="rounded-2xl bg-[#111A1A] p-4 dark:bg-slate-900">
-                <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400">Subtotal de productos</Text>
+                <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400">
+                  Subtotal de productos
+                </Text>
                 <Text className="mt-1 text-3xl font-black text-white">
                   {Number(totalAmount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                 </Text>
@@ -164,7 +175,9 @@ export const NewSaleScreen = () => {
                 onChangeText={setInputDiscount}
                 keyboardType="numeric"
               />
-              <Text className="mt-2 text-sm text-slate-500 dark:text-slate-400">Ingresá el porcentaje de descuento total.</Text>
+              <Text className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Ingresá el porcentaje de descuento total.
+              </Text>
             </View>
           </View>
         </View>
@@ -186,15 +199,21 @@ export const NewSaleScreen = () => {
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-3">
-              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Base imponible</Text>
+              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Total a pagar</Text>
               <Text className="text-base font-black text-slate-950 dark:text-white">
-                {Number(baseImponible).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {Number(total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              </Text>
+            </View>
+            <View className="flex-row items-center justify-between gap-3">
+              <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Total sin IVA</Text>
+              <Text className="text-base font-black text-slate-950 dark:text-white">
+                {Number(taxableBase).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">IVA 21%</Text>
               <Text className="text-base font-black text-slate-950 dark:text-white">
-                {Number(iva).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {Number(ivaSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
               </Text>
             </View>
 
@@ -203,7 +222,7 @@ export const NewSaleScreen = () => {
                 Total a pagar
               </Text>
               <Text className="mt-1 text-4xl font-black text-emerald-700 dark:text-emerald-300">
-                {Number(totalConIVA).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {Number(total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
               </Text>
               <Text className="mt-1 text-sm text-emerald-700/80 dark:text-emerald-200">IVA incluido.</Text>
             </View>
@@ -247,7 +266,8 @@ export const NewSaleScreen = () => {
             className={`items-center rounded-2xl p-4 active:opacity-80 ${isDisabled ? "bg-slate-300 dark:bg-slate-700" : "bg-[#111A1A] dark:bg-white"}`}
             onPress={handleAddSale}
             disabled={isDisabled}>
-            <Text className={`text-base font-black ${isDisabled ? "text-slate-500 dark:text-slate-300" : "text-white dark:text-[#111A1A]"}`}>
+            <Text
+              className={`text-base font-black ${isDisabled ? "text-slate-500 dark:text-slate-300" : "text-white dark:text-[#111A1A]"}`}>
               {isSavingSale ? "Guardando venta..." : "Guardar venta"}
             </Text>
           </Pressable>
