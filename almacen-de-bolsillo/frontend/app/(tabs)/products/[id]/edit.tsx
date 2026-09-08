@@ -93,7 +93,16 @@ export default function ProductEditScreen() {
             stockMin: product.stockMin.toString(),
             categoryId: product.categoryId.toString(),
             isActive: product.isActive,
-            supplierIds: product.suppliers?.map((supplier) => supplier.id) ?? [],
+            supplierRelations: product.suppliers.map((relation) => ({
+              supplierId: relation.supplierId,
+              price: relation.price?.toString() ?? "",
+              supplierCategory: relation.supplierCategory ?? "",
+              unitsPerPaq: relation.unitsPerPaq?.toString() ?? "1",
+              pricePerPaq: relation.pricePerPaq.toString(),
+              minimumQuantity: relation.minimumQuantity?.toString() ?? "1",
+              salesTerms: relation.salesTerms ?? "",
+              leadTimeDays: relation.leadTimeDays?.toString() ?? "",
+            })),
           }}
           submitLabel="Guardar"
           onCancel={() => router.back()}
@@ -109,7 +118,7 @@ export default function ProductEditScreen() {
                 stockMin: values.stockMin,
                 discount: product.discount,
                 categoryId: values.categoryId,
-                supplierIds: values.supplierIds,
+                supplierRelations: values.supplierRelations,
                 isActive: values.isActive,
               },
               product.id,

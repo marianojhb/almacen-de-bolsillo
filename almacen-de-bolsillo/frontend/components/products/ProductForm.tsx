@@ -1,7 +1,7 @@
 // Product Form
 import { useState, useEffect } from "react";
 import * as SuppliersAPI from "@/services/suppliersApi";
-import type { Category, CreateCategoryDto, Supplier } from "@almacen/shared";
+import type { Category, CreateCategoryDto, ProductSupplierRelationInput, Supplier } from "@almacen/shared";
 import {
   Text,
   TextInput,
@@ -26,7 +26,7 @@ export type ProductFormValues = {
   stockMin: string;
   categoryId: string;
   isActive: boolean;
-  supplierIds: number[];
+  supplierRelations?: ProductSupplierRelationFormValues[];
 };
 
 export type ParsedProductFormValues = {
@@ -38,7 +38,7 @@ export type ParsedProductFormValues = {
   stockMin: number;
   categoryId: number;
   isActive: boolean;
-  supplierIds: number[];
+  supplierRelations: ProductSupplierRelationInput[];
 };
 
 export type ProductFormProps = {
@@ -46,13 +46,42 @@ export type ProductFormProps = {
   categories?: Category[];
   submitLabel?: string;
   onCreateCategory?: (newCategory: CreateCategoryDto) => Promise<Category>;
-  onSubmit: (values: ParsedProductFormValues) => void;
+  onSubmit: (values: ParsedProductFormValues) => void | Promise<void>;
   onCancel: () => void;
+};
+
+export type ProductSupplierRelationFormValues = {
+  supplierId: number;
+  price: string;
+  supplierCategory: string;
+  unitsPerPaq: string;
+  pricePerPaq: string;
+  minimumQuantity: string;
+  salesTerms: string;
+  leadTimeDays: string;
 };
 
 const inputClassName =
   "h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-0 text-base font-medium leading-5 text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white";
 const labelClassName = "mb-2 text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500";
+
+const emptySupplierRelation = (supplierId: number): ProductSupplierRelationFormValues => ({
+  supplierId,
+  price: "",
+  supplierCategory: "",
+  unitsPerPaq: "1",
+  pricePerPaq: "",
+  minimumQuantity: "1",
+  salesTerms: "",
+  leadTimeDays: "",
+});
+
+const optionalNumber = (value: string) => (value.trim() === "" ? null : Number(value));
+
+const optionalText = (value: string) => {
+  const normalizedValue = value.trim();
+  return normalizedValue === "" ? null : normalizedValue;
+};
 
 export function ProductForm({
   initialValues,
@@ -76,13 +105,16 @@ export function ProductForm({
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [supplierIds, setSupplierIds] = useState<number[]>([initialValues?.supplierIds ?? []].flat());
   const [isSupplierModalVisible, setIsSupplierModalVisible] = useState(false);
+  const [supplierRelations, setSupplierRelations] = useState<ProductSupplierRelationFormValues[]>(
+    initialValues?.supplierRelations ?? [],
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadSuppliers() {
       try {
-        const fetchedSuppliers: Supplier[] = await SuppliersAPI.getSuppliers();
+        const fetchedSuppliers = await SuppliersAPI.getSuppliers();
         setSuppliers(fetchedSuppliers);
       } catch (error) {
         console.log(error);
@@ -91,7 +123,7 @@ export function ProductForm({
     loadSuppliers();
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (
       !sku.trim() ||
       !shortname.trim() ||
@@ -127,7 +159,6 @@ export function ProductForm({
     const numericStock = Number(stock.trim());
     const numericMinimumStock = Number(stockMin.trim());
     const numericCategoryId = Number(categoryId.trim());
-    const numericSupplierIds = supplierIds ? supplierIds.map((id) => Number(id)) : [];
 
     if (Number.isNaN(numericPrice) || Number.isNaN(numericStock) || Number.isNaN(numericMinimumStock)) {
       Alert.alert("Datos inválidos", "Precio y stock deben contener valores numéricos.");
@@ -139,17 +170,70 @@ export function ProductForm({
       return;
     }
 
-    onSubmit({
-      sku: trimmedSku,
-      shortname: trimmedShortName,
-      longname: trimmedLongName,
-      price: numericPrice,
-      stock: numericStock,
-      stockMin: numericMinimumStock,
-      categoryId: numericCategoryId,
-      supplierIds: numericSupplierIds,
-      isActive,
-    });
+    if (!Number.isInteger(numericStock) || !Number.isInteger(numericMinimumStock)) {
+      Alert.alert("Datos inválidos", "Las cantidades de stock deben ser números enteros.");
+      return;
+    }
+
+    const parsedSupplierRelations: ProductSupplierRelationInput[] = [];
+
+    for (const relation of supplierRelations) {
+      const pricePerPaq = Number(relation.pricePerPaq.trim());
+      const price = optionalNumber(relation.price);
+      const unitsPerPaq = optionalNumber(relation.unitsPerPaq);
+      const minimumQuantity = optionalNumber(relation.minimumQuantity);
+      const leadTimeDays = optionalNumber(relation.leadTimeDays);
+
+      if (!relation.pricePerPaq.trim() || !Number.isFinite(pricePerPaq) || pricePerPaq < 0) {
+        Alert.alert("Proveedor incompleto", "Cada proveedor debe tener un precio por paquete válido.");
+        return;
+      }
+
+      if (
+        [price, unitsPerPaq, minimumQuantity, leadTimeDays].some(
+          (value) => value !== null && (!Number.isFinite(value) || value < 0),
+        )
+      ) {
+        Alert.alert("Proveedor inválido", "Los importes y cantidades del proveedor deben ser números positivos.");
+        return;
+      }
+
+      if (
+        (unitsPerPaq !== null && !Number.isInteger(unitsPerPaq)) ||
+        (leadTimeDays !== null && !Number.isInteger(leadTimeDays))
+      ) {
+        Alert.alert("Proveedor inválido", "Las unidades por paquete y los días de entrega deben ser enteros.");
+        return;
+      }
+
+      parsedSupplierRelations.push({
+        supplierId: relation.supplierId,
+        price,
+        supplierCategory: optionalText(relation.supplierCategory),
+        unitsPerPaq,
+        pricePerPaq,
+        minimumQuantity,
+        salesTerms: optionalText(relation.salesTerms),
+        leadTimeDays,
+      });
+    }
+
+    try {
+      setIsSubmitting(true);
+      await onSubmit({
+        sku: trimmedSku,
+        shortname: trimmedShortName,
+        longname: trimmedLongName,
+        price: numericPrice,
+        stock: numericStock,
+        stockMin: numericMinimumStock,
+        categoryId: numericCategoryId,
+        supplierRelations: parsedSupplierRelations,
+        isActive,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCreateCategory = async () => {
@@ -185,11 +269,25 @@ export function ProductForm({
   };
 
   const toggleSupplier = (id: number) => {
-    setSupplierIds((current) =>
-      current.includes(id) ? current.filter((supplierId) => supplierId !== id) : [...current, id],
-    );
+    const isSelected = supplierRelations.some((relation) => relation.supplierId === id);
+
+    if (isSelected) {
+      setSupplierRelations((current) => current.filter((relation) => relation.supplierId !== id));
+      return;
+    }
+
+    setSupplierRelations((current) => [...current, emptySupplierRelation(id)]);
   };
 
+  const updateSupplierRelation = (
+    supplierId: number,
+    field: Exclude<keyof ProductSupplierRelationFormValues, "supplierId">,
+    value: string,
+  ) => {
+    setSupplierRelations((current) =>
+      current.map((relation) => (relation.supplierId === supplierId ? { ...relation, [field]: value } : relation)),
+    );
+  };
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-slate-50 dark:bg-[#071111]"
@@ -330,17 +428,17 @@ export function ProductForm({
             <View className="flex-1">
               <Text className="text-lg font-black text-slate-950 dark:text-white">Proveedores</Text>
               <Text className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {supplierIds.length === 0
+                {supplierRelations.length === 0
                   ? "No hay proveedores seleccionados"
-                  : supplierIds.length === 1
+                  : supplierRelations.length === 1
                     ? "1 proveedor seleccionado"
-                    : `${supplierIds.length} proveedores seleccionados`}
+                    : `${supplierRelations.length} proveedores seleccionados`}
               </Text>
             </View>
             <Pressable
               onPress={() => setIsSupplierModalVisible(true)}
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 active:opacity-75 dark:border-slate-800 dark:bg-slate-900">
-              <Text className="text-sm font-black text-slate-950 dark:text-white">Elegir</Text>
+              <Text className="text-sm font-black text-slate-950 dark:text-white">Configurar</Text>
             </Pressable>
           </View>
         </View>
@@ -366,10 +464,11 @@ export function ProductForm({
             </Text>
           </Pressable>
           <Pressable
-            onPress={handleSubmit}
-            className="flex-1 items-center justify-center rounded-2xl bg-[#111A1A] p-4 active:opacity-75 dark:bg-white">
+            onPress={() => void handleSubmit()}
+            disabled={isSubmitting}
+            className={`flex-1 items-center justify-center rounded-2xl bg-[#111A1A] p-4 active:opacity-75 dark:bg-white ${isSubmitting ? "opacity-50" : ""}`}>
             <Text numberOfLines={1} className="text-base font-black text-white dark:text-[#111A1A]">
-              {submitLabel ?? "Guardar"}
+              {isSubmitting ? "Guardando..." : (submitLabel ?? "Guardar")}
             </Text>
           </Pressable>
         </View>
@@ -430,7 +529,10 @@ export function ProductForm({
           <Pressable
             className="max-h-[70%] w-full rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950"
             onPress={(event) => event.stopPropagation()}>
-            <Text className="mb-4 text-2xl font-black text-slate-950 dark:text-white">Seleccionar proveedores</Text>
+            <Text className="text-2xl font-black text-slate-950 dark:text-white">Proveedores y condiciones</Text>
+            <Text className="mb-4 mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Seleccionar proveedores es opcional. Cada proveedor conserva sus propios precios y condiciones.
+            </Text>
             <FlatList
               data={suppliers}
               keyExtractor={(item) => item.id.toString()}
@@ -441,27 +543,130 @@ export function ProductForm({
                 </Text>
               }
               renderItem={({ item: supplier }) => {
-                const selected = supplierIds.includes(supplier.id);
+                const relation = supplierRelations.find((current) => current.supplierId === supplier.id);
+                const selected = relation !== undefined;
+
                 return (
-                  <Pressable
-                    onPress={() => toggleSupplier(supplier.id)}
-                    className={`flex-row items-center justify-between rounded-2xl border px-4 py-3 active:opacity-60 ${
+                  <View
+                    className={`rounded-2xl border p-4 ${
                       selected
                         ? "border-emerald-500 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/50"
                         : "border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
                     }`}>
-                    <Text
-                      className={`text-base ${selected ? "font-black text-emerald-700 dark:text-emerald-300" : "font-semibold text-slate-700 dark:text-slate-200"}`}>
-                      {supplier.name}
-                    </Text>
-                    <Text
-                      className={`text-lg font-black ${selected ? "text-emerald-600 dark:text-emerald-300" : "text-slate-300 dark:text-slate-700"}`}>
-                      {selected ? "✓" : "+"}
-                    </Text>
-                  </Pressable>
+                    <Pressable
+                      onPress={() => toggleSupplier(supplier.id)}
+                      className="flex-row items-center justify-between active:opacity-60">
+                      <Text
+                        className={`text-base ${selected ? "font-black text-emerald-700 dark:text-emerald-300" : "font-semibold text-slate-700 dark:text-slate-200"}`}>
+                        {supplier.name}
+                      </Text>
+                      <Text
+                        className={`text-lg font-black ${selected ? "text-emerald-600 dark:text-emerald-300" : "text-slate-300 dark:text-slate-700"}`}>
+                        {selected ? "✓" : "+"}
+                      </Text>
+                    </Pressable>
+
+                    {relation && (
+                      <View className="mt-4 gap-3 border-t border-emerald-200 pt-4 dark:border-emerald-800">
+                        <View>
+                          <Text className={labelClassName}>Precio por paquete *</Text>
+                          <TextInput
+                            className={inputClassName}
+                            value={relation.pricePerPaq}
+                            onChangeText={(value) => updateSupplierRelation(supplier.id, "pricePerPaq", value)}
+                            placeholder="Obligatorio"
+                            placeholderTextColor="#94a3b8"
+                            keyboardType="decimal-pad"
+                          />
+                        </View>
+
+                        <View>
+                          <Text className={labelClassName}>Precio de costo unitario</Text>
+                          <TextInput
+                            className={inputClassName}
+                            value={relation.price}
+                            onChangeText={(value) => updateSupplierRelation(supplier.id, "price", value)}
+                            placeholder="Opcional"
+                            placeholderTextColor="#94a3b8"
+                            keyboardType="decimal-pad"
+                          />
+                        </View>
+
+                        <View className="flex-row gap-3">
+                          <View className="flex-1">
+                            <Text className={labelClassName}>Unidades por paquete</Text>
+                            <TextInput
+                              className={inputClassName}
+                              value={relation.unitsPerPaq}
+                              onChangeText={(value) => updateSupplierRelation(supplier.id, "unitsPerPaq", value)}
+                              placeholder="1"
+                              placeholderTextColor="#94a3b8"
+                              keyboardType="number-pad"
+                            />
+                          </View>
+                          <View className="flex-1">
+                            <Text className={labelClassName}>Compra mínima</Text>
+                            <TextInput
+                              className={inputClassName}
+                              value={relation.minimumQuantity}
+                              onChangeText={(value) => updateSupplierRelation(supplier.id, "minimumQuantity", value)}
+                              placeholder="1"
+                              placeholderTextColor="#94a3b8"
+                              keyboardType="decimal-pad"
+                            />
+                          </View>
+                        </View>
+
+                        <View>
+                          <Text className={labelClassName}>Categoría del proveedor</Text>
+                          <TextInput
+                            className={inputClassName}
+                            value={relation.supplierCategory}
+                            onChangeText={(value) => updateSupplierRelation(supplier.id, "supplierCategory", value)}
+                            placeholder="Opcional"
+                            placeholderTextColor="#94a3b8"
+                          />
+                        </View>
+
+                        <View>
+                          <Text className={labelClassName}>Condiciones comerciales</Text>
+                          <TextInput
+                            className={inputClassName}
+                            value={relation.salesTerms}
+                            onChangeText={(value) => updateSupplierRelation(supplier.id, "salesTerms", value)}
+                            placeholder="Opcional"
+                            placeholderTextColor="#94a3b8"
+                          />
+                        </View>
+
+                        <View>
+                          <Text className={labelClassName}>Plazo de entrega (días)</Text>
+                          <TextInput
+                            className={inputClassName}
+                            value={relation.leadTimeDays}
+                            onChangeText={(value) => updateSupplierRelation(supplier.id, "leadTimeDays", value)}
+                            placeholder="Opcional"
+                            placeholderTextColor="#94a3b8"
+                            keyboardType="number-pad"
+                          />
+                        </View>
+
+                        <Text
+                          className="text-xs font-semibold text-emerald-700 dark:text-emerald-300"
+                          onPress={() => toggleSupplier(supplier.id)}>
+                          Quitar proveedor
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 );
               }}
             />
+            <Pressable
+              onPress={() => setIsSupplierModalVisible(false)}
+              className="mt-4 items-center rounded-2xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
+              <Text className="font-black text-white dark:text-[#111A1A]">Listo</Text>
+            </Pressable>
           </Pressable>
         </Pressable>
       </Modal>

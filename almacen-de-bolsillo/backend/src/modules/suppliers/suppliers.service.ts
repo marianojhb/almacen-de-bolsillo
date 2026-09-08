@@ -47,9 +47,8 @@ const postSupplierToDatabase = async (supplierData: CreateSupplierDto) =>
   });
 
 const updateSupplierFromDatabase = async (supplierId: number, supplierData: UpdateSupplierDto) => {
-
   const { productIds, ...supplierFields } = supplierData;
-  
+
   const productRelations = productIds?.filter(
     (product): product is Exclude<(typeof productIds)[number], number> => typeof product !== "number",
   );
@@ -62,7 +61,7 @@ const updateSupplierFromDatabase = async (supplierId: number, supplierData: Upda
       prisma.supplier.update({
         where: {
           id: supplierId,
-          isActive: true, 
+          isActive: true,
         },
         data: supplierFields,
       }),
@@ -77,16 +76,7 @@ const updateSupplierFromDatabase = async (supplierId: number, supplierData: Upda
       }),
 
       ...productRelations.map(
-        ({
-          productId,
-          price,
-          supplierCategory,
-          unitsPerPaq,
-          pricePerPaq,
-          minimumQuantity,
-          salesTerms,
-          leadTimeDays,
-        }) =>
+        ({ productId, price, supplierCategory, unitsPerPaq, pricePerPaq, minimumQuantity, salesTerms, leadTimeDays }) =>
           prisma.productOnSupplier.upsert({
             where: {
               supplierId_productId: {
@@ -160,8 +150,6 @@ const deleteSupplierFromDatabase = async (supplierId: number) =>
       isActive: false,
     },
   });
-
-
 
 export {
   getSuppliersFromDatabase,

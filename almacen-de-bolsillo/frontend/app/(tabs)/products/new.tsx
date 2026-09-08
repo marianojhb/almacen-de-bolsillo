@@ -45,9 +45,9 @@ export default function NewProductScreen() {
               price: values.price,
               stock: values.stock,
               stockMin: values.stockMin,
-              discount: null,
+              discount: 0,
               categoryId: values.categoryId,
-              supplierIds: values.supplierIds,
+              supplierRelations: values.supplierRelations,
               isActive: values.isActive,
             });
 

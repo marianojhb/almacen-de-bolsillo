@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
+import type { CreateProductDto, ProductSupplierRelationInput, UpdateProductDto } from "@almacen/shared";
 
 const ProductWithRelationsArgs = {
   include: {
@@ -38,42 +39,54 @@ const getProductByIdFromDatabase = async (productId: number) => {
   return product;
 };
 
-const postProductToDatabase = async (productData: Prisma.ProductUncheckedCreateInput) => {
+const toUncheckedSupplierCreate = ({
+  supplierId,
+  ...relationFields
+}: ProductSupplierRelationInput): Prisma.ProductOnSupplierUncheckedCreateWithoutProductInput => ({
+  supplierId,
+  ...relationFields,
+});
+
+const postProductToDatabase = async (productData: CreateProductDto) => {
+  const { supplierRelations, ...productFields } = productData;
+
+  const data: Prisma.ProductUncheckedCreateInput = {
+    ...productFields,
+    ...(supplierRelations && supplierRelations.length > 0
+      ? {
+          suppliers: {
+            create: supplierRelations.map(toUncheckedSupplierCreate),
+          },
+        }
+      : {}),
+  };
+
   const product = await prisma.product.create({
-    data: productData,
+    data,
     ...ProductWithRelationsArgs,
   });
 
   return product;
 };
 
-const updateProductFromDatabase = async (
-  productId: number,
-  productData: Prisma.ProductUncheckedUpdateInput,
-  suppliers?: number[],
-) => {
-  const product = await prisma.product.update({
+const updateProductFromDatabase = async (productId: number, productData: UpdateProductDto) => {
+  const { supplierRelations, ...productFields } = productData;
+
+  const data: Prisma.ProductUncheckedUpdateInput = {
+    ...productFields,
+    ...(supplierRelations !== undefined && {
+      suppliers: {
+        deleteMany: {},
+        create: supplierRelations.map(toUncheckedSupplierCreate),
+      },
+    }),
+  };
+
+  return prisma.product.update({
     where: { id: productId },
-
-    data: {
-      ...productData,
-
-      ...(suppliers !== undefined && {
-        suppliers: {
-          deleteMany: {},
-
-          create: suppliers.map((supplierId) => ({
-            supplier: {
-              connect: { id: supplierId },
-            },
-          })),
-        },
-      }),
-    },
+    data,
     ...ProductWithRelationsArgs,
   });
-
-  return product;
 };
 
 const deleteProductFromDatabase = async (productId: number) => {

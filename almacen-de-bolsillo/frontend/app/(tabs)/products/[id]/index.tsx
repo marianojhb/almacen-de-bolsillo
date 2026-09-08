@@ -25,7 +25,7 @@ export default function ProductDetailScreen() {
   const hasLowStock = product.stock <= product.stockMin;
 
   const supplierNames = product.suppliers?.length
-    ? product.suppliers.map((supplier) => supplier.name).join(", ")
+    ? product.suppliers.map((relation) => relation.supplier.name).join(", ")
     : "No hay proveedores";
 
   return (

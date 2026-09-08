@@ -12,9 +12,25 @@ export type Product = {
   updatedAt: string;
   stock: number;
   stockMin: number;
-  discount: number | null;
+  discount: number;
   categoryId: number;
   isActive: boolean;
+};
+
+export type ProductSupplierRelationInput = {
+  supplierId: number;
+  price?: number | null;
+  supplierCategory?: string | null;
+  unitsPerPaq?: number | null;
+  pricePerPaq: number;
+  minimumQuantity?: number | null;
+  salesTerms?: string | null;
+  leadTimeDays?: number | null;
+};
+
+export type ProductSupplierRelation = ProductSupplierRelationInput & {
+  productId: number;
+  supplier: Supplier;
 };
 
 export type CreateProductDto = {
@@ -26,16 +42,16 @@ export type CreateProductDto = {
   stockMin: number;
   description: string | null;
   categoryId: number;
-  supplierIds: number[];
   isActive: boolean;
-  discount: number | null;
+  discount: number;
+  supplierRelations?: ProductSupplierRelationInput[];
 };
 
 export type UpdateProductDto = Partial<CreateProductDto>; // se actualiza con PATCH, por lo que todos los campos son opcionales
 
 export type ProductWithRelations = Product & {
   category: Category;
-  suppliers: Supplier[] | null;
+  suppliers: ProductSupplierRelation[];
 };
 
 export type ProductWithCategory = Product & {
@@ -43,5 +59,5 @@ export type ProductWithCategory = Product & {
 };
 
 export type ProductWithSupplier = Product & {
-  suppliers: Supplier[] | null;
+  suppliers: ProductSupplierRelation[];
 };

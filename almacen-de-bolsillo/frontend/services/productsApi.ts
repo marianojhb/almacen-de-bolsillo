@@ -1,4 +1,4 @@
-import type { Product, CreateProductDto, UpdateProductDto, ProductWithRelations } from "@almacen/shared";
+import type { CreateProductDto, UpdateProductDto, ProductWithRelations } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -21,7 +21,7 @@ export async function getProductsRequest(includeInactive?: boolean): Promise<Pro
   return response.json();
 }
 
-export async function createProductRequest(product: CreateProductDto): Promise<Product> {
+export async function createProductRequest(product: CreateProductDto): Promise<ProductWithRelations> {
   const response = await fetch(`${API_URL}/products`, {
     method: "POST",
     headers: {
