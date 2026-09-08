@@ -9,30 +9,33 @@ export type PaymentMethod = "EFECTIVO" | "MERCADOPAGO" | "UALA";
 export type SalesOrderItem = {
   salesOrderId: number;
   productId: number;
+  quantity: number;
   shortname: string;
   longname: string;
-  quantity: number;
   price: number;
+  createdAt: string;
+  updatedAt: string;
+  product: ProductWithRelations;
   discount: number;
   subtotal: number;
-  product: ProductWithRelations;
 };
 
 export type SalesOrder = {
   id: number;
-  invoice: string;
-  sellerId: number;
+  invoice?: string;
   date: string;
+  sellerId: number;
+  createdAt: string;
   paymentMethod: PaymentMethod;
   discount: number;
+  ivaSales: number;
+  isActive: boolean;
   taxableBase: number;
   subtotal: number;
-  ivaSales: number;
   total: number;
-  isActive: boolean;
-  createdAt: string;
   updatedAt: string;
   seller: User;
+  transactionId: number;
 };
 
 // DTOs CRUD
@@ -56,7 +59,7 @@ export type CreateSalesOrderItemDto = {
 
 export type CreateSalesOrderDto = {
   invoice: string;
-  sellerId: number;
+  sellerId: number; // TODO: Conviene sacarlo porque el frontend no dice quien genero la venta. Preferiblemente JWT lo diga en req.user.id
   paymentMethod: PaymentMethod;
   discount: number;
   ivaSales: number;
