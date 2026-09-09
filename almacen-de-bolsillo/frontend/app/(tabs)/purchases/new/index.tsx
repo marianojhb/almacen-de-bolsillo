@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { router } from "expo-router";
 import {
   FlatList,
@@ -10,15 +10,28 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import { useProducts } from "@/contexts/products";
 
 // import { usePurchaseDraft } from "@/contexts/purchase-draft";
 // import { createPurchaseOrderRequest } from "@/services/purchasesApi";
 import { Ionicons } from "@expo/vector-icons";
 
+import type { ProductWithRelations } from "@almacen/shared";
+
 export default function NewPurchaseScreen() {
   const colorScheme = useColorScheme();
   const [isOnlyMissingProducts, setIsOnlyMissingProducts] = useState(false);
   const [search, setSearch] = useState("");
+
+  const {
+    products,
+    categories,
+    isLoadingProducts,
+    isLoadingCategories,
+    productsError,
+    refreshProducts,
+    refreshCategories,
+  } = useProducts();
 
   /*  previously commented out code
 
@@ -90,6 +103,26 @@ export default function NewPurchaseScreen() {
             onChangeText={setSearch}
           />
         </View>
+
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View className="mt-2 rounded-lg border border-gray-300 p-4">
+              <Text className="text-sm font-bold">{item.shortname}</Text>
+              <Text className="text-sm text-gray-600">{item.longname}</Text>
+              <View className="flex-row items-center justify-between mt-2">
+                <Text className={`text-sm text-gray-600 ${ item?.stockMin > item?.stock? "text-red-500" : "text-green-500"}`}>Stock: {item.stock}</Text>
+                <Text className="text-sm text-gray-600">Mínimo: {item.stockMin}</Text>
+              </View>
+            </View>
+          )}
+          ListEmptyComponent={
+            <View className="mt-4 items-center justify-center">
+              <Text className="text-sm text-gray-600">No se encontraron productos</Text>
+            </View>
+          }
+        />
 
         <View className="mt-auto flex-row">
           <View className="flex-column">
