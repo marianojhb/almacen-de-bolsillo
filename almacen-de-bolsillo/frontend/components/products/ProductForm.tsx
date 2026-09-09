@@ -1,7 +1,7 @@
 // Product Form
 import { useState, useEffect } from "react";
 import * as SuppliersAPI from "@/services/suppliersApi";
-import type { Category, CreateCategoryDto, ProductSupplierRelationInput, Supplier } from "@almacen/shared";
+import type { Category, CreateCategoryDto, CreateProductOnSupplierFromProductDto, Supplier } from "@almacen/shared";
 import {
   Text,
   TextInput,
@@ -38,7 +38,7 @@ export type ParsedProductFormValues = {
   stockMin: number;
   categoryId: number;
   isActive: boolean;
-  supplierRelations: ProductSupplierRelationInput[];
+  supplierRelations: CreateProductOnSupplierFromProductDto[];
 };
 
 export type ProductFormProps = {
@@ -175,7 +175,7 @@ export function ProductForm({
       return;
     }
 
-    const parsedSupplierRelations: ProductSupplierRelationInput[] = [];
+    const parsedSupplierRelations: CreateProductOnSupplierFromProductDto[] = [];
 
     for (const relation of supplierRelations) {
       const pricePerPaq = Number(relation.pricePerPaq.trim());

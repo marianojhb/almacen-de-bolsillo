@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, Keyboard, Pressable, Text, TextInput, View, RefreshControl } from "react-native";
+import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { usePurchases } from "@/contexts/purchases";
 
 const PurchasesScreen = () => {

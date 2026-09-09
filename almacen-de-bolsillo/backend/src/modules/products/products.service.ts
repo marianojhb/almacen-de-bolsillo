@@ -1,6 +1,10 @@
 import { prisma } from "../../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
-import type { CreateProductDto, ProductSupplierRelationInput, UpdateProductDto } from "@almacen/shared";
+import type {
+  CreateProductDto,
+  CreateProductOnSupplierFromProductDto,
+  UpdateProductDto,
+} from "@almacen/shared";
 
 const ProductWithRelationsArgs = {
   include: {
@@ -42,7 +46,7 @@ const getProductByIdFromDatabase = async (productId: number) => {
 const toUncheckedSupplierCreate = ({
   supplierId,
   ...relationFields
-}: ProductSupplierRelationInput): Prisma.ProductOnSupplierUncheckedCreateWithoutProductInput => ({
+}: CreateProductOnSupplierFromProductDto): Prisma.ProductOnSupplierUncheckedCreateWithoutProductInput => ({
   supplierId,
   ...relationFields,
 });

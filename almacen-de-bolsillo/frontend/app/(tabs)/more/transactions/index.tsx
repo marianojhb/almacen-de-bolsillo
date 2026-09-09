@@ -159,7 +159,7 @@ export default function TransactionsScreen() {
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
                     <Text className="text-2xl font-black text-slate-950 dark:text-white">
-                      Movimiento #{transaction.id}
+                      Transacción #{transaction.id}
                     </Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
                       {new Date(transaction.date).toLocaleDateString("es-AR", {

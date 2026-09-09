@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { ProductSupplierRelationInput } from "@almacen/shared";
+import type { CreateProductOnSupplierFromProductDto } from "@almacen/shared";
 
 import {
   getProductsFromDatabase,
@@ -12,7 +12,7 @@ import {
 const isOptionalNonNegativeNumber = (value: unknown) =>
   value === undefined || value === null || (typeof value === "number" && Number.isFinite(value) && value >= 0);
 
-const isValidSupplierRelation = (relation: unknown): relation is ProductSupplierRelationInput => {
+const isValidSupplierRelation = (relation: unknown): relation is CreateProductOnSupplierFromProductDto => {
   if (typeof relation !== "object" || relation === null) {
     return false;
   }

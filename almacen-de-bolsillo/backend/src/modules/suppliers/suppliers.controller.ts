@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { SupplierProductRelationInput } from "@almacen/shared";
+import type { CreateProductOnSupplierFromSupplierDto } from "@almacen/shared";
 
 // Supplier service
 
@@ -109,7 +109,7 @@ const updateSupplier = async (req: Request, res: Response) => {
 
   const { productIds } = supplierData;
 
-  const isValidProductRelation = (product: SupplierProductRelationInput) =>
+  const isValidProductRelation = (product: CreateProductOnSupplierFromSupplierDto) =>
     Number.isInteger(product.productId) &&
     product.productId > 0 &&
     typeof product.pricePerPaq === "number";

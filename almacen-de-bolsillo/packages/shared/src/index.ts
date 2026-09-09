@@ -1,4 +1,5 @@
 export * from "./products/product.types.js";
+export * from "./product-suppliers/product-supplier.types.js";
 export * from "./categories/category.types.js";
 export * from "./suppliers/supplier.types.js";
 export * from "./sales/sale.types.js";

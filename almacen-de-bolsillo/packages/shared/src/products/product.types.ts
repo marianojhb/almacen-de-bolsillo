@@ -1,4 +1,8 @@
 import type { Category } from "../categories/category.types.js";
+import type {
+  CreateProductOnSupplierDto,
+  CreateProductOnSupplierFromProductDto,
+} from "../product-suppliers/product-supplier.types.js";
 import type { Supplier } from "../suppliers/supplier.types.js";
 
 export type Product = {
@@ -17,19 +21,7 @@ export type Product = {
   isActive: boolean;
 };
 
-export type ProductSupplierRelationInput = {
-  supplierId: number;
-  price?: number | null;
-  supplierCategory?: string | null;
-  unitsPerPaq?: number | null;
-  pricePerPaq: number;
-  minimumQuantity?: number | null;
-  salesTerms?: string | null;
-  leadTimeDays?: number | null;
-};
-
-export type ProductSupplierRelation = ProductSupplierRelationInput & {
-  productId: number;
+export type ProductOnSupplierWithSupplierDto = CreateProductOnSupplierDto & {
   supplier: Supplier;
 };
 
@@ -44,14 +36,14 @@ export type CreateProductDto = {
   categoryId: number;
   isActive: boolean;
   discount: number;
-  supplierRelations?: ProductSupplierRelationInput[];
+  supplierRelations?: CreateProductOnSupplierFromProductDto[];
 };
 
 export type UpdateProductDto = Partial<CreateProductDto>; // se actualiza con PATCH, por lo que todos los campos son opcionales
 
 export type ProductWithRelations = Product & {
   category: Category;
-  suppliers: ProductSupplierRelation[];
+  suppliers: ProductOnSupplierWithSupplierDto[];
 };
 
 export type ProductWithCategory = Product & {
@@ -59,5 +51,5 @@ export type ProductWithCategory = Product & {
 };
 
 export type ProductWithSupplier = Product & {
-  suppliers: ProductSupplierRelation[];
+  suppliers: ProductOnSupplierWithSupplierDto[];
 };
