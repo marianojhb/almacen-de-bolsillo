@@ -3,7 +3,7 @@ import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import type { CreateStockMovementDto } from "@almacen/shared";
-import { postStockMovement } from "@/services/movementsApi";
+import { postStockMovementRequest } from "@/services/movementsApi";
 
 const stockAdjustmentSignClassName = "w-8 text-center text-3xl font-black leading-8 text-slate-950 dark:text-white";
 const stockAdjustmentInputClassName =
@@ -78,7 +78,7 @@ export default function StockAdjustmentScreen() {
 
     try {
       setIsSaving(true);
-      await postStockMovement(newStockMovement);
+      await postStockMovementRequest(newStockMovement);
       await refreshProducts();
       return true;
     } catch (error) {
