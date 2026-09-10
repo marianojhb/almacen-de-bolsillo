@@ -5,14 +5,35 @@ import { SalesProvider } from "@/contexts/sales/provider";
 import { PurchasesProvider } from "@/contexts/purchases/provider";
 import { SuppliersProvider } from "@/contexts/suppliers/provider";
 import { ProductsProvider } from "@/contexts/products/provider";
+import { useColorScheme } from "react-native";
 
 export default function TabScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   return (
     <ProductsProvider>
       <SuppliersProvider>
         <PurchasesProvider>
           <SalesProvider>
-            <Tabs>
+            <Tabs
+              screenOptions={{
+                headerStyle: {
+                  backgroundColor: isDark ? "#111A1A" : "#ffffff",
+                },
+                headerTintColor: isDark ? "#ffffff" : "#111111",
+
+                tabBarStyle: {
+                  backgroundColor: isDark ? "#111A1A" : "#ffffff",
+                  borderTopColor: isDark ? "#263333" : "#dddddd",
+                },
+
+                tabBarActiveTintColor: isDark ? "#ffffff" : "#111111",
+                tabBarInactiveTintColor: isDark ? "#8A9999" : "#777777",
+
+                headerTitleStyle: {
+                  fontWeight: "900",
+                },
+              }}>
               <Tabs.Screen
                 name="index"
                 options={{
