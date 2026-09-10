@@ -2,8 +2,19 @@ packages:
   - "backend"
   - "frontend"
   - "packages/*"
+supportedArchitectures:
+  os:
+    - darwin
+  cpu:
+    - arm64
+    - x64
 allowBuilds:
   "@prisma/engines": true
   esbuild: true
   prisma: true
   unrs-resolver: true
+overrides:
+  "@expo/cli": 57.0.18
+  "@expo/metro": 56.0.0
+  "@expo/prebuild-config": 57.0.14
+  "babel-preset-expo": 57.0.8
