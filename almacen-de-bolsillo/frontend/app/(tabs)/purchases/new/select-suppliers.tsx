@@ -9,13 +9,13 @@ import { useState } from "react";
 export default function SelectSuppliersScreen() {
   const colorScheme = useColorScheme();
 
-  const { items } = usePurchaseDraft();
+  const { items, purchaseQuantities, updatePurchaseQuantity } = usePurchaseDraft();
   const { products, isLoadingProducts, productsError } = useProducts();
   const { suppliers, isLoadingSuppliers, suppliersError } = useSuppliers();
 
-  const [purchaseQuantities, setPurchaseQuantities] = useState<Record<string, number>>({});
   const getPurchaseKey = (productId: number, supplierId: number) => `${productId}-${supplierId}`;
 
+  console.log(purchaseQuantities);
   return (
     <View className="flex-1 p-4">
       <View className="flex-row items-start mb-2">
@@ -30,9 +30,22 @@ export default function SelectSuppliersScreen() {
       </View>
 
       <FlatList
+        className="flex-1"
         data={items}
         keyExtractor={(item) => item.productId.toString()}
         renderItem={({ item }) => {
+          // busca el mejor precio entre los proveedores que tienen el producto
+          const productSuppliers = suppliers.filter((supplier) =>
+            supplier.products.some((p) => p.productId === item.productId),
+          );
+          const bestPrice = Math.min(
+            ...productSuppliers.map((supplier) => {
+              const product = supplier.products.find((p) => p.productId === item.productId);
+              return product ? Number(product.price) : Infinity;
+            }),
+          );
+
+          // lista los proveedores que tienen el producto
           const availableSuppliers = suppliers.some((supplier) =>
             supplier.products.filter((p) => p.productId === item.productId),
           );
@@ -41,6 +54,7 @@ export default function SelectSuppliersScreen() {
             product?.stockMin != null && product?.stock != null && product.stock < product.stockMin
               ? product.stockMin - product.stock
               : 0;
+
           return (
             <View className="flex-column border border-1 rounded-lg border-gray-300 dark:border-gray-700 mb-2">
               <View className="flex-row *:items-start   py-2 px-2 ">
@@ -56,9 +70,7 @@ export default function SelectSuppliersScreen() {
                 </View>
               </View>
 
-              <View></View>
-
-              <View className="flex-row items-center justify-between  py-2">
+              <View className="flex-1 flex-row items-center justify-between  py-2">
                 {!availableSuppliers && (
                   <View>
                     <Text className="mt-1 text-sm text-red-500 dark:text-red-400">
@@ -74,7 +86,7 @@ export default function SelectSuppliersScreen() {
                       <Text className="text-[10px] text-gray-600 dark:text-gray-400 w-24 text-center">
                         Precio unidad
                       </Text>
-                      <Text className="text-[10px] text-gray-600 dark:text-gray-400 w-28 text-center ">Cantidad</Text>
+                      <Text className="text-[10px] text-gray-600 dark:text-gray-400 w-18 text-center ">Cantidad</Text>
                       <Text className="text-[10px] text-gray-600 dark:text-gray-400 w-24 text-center">Total</Text>
                     </View>
 
@@ -97,21 +109,23 @@ export default function SelectSuppliersScreen() {
                         return (
                           <View className="flex-row items-center justify-between py-2 ">
                             <Text className="text-[10px] w-24   dark:text-white ">{supplier.name}</Text>
-                            <Text className="text-[10px] text-center w-24 dark:text-white ">
-                              {price.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-                            </Text>
+                            <View>
+                              <Text className="text-[10px] text-center w-24 dark:text-white ">
+                                {price.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                              </Text>
+                              <Text
+                                className={`text-center text-[10px] px-1 rounded-md + ${price === bestPrice ? "bg-green-200 text-green-600" : ""}`}>
+                                {price === bestPrice ? "Mejor precio" : ""}
+                              </Text>
+                            </View>
                             <View className=" w-18 flex-row items-center border border-gray-300 rounded  dark:bg-[#071111] dark:text-white ">
-                              <Pressable className="text-[10px] text-center px-4 dark:text-white "
-                              onPress={()=>{
-                                setPurchaseQuantities((prev) => {
-                                  const newQuantity = Math.max(0, (prev[key] ?? 0) - 1);
-                                  return {
-                                    ...prev,
-                                    [key]: newQuantity,
-                                  };
-                                });
-                              }}
-                              ><Text>-</Text></Pressable>
+                              <Pressable
+                                className="text-[10px] text-center px-2 dark:text-white "
+                                onPress={() => {
+                                  updatePurchaseQuantity(item.productId, supplier.id, Math.max(0, quantity - 1));
+                                }}>
+                                <Text>-</Text>
+                              </Pressable>
                               <TextInput
                                 className="w-8 h-8  text-center text-[10px] "
                                 placeholder="0"
@@ -119,22 +133,20 @@ export default function SelectSuppliersScreen() {
                                 keyboardType="numeric"
                                 onChangeText={(value) => {
                                   const newQuantity = Number(value) || 0;
-                                  setPurchaseQuantities((prev) => ({
-                                    ...prev,
-                                    [key]: newQuantity,
-                                  }));
+                                  updatePurchaseQuantity(item.productId, supplier.id, newQuantity);
                                 }}
                               />
-                              <Pressable className="text-[10px] text-center px-4 dark:text-white" 
-                              onPress={() => {
-                                setPurchaseQuantities((prev) => {
-                                  const newQuantity = (prev[key] ?? 0) + 1;
-                                  return {
-                                    ...prev,
-                                    [key]: newQuantity,
-                                  };
-                                });
-                              }}><Text>+</Text></Pressable>
+                              <Pressable
+                                className="text-[10px] text-center px-2 dark:text-white"
+                                onPress={() => {
+                                  updatePurchaseQuantity(
+                                    item.productId,
+                                    supplier.id,
+                                    (purchaseQuantities[`${item.productId}-${supplier.id}`] ?? 0) + 1,
+                                  );
+                                }}>
+                                <Text>+</Text>
+                              </Pressable>
                             </View>
                             <Text className="text-[10px] w-24 text-center dark:text-white ">
                               $ {subtotal.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
@@ -151,7 +163,7 @@ export default function SelectSuppliersScreen() {
         }}
       />
 
-      <View className="flex-1  bg-slate-50 px-6 dark:bg-[#071111]">
+      <View className=" bg-slate-50 px-6 dark:bg-[#071111]">
         <View className="flex-column  mt-auto ">
           <Pressable
             className="w-44 ms-auto mt-4 rounded-lg bg-green-800 p-3 items-center"

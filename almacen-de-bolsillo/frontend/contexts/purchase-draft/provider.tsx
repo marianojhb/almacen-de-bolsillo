@@ -7,6 +7,7 @@ type PurchaseDraftProviderProps = {
 
 export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) {
   const [items, setItems] = useState<PurchaseDraftItem[]>([]);
+  const [purchaseQuantities, setPurchaseQuantities] = useState<Record<string, number>>({});
 
   const totalAmount = items.reduce((total, item) => total + (item.subtotal || 0), 0);
 
@@ -64,15 +65,44 @@ export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) 
 
   function removeItem(productId: number) {
     setItems((currentItems) => currentItems.filter((item) => item.productId !== productId));
+    setPurchaseQuantities((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(([key]) => {
+          const [keyProductId] = key.split("-").map(Number);
+
+          return keyProductId !== productId;
+        }),
+      ),
+    );
   }
 
   function clearPurchase() {
     setItems([]);
+    setPurchaseQuantities({});
   }
-  
+
+  function updatePurchaseQuantity(productId: number, supplierId: number, quantity: number) {
+    const key = `${productId}-${supplierId}`;
+
+    setPurchaseQuantities((current) => ({
+      ...current,
+      [key]: quantity,
+    }));
+  }
   return (
     <PurchaseDraftContext.Provider
-      value={{ items, totalAmount, addItem, toggleProduct, updateItem, removeItem, clearPurchase }}>
+      value={{
+        items,
+        totalAmount,
+        purchaseQuantities,
+        addItem,
+        toggleProduct,
+        updateItem,
+        removeItem,
+        clearPurchase,
+        updatePurchaseQuantity,
+        setPurchaseQuantities,
+      }}>
       {children}
     </PurchaseDraftContext.Provider>
   );
