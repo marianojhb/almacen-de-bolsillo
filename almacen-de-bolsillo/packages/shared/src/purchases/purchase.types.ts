@@ -1,6 +1,17 @@
 import type { Product } from "../index.js";
 import type { Supplier } from "../index.js";
 
+export type PurchaseDraftItem = {
+  productId: number;
+  shortname: string;
+  longname: string | null;
+  supplierId: number | null;
+  quantity: number;
+  price: number;
+  discount: number;
+  subtotal: number | null;
+};
+
 export type PurchaseOrderDto = {
   id: number;
   date: string;

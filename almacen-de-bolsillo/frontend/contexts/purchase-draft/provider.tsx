@@ -8,7 +8,7 @@ type PurchaseDraftProviderProps = {
 export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) {
   const [items, setItems] = useState<PurchaseDraftItem[]>([]);
 
-  const totalAmount = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalAmount = items.reduce((total, item) => total + (item.subtotal || 0), 0);
 
   function addItem(item: PurchaseDraftItem) {
     setItems((currentItems) => {
@@ -19,15 +19,47 @@ export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) 
           currentItem.productId === item.productId
             ? {
                 ...currentItem,
-                quantity: currentItem.quantity + item.quantity,
-                subtotal: (currentItem.quantity + item.quantity) * item.price,
+                quantity: (currentItem.quantity ?? 0) + (item.quantity ?? 0),
+                subtotal: ((currentItem.quantity ?? 0) + (item.quantity ?? 0)) * (item.price ?? 0),
               }
             : currentItem,
         );
       }
 
-      return [...currentItems, { ...item, subtotal: item.quantity * item.price }];
+      return [...currentItems, { ...item, subtotal: (item.quantity ?? 0) * (item.price ?? 0) }];
     });
+  }
+
+  function toggleProduct(item: PurchaseDraftItem) {
+    setItems((currentItems) => {
+      const isSelected = currentItems.some((currentItem) => currentItem.productId === item.productId);
+
+      if (isSelected) {
+        return currentItems.filter((currentItem) => currentItem.productId !== item.productId);
+      }
+
+      return [...currentItems, item];
+    });
+  }
+
+  function updateItem(productId: number, changes: Partial<PurchaseDraftItem>) {
+    setItems((currentItems) =>
+      currentItems.map((currentItem) => {
+        if (currentItem.productId !== productId) {
+          return currentItem;
+        }
+
+        const updatedItem = {
+          ...currentItem,
+          ...changes,
+        };
+
+        return {
+          ...updatedItem,
+          subtotal: (updatedItem.quantity ?? 0) * (updatedItem.price ?? 0),
+        };
+      }),
+    );
   }
 
   function removeItem(productId: number) {
@@ -37,9 +69,10 @@ export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) 
   function clearPurchase() {
     setItems([]);
   }
-
+  
   return (
-    <PurchaseDraftContext.Provider value={{ items, totalAmount, addItem, removeItem, clearPurchase }}>
+    <PurchaseDraftContext.Provider
+      value={{ items, totalAmount, addItem, toggleProduct, updateItem, removeItem, clearPurchase }}>
       {children}
     </PurchaseDraftContext.Provider>
   );

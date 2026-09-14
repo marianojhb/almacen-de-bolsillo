@@ -20,7 +20,7 @@ export default function SalesScreen() {
         sale.paymentMethod === "EFECTIVO" ? "eft" : sale.paymentMethod === "MERCADOPAGO" ? "mp" : "ual";
 
       return [`venta ${sale.id}`, `#${sale.id}`, sale.invoice, sale.paymentMethod, formattedPaymentMethod]
-        .filter(Boolean)
+        .filter((value): value is string => value !== undefined)
         .some((value) => value.toLowerCase().includes(normalizedSearchText));
     });
   }, [sales, searchText]);
