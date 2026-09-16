@@ -7,3 +7,4 @@ export * from "./purchases/purchase.types.js";
 export * from "./stock-movements/stock-movements.types.js";
 export * from "./users/user.types.js";
 export * from "./transactions/transaction.types.js";
+export * from "./employees/employee.types.js";

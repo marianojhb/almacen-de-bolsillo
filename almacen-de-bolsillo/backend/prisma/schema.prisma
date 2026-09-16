@@ -203,7 +203,7 @@ model Employee {
   firstname String?   @map("firstname_e")
   lastname  String?   @map("lastname_e")
   fullname  String?   @map("fullname_e")
-  dni       String?   @map("dni_e")
+  dni       String?   @unique @map("dni_e")
   cuil      String?   @map("cuil_e")
   dob       DateTime? @map("dob_e")
   salary    Decimal?  @map("salary_e") @db.Decimal(10, 2)
