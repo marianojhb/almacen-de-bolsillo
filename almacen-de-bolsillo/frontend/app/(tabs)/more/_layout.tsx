@@ -26,6 +26,10 @@ export default function MoreLayout() {
         name="transactions" 
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="employees"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

@@ -25,4 +25,11 @@ export const MORE_OPTIONS = [
     href: "/more/transactions" as Href,
     icon: "cash-outline",
   },
+  {
+    id: "employees",
+    title: "Empleados",
+    description: "Gestionar empleados del negocio",
+    href: "/more/employees" as Href,
+    icon: "people-outline",
+  },
 ] satisfies MoreOption[];

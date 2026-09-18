@@ -6,6 +6,7 @@ import { PurchasesProvider } from "@/contexts/purchases/provider";
 import { SuppliersProvider } from "@/contexts/suppliers/provider";
 import { ProductsProvider } from "@/contexts/products/provider";
 import { useColorScheme } from "react-native";
+import { EmployeesProvider } from "@/contexts/employees";
 
 export default function TabScreen() {
   const colorScheme = useColorScheme();
@@ -13,9 +14,10 @@ export default function TabScreen() {
   return (
     <ProductsProvider>
       <SuppliersProvider>
-        <PurchasesProvider>
-          <SalesProvider>
-            <Tabs
+        <EmployeesProvider>
+          <PurchasesProvider>
+            <SalesProvider>
+              <Tabs
               screenOptions={{
                 headerStyle: {
                   backgroundColor: isDark ? "#111A1A" : "#ffffff",
@@ -78,9 +80,10 @@ export default function TabScreen() {
                   tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
                 }}
               />
-            </Tabs>
-          </SalesProvider>
-        </PurchasesProvider>
+              </Tabs>
+            </SalesProvider>
+          </PurchasesProvider>
+        </EmployeesProvider>    
       </SuppliersProvider>
     </ProductsProvider>
   );
