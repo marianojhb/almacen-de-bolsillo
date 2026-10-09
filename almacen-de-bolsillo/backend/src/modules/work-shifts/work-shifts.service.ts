@@ -1,4 +1,4 @@
-import { getWorkShiftLocalFields, getUserDisplayName, type AuthSessionInfo, type WorkShiftDto, type WorkShiftFilters } from "@almacen/shared";
+import { addCalendarDays, getWorkShiftLocalFields, getUserDisplayName, workShiftLocalToDate, type AuthSessionInfo, type WorkShiftDto, type WorkShiftFilters } from "@almacen/shared";
 import type { Prisma } from "../../../generated/prisma/index.js";
 import { prisma } from "../config/prisma.js";
 import { ApiError } from "../auth/request.utils.js";
@@ -13,17 +13,27 @@ const shiftInclude = {
 } satisfies Prisma.WorkShiftInclude;
 type ShiftRecord = Prisma.WorkShiftGetPayload<{ include: typeof shiftInclude }>;
 
-const shiftResponse = ({ workShiftType, ...shift }: ShiftRecord): WorkShiftDto => ({
-  ...shift, ...workShiftType,
+const shiftResponse = ({ workShiftType, ...shift }: ShiftRecord, timeZone: string): WorkShiftDto => ({
+  // La asignación conserva su ID y sus fechas; del tipo solo tomamos su presentación y tolerancia.
+  id: shift.id, commerceId: shift.commerceId, employeeId: shift.employeeId, workShiftTypeId: shift.workShiftTypeId,
+  status: shift.status, notes: shift.notes, createdById: shift.createdById,
+  name: workShiftType.name, icon: workShiftType.icon, iconColor: workShiftType.iconColor, color: workShiftType.color,
+  lateToleranceMinutes: workShiftType.lateToleranceMinutes,
   createdBy: { id: shift.createdBy.id, username: shift.createdBy.username, name: getUserDisplayName(shift.createdBy) },
   startsAt: shift.startsAt?.toISOString() ?? "", endsAt: shift.endsAt?.toISOString() ?? "",
   actualStartedAt: shift.actualStartedAt?.toISOString() ?? null, actualEndedAt: shift.actualEndedAt?.toISOString() ?? null,
   createdAt: shift.createdAt.toISOString(), updatedAt: shift.updatedAt.toISOString(),
   employee: { id: shift.employee.id, name: employeeName(shift.employee), isActive: shift.employee.isActive },
-  breaks: (shift as ShiftRecord & { workShiftType: { breaks: Array<{ id: number; mode: "FLEXIBLE" | "FIXED"; durationMinutes: number | null; startTime: string | null; endTime: string | null }> } }).workShiftType.breaks.map((item) => ({ id: item.id, mode: item.mode, durationMinutes: item.durationMinutes,
-    startsAt: item.startTime ? `${shift.date.toISOString().slice(0, 10)}T${item.startTime}:00.000Z` : null,
-    endsAt: item.endTime ? `${shift.date.toISOString().slice(0, 10)}T${item.endTime}:00.000Z` : null,
-  })),
+  breaks: workShiftType.breaks.map((item) => {
+    const day = shift.date.toISOString().slice(0, 10);
+    // Los horarios del descanso son locales al comercio, no horas UTC.
+    return { id: item.id, mode: item.mode, durationMinutes: item.mode === "FLEXIBLE" ? item.durationMinutes : null,
+      startsAt: item.mode === "FIXED" && item.startTime
+        ? workShiftLocalToDate(item.startsNextDay ? addCalendarDays(day, 1) : day, item.startTime, timeZone).toISOString() : null,
+      endsAt: item.mode === "FIXED" && item.endTime
+        ? workShiftLocalToDate(item.endsNextDay ? addCalendarDays(day, 1) : day, item.endTime, timeZone).toISOString() : null,
+    };
+  }),
 });
 
 export async function getWorkShiftsFromDatabase(filters: WorkShiftFilters, session: AuthSessionInfo, ownOnly = false) {
@@ -41,13 +51,13 @@ export async function getWorkShiftsFromDatabase(filters: WorkShiftFilters, sessi
     include: shiftInclude, orderBy: [{ startsAt: "asc" }, { employeeId: "asc" }, { id: "asc" }], take: 2001,
   });
   if (records.length > 2000) throw new ApiError(400, "Hay demasiados turnos para esta consulta. Acortá las fechas o filtrá por empleado.");
-  return records.map(shiftResponse);
+  return records.map((record) => shiftResponse(record, session.commerce.timeZone));
 }
 
 export async function getWorkShiftByIdFromDatabase(id: number, session: AuthSessionInfo) {
   const record = await prisma.workShift.findUnique({ where: { id, commerceId: session.commerce.id }, include: shiftInclude });
   if (!record || !canReadWorkShift(session, record.employeeId)) throw new ApiError(404, "Turno no encontrado en este comercio.");
-  return shiftResponse(record);
+  return shiftResponse(record, session.commerce.timeZone);
 }
 
 export async function getWorkShiftEmployeesFromDatabase(commerceId: number) {
@@ -77,7 +87,7 @@ export async function updateWorkShift(id: number, body: unknown, session: AuthSe
     const updated = await tx.workShift.update({ where: { id, commerceId: session.commerce.id }, include: shiftInclude, data: {
       ...(data.notes !== undefined && { notes: data.notes }),
     } });
-    return shiftResponse(updated);
+    return shiftResponse(updated, session.commerce.timeZone);
   }, { isolationLevel: "ReadCommitted" });
 }
 
@@ -90,7 +100,7 @@ export async function cancelWorkShift(id: number, reason: string, session: AuthS
     const updated = await tx.workShift.update({ where: { id, commerceId: session.commerce.id }, include: shiftInclude,
       data: { status: "CANCELLED", notes: [record.notes, `Cancelación: ${reason}`].filter(Boolean).join("\n") },
     });
-    return shiftResponse(updated);
+    return shiftResponse(updated, session.commerce.timeZone);
   }, { isolationLevel: "ReadCommitted" });
 }
 
@@ -117,6 +127,6 @@ export async function recordWorkShiftAttendance(id: number, action: "start" | "f
     const updated = await tx.workShift.update({ where: { id, commerceId: session.commerce.id }, include: shiftInclude,
       data: action === "start" ? { status: "IN_PROGRESS", actualStartedAt: now } : { status: "COMPLETED", actualEndedAt: now },
     });
-    return shiftResponse(updated);
+    return shiftResponse(updated, session.commerce.timeZone);
   }, { isolationLevel: "ReadCommitted" });
 }

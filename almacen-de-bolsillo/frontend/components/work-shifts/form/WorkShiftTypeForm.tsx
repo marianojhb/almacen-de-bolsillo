@@ -143,11 +143,11 @@ export function WorkShiftTypeForm({ typeId }: { typeId?: number }) {
       <View className="gap-3">
         <Text className="font-semibold text-gray-950 dark:text-white">Color del icono</Text>
         <View className="flex-row gap-3">
-          {[{ value: "#000000", label: "Negro" }, { value: "#FFFFFF", label: "Blanco" }].map((option) => <Pressable key={option.value}
-            disabled={saving} accessibilityRole="radio" accessibilityState={{ checked: data.iconColor === option.value }}
-            onPress={() => setData({ ...data, iconColor: option.value })}
-            className={`min-h-12 flex-1 flex-row items-center justify-center gap-2 rounded-xl border ${data.iconColor === option.value ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950" : "border-gray-300 dark:border-gray-700"}`}>
-            <View style={{ backgroundColor: option.value }} className="h-5 w-5 rounded-full border border-gray-400" />
+          {[{ color: "#000000", label: "Negro" }, { color: "#FFFFFF", label: "Blanco" }].map((option) => <Pressable key={option.color}
+            disabled={saving} accessibilityRole="radio" accessibilityState={{ checked: data.iconColor === option.color }}
+            onPress={() => setData({ ...data, iconColor: option.color })}
+            className={`min-h-12 flex-1 flex-row items-center justify-center gap-2 rounded-xl border ${data.iconColor === option.color ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950" : "border-gray-300 dark:border-gray-700"}`}>
+            <View style={{ backgroundColor: option.color }} className="h-5 w-5 rounded-full border border-gray-400" />
             <Text className="font-semibold text-gray-950 dark:text-white">{option.label}</Text>
           </Pressable>)}
         </View>
