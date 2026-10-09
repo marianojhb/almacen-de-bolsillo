@@ -1,6 +1,6 @@
 import type { CreateTransactionDto, TransactionDto } from "@almacen/shared";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { apiFetch } from "./apiClient";
 
 export async function getTransactionsRequest(from?: string, to?: string): Promise<TransactionDto[]> {
   const params = new URLSearchParams();
@@ -9,7 +9,7 @@ export async function getTransactionsRequest(from?: string, to?: string): Promis
 
   if (to) params.append("to", to);
 
-  const response = await fetch(`${API_URL}/transactions?${params.toString()}`);
+  const response = await apiFetch(`/transactions?${params.toString()}`);
 
   if (!response.ok) {
     throw new Error("Error fetching transactions");
@@ -19,7 +19,7 @@ export async function getTransactionsRequest(from?: string, to?: string): Promis
 }
 
 export async function createTransactionRequest(newTransaction: CreateTransactionDto): Promise<TransactionDto> {
-  const response = await fetch(`${API_URL}/transactions`, {
+  const response = await apiFetch(`/transactions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -2,6 +2,7 @@ export type EmployeeGender = | "M" | "F" | "OTHER";
 
 export type Employee = {
     id: number;
+    commerceEmployeeId: number;
     firstname: string | null;
     lastname: string | null;
     fullname: string | null;
@@ -10,11 +11,11 @@ export type Employee = {
     dob: string | null;
     salary: number | string | null;
     jobTitle: string | null;
-    pto: string | null;
     createdAt: string;
     updatedAt: string;
     isActive: boolean;
     gender: EmployeeGender;
+    account: { id: number; username: string | null; role: { id: number; name: string } } | null;
 };
 
 export type CreateEmployeeDto = {
@@ -25,7 +26,6 @@ export type CreateEmployeeDto = {
     dob?: string | null;
     salary?: number | null;
     jobTitle?: string | null;
-    pto?: string | null;
     gender: EmployeeGender;
 };
 

@@ -1,13 +1,19 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { usePermissions } from "@/hooks/use-permissions";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, FlatList, Pressable, Text, TextInput, View } from "react-native";
 
-import type { Product } from "@almacen/shared";
+import { allowsFractionalQuantity, getMeasurementUnit, isValidDecimal, isValidProductQuantity, parseDecimalInput, type Product } from "@almacen/shared";
 import { useSuppliers } from "@/contexts/suppliers";
 import { getProductsRequest } from "@/services/productsApi";
 
 export default function SupplierProductsScreen() {
+  const { currency } = useCommerceFormat();
+  const { can } = usePermissions();
+  const canEdit = can("suppliers.update");
   const { id } = useLocalSearchParams<{ id: string }>();
 
   // Validate supplier ID
@@ -55,9 +61,9 @@ export default function SupplierProductsScreen() {
       return null;
     }
 
-    const numberValue = Number(trimmedValue);
-
-    return Number.isNaN(numberValue) ? null : numberValue;
+    const numberValue = parseDecimalInput(trimmedValue);
+    if (!Number.isFinite(numberValue)) throw new Error("Ingresá un número válido, sin separadores de miles.");
+    return numberValue;
   };
 
   const toRequiredNumber = (value?: string) => {
@@ -67,9 +73,9 @@ export default function SupplierProductsScreen() {
       return null;
     }
 
-    const numberValue = Number(trimmedValue);
-
-    return Number.isNaN(numberValue) ? null : numberValue;
+    const numberValue = parseDecimalInput(trimmedValue);
+    if (!Number.isFinite(numberValue)) throw new Error("Ingresá un número válido, sin separadores de miles.");
+    return numberValue;
   };
 
   useEffect(() => {
@@ -198,6 +204,7 @@ export default function SupplierProductsScreen() {
   };
 
   const saveProducts = async () => {
+    if (!canEdit) return;
     try {
       setIsSaving(true);
 
@@ -208,15 +215,31 @@ export default function SupplierProductsScreen() {
           throw new Error("Todos los productos seleccionados deben tener precio por paquete.");
         }
 
+        const product = products.find((item) => item.id === productId);
+        if (!product) throw new Error("No se encontró uno de los productos seleccionados.");
+        const price = toNullableNumber(prices[productId]);
+        const minimum = toNullableNumber(minimumQuantity[productId]);
+        const packageUnits = toNullableNumber(unitsPerPaq[productId]);
+        const deliveryDays = toNullableNumber(leadTimeDays[productId]);
+        if (!isValidDecimal(parsedPricePerPaq, 2) || (price !== null && !isValidDecimal(price, 2))) {
+          throw new Error("Los precios deben ser positivos o cero y tener hasta dos decimales.");
+        }
+        if (minimum !== null && !isValidProductQuantity(minimum, product.measurementUnit)) {
+          throw new Error("Revisá la cantidad mínima de " + product.shortname + ".");
+        }
+        if ((packageUnits !== null && (!Number.isInteger(packageUnits) || packageUnits < 1)) ||
+            (deliveryDays !== null && (!Number.isInteger(deliveryDays) || deliveryDays < 0))) {
+          throw new Error("La cantidad por paquete y los días deben ser enteros válidos.");
+        }
         return {
           productId,
-          price: toNullableNumber(prices[productId]),
+          price,
           supplierCategory: toNullableString(supplierCategory[productId]),
-          unitsPerPaq: toNullableNumber(unitsPerPaq[productId]),
+          unitsPerPaq: packageUnits,
           pricePerPaq: parsedPricePerPaq,
-          minimumQuantity: toNullableNumber(minimumQuantity[productId]),
+          minimumQuantity: minimum,
           salesTerms: toNullableString(salesTerms[productId]),
-          leadTimeDays: toNullableNumber(leadTimeDays[productId]),
+          leadTimeDays: deliveryDays,
         };
       });
 
@@ -283,7 +306,7 @@ export default function SupplierProductsScreen() {
         <Text className="text-2xl font-bold text-gray-950 dark:text-white">{supplier.name}</Text>
 
         <Text className="mb-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Seleccioná los productos que pertenecen a este proveedor.
+          {canEdit ? "Seleccioná los productos que pertenecen a este proveedor." : "Productos y condiciones vinculados a este proveedor."}
         </Text>
 
         <View className="mb-4 flex-row items-center rounded-xl border border-gray-200 bg-white px-3 dark:border-gray-700 dark:bg-gray-900">
@@ -302,14 +325,14 @@ export default function SupplierProductsScreen() {
             {selectedProductIds.size} Productos vinculados
           </Text>
 
-          <Pressable
+          <PermissionGate permission="suppliers.update"><Pressable
             disabled={isSaving}
             onPress={saveProducts}
             className={`rounded-xl bg-[#111A1A] px-5 py-3 active:opacity-75 dark:bg-white ${
               isSaving ? "opacity-50" : ""
             }`}>
             <Text className="font-semibold text-white dark:text-black">{isSaving ? "Guardando..." : "Guardar"}</Text>
-          </Pressable>
+          </Pressable></PermissionGate>
         </View>
 
         {/* Products list */}
@@ -331,6 +354,7 @@ export default function SupplierProductsScreen() {
             return (
               //  Touch Product
               <Pressable
+                disabled={!canEdit || isSaving}
                 onPress={() => toggleProduct(product.id)}
                 className={`flex-row items-center rounded-xl border p-4 active:opacity-70 ${
                   isSelected
@@ -338,7 +362,7 @@ export default function SupplierProductsScreen() {
                     : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
                 }`}>
                 <View className="flex-1">
-                  <Text className="text-lg font-semibold text-gray-950 dark:text-white">{product.shortname}</Text>
+                  <Text className="text-lg font-semibold text-gray-950 dark:text-white">{product.shortname} · {getMeasurementUnit(product.measurementUnit).symbol}</Text>
 
                   <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">{product.longname}</Text>
 
@@ -348,10 +372,12 @@ export default function SupplierProductsScreen() {
 
                   {isSelected && (
                     <View>
-                      <Text className={styles.inputField.label}>Precio de compra</Text>
+                      <Text className={styles.inputField.label}>Precio por {getMeasurementUnit(product.measurementUnit).priceLabel} ({currency})</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese el precio"
+                        keyboardType="decimal-pad"
                         value={prices[product.id] ?? ""}
                         onChangeText={(text) => {
                           setPrices((prevPrices) => ({
@@ -366,6 +392,7 @@ export default function SupplierProductsScreen() {
                     <View>
                       <Text className={styles.inputField.label}>Categoría del proveedor</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese la categoría"
                         value={supplierCategory[product.id] ?? ""}
@@ -382,6 +409,7 @@ export default function SupplierProductsScreen() {
                     <View>
                       <Text className={styles.inputField.label}>Unidades por paquete</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese las unidades por paquete"
                         value={unitsPerPaq[product.id] ?? ""}
@@ -396,10 +424,12 @@ export default function SupplierProductsScreen() {
                   )}
                   {isSelected && (
                     <View>
-                      <Text className={styles.inputField.label}>Precio por paquete</Text>
+                      <Text className={styles.inputField.label}>Precio por paquete ({currency})</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese el precio por paquete"
+                        keyboardType="decimal-pad"
                         value={pricePerPaq[product.id] ?? ""}
                         onChangeText={(text) => {
                           setPricePerPaq((prevPricePerPaq) => ({
@@ -412,10 +442,12 @@ export default function SupplierProductsScreen() {
                   )}
                   {isSelected && (
                     <View>
-                      <Text className={styles.inputField.label}>Cantidad mínima</Text>
+                      <Text className={styles.inputField.label}>Cantidad mínima ({getMeasurementUnit(product.measurementUnit).symbol})</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese la cantidad mínima"
+                        keyboardType={allowsFractionalQuantity(product.measurementUnit) ? "decimal-pad" : "number-pad"}
                         value={minimumQuantity[product.id] ?? ""}
                         onChangeText={(text) => {
                           setMinimumQuantity((prevMinimumQuantity) => ({
@@ -430,6 +462,7 @@ export default function SupplierProductsScreen() {
                     <View>
                       <Text className={styles.inputField.label}>Condiciones de venta</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese las condiciones de venta"
                         value={salesTerms[product.id] ?? ""}
@@ -446,6 +479,7 @@ export default function SupplierProductsScreen() {
                     <View>
                       <Text className={styles.inputField.label}>Tiempo de entrega (días)</Text>
                       <TextInput
+                        editable={canEdit && !isSaving}
                         className={styles.inputField.input}
                         placeholder="Ingrese el tiempo de entrega (días)"
                         value={leadTimeDays[product.id] ?? ""}

@@ -1,9 +1,9 @@
 import type { Category } from "@almacen/shared";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { apiFetch } from "./apiClient";
 
 export async function getCategoriesRequest(): Promise<Category[]> {
-  const response = await fetch(`${API_URL}/categories`);
+  const response = await apiFetch(`/categories`);
 
   if (!response.ok) {
     throw new Error("Error fetching categories");
@@ -13,7 +13,7 @@ export async function getCategoriesRequest(): Promise<Category[]> {
 }
 
 export async function createCategoryRequest(category: { name: string }): Promise<Category> {
-  const response = await fetch(`${API_URL}/categories`, {
+  const response = await apiFetch(`/categories`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

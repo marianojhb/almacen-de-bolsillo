@@ -1,6 +1,29 @@
 import type { CreateEmployeeDto, UpdateEmployeeDto } from "@almacen/shared";
 
-import { prisma } from "../../config/prisma.js";
+import { prisma } from "../config/prisma.js";
+import type { Prisma } from "../../../generated/prisma/index.js";
+import { assertCanDeactivateEmployeeAccount, assertCanDeleteEmployee } from "./employees.access.js";
+
+const employeeAccountInclude = {
+  user: { select: {
+    id: true, username: true,
+    role: { select: { id: true, name: true } },
+  } },
+} satisfies Prisma.EmployeeInclude;
+
+type EmployeeWithAccount = Prisma.EmployeeGetPayload<{ include: typeof employeeAccountInclude }>;
+
+const toEmployeeResponse = (record: EmployeeWithAccount) => {
+  const { user, ...employee } = record;
+  return {
+    ...employee,
+    account: user ? {
+      id: user.id,
+      username: user.username,
+      role: { id: user.role.id, name: user.role.name },
+    } : null,
+  };
+};
 
 const buildFullname = (firstname: string | null | undefined, lastname: string | null | undefined) => {
   const fullname = [firstname, lastname]
@@ -41,10 +64,6 @@ const mapEmployeeFields = (employeeData: UpdateEmployeeDto) => ({
     jobTitle: employeeData.jobTitle?.trim() || null
   }),
 
-  ...(employeeData.pto !== undefined && {
-    pto: employeeData.pto?.trim() || null
-  }),
-
   ...(employeeData.gender !== undefined && {
     gender: employeeData.gender
   }),
@@ -54,13 +73,10 @@ const mapEmployeeFields = (employeeData: UpdateEmployeeDto) => ({
   }),
 });
 
-const getEmployeesFromDatabase = async (includeInactive: boolean) =>
-  prisma.employee.findMany({
-    where: includeInactive
-      ? {}
-      : {
-          isActive: true,
-        },
+const getEmployeesFromDatabase = async (includeInactive: boolean, commerceId: number) => {
+  const employees = await prisma.employee.findMany({
+    include: employeeAccountInclude,
+    where: { commerceId, ...(!includeInactive && { isActive: true }) },
     orderBy: [
       {
         lastname: "asc",
@@ -70,18 +86,25 @@ const getEmployeesFromDatabase = async (includeInactive: boolean) =>
       },
     ],
   });
+  return employees.map(toEmployeeResponse);
+};
 
-const getEmployeeByIdFromDatabase = async (employeeId: number) =>
-  prisma.employee.findUnique({
+const getEmployeeByIdFromDatabase = async (employeeId: number, commerceId: number) => {
+  const employee = await prisma.employee.findUnique({
+    include: employeeAccountInclude,
     where: {
       id: employeeId,
+      commerceId,
     },
   });
+  return employee ? toEmployeeResponse(employee) : null;
+};
 
-const getEmployeeByDniFromDatabase = async (dni: string, excludedEmployeeId?: number) =>
+const getEmployeeByDniFromDatabase = async (dni: string, commerceId: number, excludedEmployeeId?: number) =>
   prisma.employee.findFirst({
     where: {
       dni,
+      commerceId,
       ...(excludedEmployeeId !== undefined && {
         id: {
           not: excludedEmployeeId,
@@ -93,22 +116,40 @@ const getEmployeeByDniFromDatabase = async (dni: string, excludedEmployeeId?: nu
     },
   });
 
-const postEmployeeToDatabase = async (employeeData: CreateEmployeeDto) =>
-  prisma.employee.create({
-    data: {
-      ...mapEmployeeFields(employeeData),
-
-      fullname: buildFullname(
-        employeeData.firstname,
-        employeeData.lastname,
-      ),
-    },
+const postEmployeeToDatabase = async (employeeData: CreateEmployeeDto, commerceId: number) =>
+  prisma.$transaction(async (tx) => {
+    const commerce = await tx.commerce.update({
+      where: { id: commerceId, isActive: true },
+      data: { lastEmployeeNumber: { increment: 1 } },
+      select: { lastEmployeeNumber: true },
+    });
+    const employee = await tx.employee.create({
+      include: employeeAccountInclude,
+      data: {
+        ...mapEmployeeFields(employeeData),
+        commerceId,
+        commerceEmployeeId: commerce.lastEmployeeNumber,
+        fullname: buildFullname(employeeData.firstname, employeeData.lastname),
+      },
+    });
+    return toEmployeeResponse(employee);
   });
 
-const updateEmployeeFromDatabase = async (employeeId: number, employeeData: UpdateEmployeeDto) => {
-  const currentEmployee = await prisma.employee.findUniqueOrThrow({
+const closeEmployeeAccess = async (tx: Prisma.TransactionClient, employeeId: number, commerceId: number, actorId: number) => {
+  const user = await tx.user.findUnique({ where: { employeeId_commerceId: { employeeId, commerceId } }, select: { id: true } });
+  if (!user) return;
+  const commerce = await tx.commerce.findUniqueOrThrow({ where: { id: commerceId }, select: { ownerId: true } });
+  assertCanDeactivateEmployeeAccount(user.id, commerce.ownerId, actorId);
+  await tx.user.update({ where: { id: user.id, commerceId }, data: { isActive: false } });
+  await tx.authSession.updateMany({ where: { userId: user.id, revokedAt: null }, data: { revokedAt: new Date() } });
+};
+
+const updateEmployeeFromDatabase = async (employeeId: number, employeeData: UpdateEmployeeDto, commerceId: number, actorId: number) =>
+prisma.$transaction(async (tx) => {
+  const currentEmployee = await tx.employee.findUniqueOrThrow({
     where: {
       id: employeeId,
+      commerceId,
     },
     select: {
       firstname: true,
@@ -120,9 +161,11 @@ const updateEmployeeFromDatabase = async (employeeId: number, employeeData: Upda
 
   const lastname = employeeData.lastname ?? currentEmployee.lastname;
 
-  return prisma.employee.update({
+  const employee = await tx.employee.update({
+    include: employeeAccountInclude,
     where: {
       id: employeeId,
+      commerceId,
     },
     data: {
       ...mapEmployeeFields(employeeData),
@@ -133,24 +176,25 @@ const updateEmployeeFromDatabase = async (employeeId: number, employeeData: Upda
       ),
     },
   });
-};
+  if (employeeData.isActive === false) await closeEmployeeAccess(tx, employeeId, commerceId, actorId);
+  return toEmployeeResponse(employee);
+});
 
-const deactivateEmployeeFromDatabase = async (employeeId: number) =>
-  prisma.employee.update({
-    where: {
-      id: employeeId,
-    },
-    data: {
-      isActive: false,
-    },
-  });
+const deactivateEmployeeFromDatabase = async (employeeId: number, commerceId: number, actorId: number) =>
+  updateEmployeeFromDatabase(employeeId, { isActive: false }, commerceId, actorId);
 
-const permanentlyDeleteEmployeeFromDatabase = async (employeeId: number) =>
-    prisma.employee.delete({
-      where: {
-        id: employeeId,
+const permanentlyDeleteEmployeeFromDatabase = async (employeeId: number, commerceId: number) =>
+  prisma.$transaction(async (tx) => {
+    const employee = await tx.employee.findUniqueOrThrow({
+      where: { id: employeeId, commerceId },
+      select: {
+        user: { select: { id: true } },
+        _count: { select: { workShifts: true } },
       },
     });
+    assertCanDeleteEmployee(employee);
+    return tx.employee.delete({ where: { id: employeeId, commerceId } });
+  });
 
 export {
   deactivateEmployeeFromDatabase,

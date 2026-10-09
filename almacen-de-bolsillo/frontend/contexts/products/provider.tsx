@@ -1,4 +1,5 @@
-import { useState, useEffect, ReactNode, useCallback } from "react";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useRef, useState, useEffect, ReactNode, useCallback } from "react";
 
 import { ProductsContext } from "@/contexts/products/context";
 import type {
@@ -7,22 +8,22 @@ import type {
   Category,
   CreateCategoryDto,
   UpdateProductDto,
-  Supplier,
+  SupplierOption,
 } from "@almacen/shared";
 import { createProductRequest, getProductsRequest, updateProductRequest } from "@/services/productsApi";
 import { createCategoryRequest, getCategoriesRequest } from "@/services/categoriesApi";
-import { getSuppliers } from "@/services/suppliersApi";
+import { getSupplierOptions } from "@/services/suppliersApi";
 
 type ProductsProviderProps = {
   children: ReactNode;
 };
 
 export function ProductsProvider({ children }: ProductsProviderProps) {
+  const { can } = usePermissions();
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierOption[]>([]);
 
-  // State to track loading and error states
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
@@ -30,60 +31,79 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [suppliersError, setSuppliersError] = useState<string | null>(null);
 
+  const refreshProductsRequest = useRef<Promise<void> | null>(null);
   const refreshProducts = useCallback(async () => {
-    try {
-      setIsLoadingProducts(true);
-      setProductsError(null);
-      const products = await getProductsRequest(true);
-      setProducts(products);
-    } catch (error) {
-      console.error("Error cargando productos:", error);
-      setProductsError("Error cargando productos");
-    } finally {
-      setIsLoadingProducts(false);
-    }
-  }, []);
+    if (refreshProductsRequest.current) return refreshProductsRequest.current;
+    const request = (async () => {
+      if (!can("products.read")) { setProducts([]); setProductsError(null); setIsLoadingProducts(false); return; }
+      try {
+        setIsLoadingProducts(true);
+        setProductsError(null);
+        const products = await getProductsRequest(true);
+        setProducts(products);
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+        setProductsError("Error cargando productos");
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    })();
+    refreshProductsRequest.current = request;
+    try { await request; } finally { if (refreshProductsRequest.current === request) refreshProductsRequest.current = null; }
+  }, [can]);
 
+  const refreshCategoriesRequest = useRef<Promise<void> | null>(null);
   const refreshCategories = useCallback(async () => {
-    try {
-      setIsLoadingCategories(true);
-      setCategoriesError(null);
-      const categories = await getCategoriesRequest();
-      setCategories(categories);
-    } catch (error) {
-      console.error("Error cargando categorías:", error);
-      setCategoriesError("Error cargando categorías");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  }, []);
+    if (refreshCategoriesRequest.current) return refreshCategoriesRequest.current;
+    const request = (async () => {
+      if (!can("categories.read")) { setCategories([]); setCategoriesError(null); setIsLoadingCategories(false); return; }
+      try {
+        setIsLoadingCategories(true);
+        setCategoriesError(null);
+        const categories = await getCategoriesRequest();
+        setCategories(categories);
+      } catch (error) {
+        console.error("Error cargando categorías:", error);
+        setCategoriesError("Error cargando categorías");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    })();
+    refreshCategoriesRequest.current = request;
+    try { await request; } finally { if (refreshCategoriesRequest.current === request) refreshCategoriesRequest.current = null; }
+  }, [can]);
 
+  const refreshSuppliersRequest = useRef<Promise<void> | null>(null);
   const refreshSuppliers = useCallback(async () => {
-    try {
-      setIsLoadingSuppliers(true);
-      setSuppliersError(null);
-      const suppliers = await getSuppliers();
-      setSuppliers(suppliers);
-    } catch (error) {
-      console.error("Error cargando proveedores:", error);
-      setSuppliersError("Error cargando proveedores");
-    } finally {
-      setIsLoadingSuppliers(false);
-    }
-  }, []);
+    if (refreshSuppliersRequest.current) return refreshSuppliersRequest.current;
+    const request = (async () => {
+      if (!can("products.create") && !can("products.update") && !can("purchases.create")) { setSuppliers([]); setSuppliersError(null); setIsLoadingSuppliers(false); return; }
+      try {
+        setIsLoadingSuppliers(true);
+        setSuppliersError(null);
+        const suppliers = await getSupplierOptions();
+        setSuppliers(suppliers);
+      } catch (error) {
+        console.error("Error cargando proveedores:", error);
+        setSuppliersError("Error cargando proveedores");
+      } finally {
+        setIsLoadingSuppliers(false);
+      }
+    })();
+    refreshSuppliersRequest.current = request;
+    try { await request; } finally { if (refreshSuppliersRequest.current === request) refreshSuppliersRequest.current = null; }
+  }, [can]);
 
   useEffect(() => {
-    // Obtener los productos desde la API y actualizar el estado
     refreshProducts();
-    // Obtener las categorías desde la API y actualizar el estado
     refreshCategories();
-    // Obtener los proveedores desde la API y actualizar el estado
     refreshSuppliers();
   }, [refreshProducts, refreshCategories, refreshSuppliers]);
 
   async function addProduct(product: CreateProductDto): Promise<boolean> {
-    const normalizedSku = product.sku.trim().toUpperCase();
-    const skuAlreadyExists = products.some((currentProduct) => currentProduct.sku.toUpperCase() === normalizedSku);
+    if (!can("products.create")) return false;
+    const normalizedSku = product.sku?.trim().toUpperCase() || null;
+    const skuAlreadyExists = !!normalizedSku && products.some((currentProduct) => currentProduct.sku?.toUpperCase() === normalizedSku);
 
     if (skuAlreadyExists) {
       return false;
@@ -97,20 +117,21 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
     try {
       await createProductRequest(productToCreate);
       await refreshProducts();
-      await refreshSuppliers(); // Refresh suppliers after creating a product to ensure the latest data is available
+      await refreshSuppliers(); 
 
       return true;
     } catch (error) {
       console.error("Error creating product:", error);
-      return false;
+      throw error;
     }
   }
 
   async function updateProduct(updatedProduct: UpdateProductDto, id: number): Promise<boolean> {
-    const normalizedSku = updatedProduct.sku?.trim().toUpperCase();
+    if (!can("products.update")) return false;
+    const normalizedSku = updatedProduct.sku === undefined ? undefined : updatedProduct.sku?.trim().toUpperCase() || null;
 
     const skuAlreadyExists = products.some(
-      (product) => normalizedSku && product.id !== id && product.sku.toUpperCase() === normalizedSku,
+      (product) => normalizedSku && product.id !== id && product.sku?.toUpperCase() === normalizedSku,
     );
 
     if (skuAlreadyExists) {
@@ -119,7 +140,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
 
     const productToUpdate: UpdateProductDto = {
       ...updatedProduct,
-      ...(normalizedSku ? { sku: normalizedSku } : {}),
+      ...(normalizedSku !== undefined ? { sku: normalizedSku } : {}),
     };
 
     try {
@@ -129,7 +150,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
       return true;
     } catch (error) {
       console.error("Error updating product:", error);
-      return false;
+      throw error;
     }
   }
 
@@ -149,6 +170,7 @@ export function ProductsProvider({ children }: ProductsProviderProps) {
   }
 
   async function addCategory(category: CreateCategoryDto): Promise<Category> {
+    if (!can("categories.create")) throw new Error("No tenés permiso para crear categorías.");
     const createdCategory = await createCategoryRequest(category);
     setCategories((currentCategories) => [...currentCategories, createdCategory]);
     return createdCategory;

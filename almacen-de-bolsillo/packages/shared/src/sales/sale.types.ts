@@ -1,21 +1,22 @@
 // This file contains the types for sales orders and their related entities.
-import type { ProductWithRelations } from "../index.js";
-import type { User } from "../users/user.types.js";
+import type { Product, MeasurementUnit } from "../index.js";
 
-export type PaymentMethod = "EFECTIVO" | "MERCADOPAGO" | "UALA";
+
+import type { PaymentMethod, WalletProvider } from "../transactions/payment-options.js";
 
 // Sales Order Types
 
 export type SalesOrderItem = {
   salesOrderId: number;
   productId: number;
+  measurementUnit: MeasurementUnit;
   quantity: number;
   shortname: string;
   longname: string;
   price: number;
   createdAt: string;
   updatedAt: string;
-  product: ProductWithRelations;
+  product: Product;
   discount: number;
   subtotal: number;
 };
@@ -27,6 +28,7 @@ export type SalesOrder = {
   sellerId: number;
   createdAt: string;
   paymentMethod: PaymentMethod;
+  walletProvider: WalletProvider | null;
   discount: number;
   ivaSales: number;
   isActive: boolean;
@@ -34,7 +36,7 @@ export type SalesOrder = {
   subtotal: number;
   total: number;
   updatedAt: string;
-  seller: User;
+  seller: { id: number; username: string | null; name: string };
   transactionId: number;
 };
 
@@ -59,8 +61,9 @@ export type CreateSalesOrderItemDto = {
 
 export type CreateSalesOrderDto = {
   invoice: string;
-  sellerId: number; // TODO: Conviene sacarlo porque el frontend no dice quien genero la venta. Preferiblemente JWT lo diga en req.user.id
+  sellerId?: number; // Compatibilidad: el backend siempre usa la sesión.
   paymentMethod: PaymentMethod;
+  walletProvider: WalletProvider | null;
   discount: number;
   ivaSales: number;
   taxableBase: number;
@@ -69,8 +72,10 @@ export type CreateSalesOrderDto = {
   salesOrderItems: CreateSalesOrderItemDto[];
 };
 
+export type SalesDraftItem = CreateSalesOrderItemDto & { measurementUnit: MeasurementUnit };
+
 // Update
-export type UpdateSalesOrderDto = Partial<CreateSalesOrderDto>;
+export type UpdateSalesOrderDto = { invoice?: string; isActive?: boolean };
 
 // Delete
 export type DeleteSalesOrderDto = {

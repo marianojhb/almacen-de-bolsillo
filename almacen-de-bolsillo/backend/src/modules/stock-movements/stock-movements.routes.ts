@@ -1,26 +1,19 @@
 import { Router } from "express";
 import {
-  getStockMovements,
-  getStockMovementById,
-  getStockMovementsByProductId,
-  getStockMovementsByProductSku,
-  postStockMovement,
-  updateStockMovement,
-  deleteStockMovement,
+  getStockMovements, getStockMovementById, getStockMovementsByProductId,
+  getStockMovementsByProductSku, postStockMovement, updateStockMovement, deleteStockMovement,
 } from "./stock-movements.controller.js";
+import { requireAuth, requirePermission } from "../auth/auth.middleware.js";
 
 const stockMovementsRouter: Router = Router();
-
-stockMovementsRouter.get("/", getStockMovements);
-
-stockMovementsRouter.get("/product/id/:productId", getStockMovementsByProductId); // + específica
-stockMovementsRouter.get("/product/sku/:productSku", getStockMovementsByProductSku); // + específica
-stockMovementsRouter.get("/:id", getStockMovementById); // menos específica
-
-stockMovementsRouter.post("/", postStockMovement);
-
+stockMovementsRouter.use(requireAuth);
+stockMovementsRouter.get("/", requirePermission("stock_movements.read"), getStockMovements);
+stockMovementsRouter.get("/product/id/:productId", requirePermission("stock_movements.read"), getStockMovementsByProductId);
+stockMovementsRouter.get("/product/sku/:productSku", requirePermission("stock_movements.read"), getStockMovementsByProductSku);
+stockMovementsRouter.get("/:id", requirePermission("stock_movements.read"), getStockMovementById);
+stockMovementsRouter.post("/", requirePermission("stock_movements.create"), postStockMovement);
+// El historial se conserva; las correcciones se registran como nuevos ajustes.
 stockMovementsRouter.put("/:id", updateStockMovement);
-
 stockMovementsRouter.delete("/:id", deleteStockMovement);
 
 export default stockMovementsRouter;

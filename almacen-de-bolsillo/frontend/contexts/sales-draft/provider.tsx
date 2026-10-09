@@ -1,23 +1,23 @@
 import { ReactNode, useState } from "react";
 import { SalesDraftContext } from "./context";
-import type { CreateSalesOrderItemDto } from "@almacen/shared";
+import { lineAmount, sumAmounts, type SalesDraftItem } from "@almacen/shared";
 
 type SalesDraftProviderProps = {
   children: ReactNode;
 };
 
 export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
-  const [items, setItems] = useState<CreateSalesOrderItemDto[]>([]);
+  const [items, setItems] = useState<SalesDraftItem[]>([]);
 
-  const totalAmount = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalAmount = sumAmounts(items.map((item) => lineAmount(item.quantity, item.price, item.discount)));
 
-  function addItem(item: CreateSalesOrderItemDto) {
+  function addItem(item: SalesDraftItem) {
     setItems((currentItems) => {
-      const itemAlreadyExists = items.some((currentProduct) => currentProduct.productId === item.productId);
+      const itemAlreadyExists = currentItems.some((currentProduct) => currentProduct.productId === item.productId);
       if (itemAlreadyExists) {
         return currentItems.map((updateItem) =>
           updateItem.productId === item.productId
-            ? { ...updateItem, quantity: updateItem.quantity + item.quantity }
+            ? { ...updateItem, quantity: Math.round((updateItem.quantity + item.quantity) * 1000) / 1000 }
             : updateItem,
         );
       }

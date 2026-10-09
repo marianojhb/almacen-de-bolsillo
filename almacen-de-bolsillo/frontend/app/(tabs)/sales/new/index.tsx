@@ -1,32 +1,39 @@
-import { CreateSalesOrderDto } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PAYMENT_METHODS, WALLET_PROVIDERS, formatProductQuantity, getMeasurementUnit, isValidDecimal, parseDecimalInput, lineAmount, type PaymentMethod, type WalletProvider, type CreateSalesOrderDto } from "@almacen/shared";
+import { SearchSelect } from "@/components/forms/SearchSelect";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSales } from "@/contexts/sales";
 import { useSalesDraft } from "@/contexts/sales-draft";
 
 export const NewSaleScreen = () => {
+  const { formatCurrency } = useCommerceFormat();
   const { items, totalAmount, removeItem, clearSales } = useSalesDraft();
   const { addSale, refreshSales } = useSales();
 
   const [inputDiscount, setInputDiscount] = useState("");
-  const [metodoDePago, setMetodoDePago] = useState<"EFECTIVO" | "MERCADOPAGO" | "UALA">("EFECTIVO");
+  const [metodoDePago, setMetodoDePago] = useState<PaymentMethod>("CASH");
+  const [walletProvider, setWalletProvider] = useState<WalletProvider>("MERCADOPAGO");
+  const saving = useRef(false);
   const [numeroFactura, setNumeroFactura] = useState("");
   const [isSavingSale, setIsSavingSale] = useState(false);
 
   const subtotal = Math.round(Number(totalAmount) * 100) / 100;
-  const discount = (Number(inputDiscount || 0) / 100) * 100;
+  const discount = inputDiscount.trim() ? parseDecimalInput(inputDiscount) : 0;
   const total = Math.round((Number(totalAmount) - discount) * 100) / 100;
   const taxableBase = Math.round((subtotal - discount)/1.21 * 100) / 100;
-  const ivaSales = Math.round(taxableBase * 0.21 * 100) / 100;
+  const ivaSales = Math.round((total - taxableBase) * 100) / 100;
 
   const isDisabled = items.length === 0 || isSavingSale;
 
   async function handleAddSale() {
+    if (saving.current || isDisabled) return;
+    if (!isValidDecimal(discount, 2) || discount > 99999999.99 || discount > subtotal) { Alert.alert("Descuento inválido", "Ingresá un importe válido que no supere el subtotal."); return; }
     const payload: CreateSalesOrderDto = {
       invoice: numeroFactura,
-      sellerId: 3,
       paymentMethod: metodoDePago,
+      walletProvider: metodoDePago === "VIRTUAL_WALLET" ? walletProvider : null,
       subtotal: subtotal,
       discount: discount,
       taxableBase: taxableBase,
@@ -39,16 +46,20 @@ export const NewSaleScreen = () => {
         quantity: item.quantity,
         price: item.price,
         discount: 0,
-        subtotal: item.quantity * item.price,
+        subtotal: lineAmount(item.quantity, item.price),
       })),
     };
 
+    saving.current = true;
     setIsSavingSale(true);
-    await addSale(payload);
-    clearSales();
-    await refreshSales();
-    router.replace("/sales");
-    setIsSavingSale(false);
+    try {
+      if (!(await addSale(payload))) { Alert.alert("No se pudo guardar", "Revisá los permisos e intentá nuevamente."); return; }
+      clearSales();
+      await refreshSales();
+      router.replace("/sales");
+    } catch (error) {
+      Alert.alert("No se pudo guardar", error instanceof Error ? error.message : "Intentá nuevamente.");
+    } finally { saving.current = false; setIsSavingSale(false); }
   }
 
   return (
@@ -61,7 +72,7 @@ export const NewSaleScreen = () => {
               <Text className="mt-1 text-4xl font-black text-white">Nueva venta</Text>
               <Text className="mt-2 text-sm leading-5 text-slate-300">
                 {items.length} productos cargados · Total estimado{" "}
-                {Number(total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {formatCurrency(total)}
               </Text>
             </View>
 
@@ -113,21 +124,18 @@ export const NewSaleScreen = () => {
                   <View className="mt-4 flex-row flex-wrap gap-2">
                     <View className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800">
                       <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                        Cantidad: {item.quantity}
+                        Cantidad: {formatProductQuantity(item.quantity, item.measurementUnit)}
                       </Text>
                     </View>
                     <View className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800">
                       <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                        Unitario: {Number(item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                        Por {getMeasurementUnit(item.measurementUnit).priceLabel}: {formatCurrency(item.price)}
                       </Text>
                     </View>
                     <View className="rounded-full bg-emerald-50 px-3 py-1.5 dark:bg-emerald-950/60">
                       <Text className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
                         Subtotal:{" "}
-                        {Number(item.quantity * item.price).toLocaleString("es-AR", {
-                          style: "currency",
-                          currency: "ARS",
-                        })}
+                        {formatCurrency(lineAmount(item.quantity, item.price))}
                       </Text>
                     </View>
                   </View>
@@ -139,7 +147,7 @@ export const NewSaleScreen = () => {
                   Subtotal de productos
                 </Text>
                 <Text className="mt-1 text-3xl font-black text-white">
-                  {Number(totalAmount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {formatCurrency(totalAmount)}
                 </Text>
               </View>
             </View>
@@ -176,7 +184,7 @@ export const NewSaleScreen = () => {
                 keyboardType="numeric"
               />
               <Text className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Ingresá el porcentaje de descuento total.
+                Ingresá el importe del descuento total.
               </Text>
             </View>
           </View>
@@ -189,31 +197,31 @@ export const NewSaleScreen = () => {
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Subtotal</Text>
               <Text className="text-base font-black text-slate-950 dark:text-white">
-                {Number(totalAmount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {formatCurrency(totalAmount)}
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Descuento</Text>
               <Text className="text-base font-black text-red-600 dark:text-red-300">
-                -{Number(discount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                -{formatCurrency(discount)}
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Total a pagar</Text>
               <Text className="text-base font-black text-slate-950 dark:text-white">
-                {Number(total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {formatCurrency(total)}
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">Total sin IVA</Text>
               <Text className="text-base font-black text-slate-950 dark:text-white">
-                {Number(taxableBase).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {formatCurrency(taxableBase)}
               </Text>
             </View>
             <View className="flex-row items-center justify-between gap-3">
               <Text className="text-sm font-semibold text-slate-500 dark:text-slate-400">IVA 21%</Text>
               <Text className="text-base font-black text-slate-950 dark:text-white">
-                {Number(ivaSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {formatCurrency(ivaSales)}
               </Text>
             </View>
 
@@ -222,7 +230,7 @@ export const NewSaleScreen = () => {
                 Total a pagar
               </Text>
               <Text className="mt-1 text-4xl font-black text-emerald-700 dark:text-emerald-300">
-                {Number(total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                {formatCurrency(total)}
               </Text>
               <Text className="mt-1 text-sm text-emerald-700/80 dark:text-emerald-200">IVA incluido.</Text>
             </View>
@@ -233,11 +241,7 @@ export const NewSaleScreen = () => {
           <Text className="text-lg font-black text-slate-950 dark:text-white">Método de pago</Text>
 
           <View className="mt-4 flex-row flex-wrap gap-2">
-            {[
-              { value: "EFECTIVO", label: "Efectivo" },
-              { value: "MERCADOPAGO", label: "Mercado Pago" },
-              { value: "UALA", label: "Ualá" },
-            ].map((method) => {
+            {PAYMENT_METHODS.map((method) => {
               const isSelected = metodoDePago === method.value;
 
               return (
@@ -248,7 +252,7 @@ export const NewSaleScreen = () => {
                       ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
                       : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
                   }`}
-                  onPress={() => setMetodoDePago(method.value as "EFECTIVO" | "MERCADOPAGO" | "UALA")}>
+                  onPress={() => setMetodoDePago(method.value)}>
                   <Text
                     className={`text-sm font-bold ${
                       isSelected ? "text-white dark:text-[#111A1A]" : "text-slate-700 dark:text-slate-200"
@@ -259,6 +263,7 @@ export const NewSaleScreen = () => {
               );
             })}
           </View>
+          {metodoDePago === "VIRTUAL_WALLET" && <View className="mt-4"><SearchSelect label="Billetera virtual" value={walletProvider} options={WALLET_PROVIDERS} onChange={(value) => setWalletProvider(value as WalletProvider)} /></View>}
         </View>
 
         <View className="gap-3 pb-2">

@@ -1,5 +1,6 @@
+import { usePermissions } from "@/hooks/use-permissions";
 import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { useRef, type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { 
   createEmployeeRequest, 
@@ -26,28 +27,42 @@ const sortEmployees = (employees: Employee[]) =>
   });
 
 export function EmployeesProvider({children}: Props) {
+  const { can } = usePermissions();
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   const [ isLoadingEmployees, setIsLoadingEmployees ] = useState(true);
 
   const [ employeesError, setEmployeesError ] = useState<string | null>(null);
 
+  const refreshEmployeesRequest = useRef<Promise<void> | null>(null);
   const refreshEmployees = useCallback(async () => {
-    try {
-      setIsLoadingEmployees(true);
-      setEmployeesError(null);
-
-      const response = await getEmployeesRequest();
-
-      setEmployees(sortEmployees(response));
-    } catch (error) {
-      console.error("Error loading employees:", error);
-
-      setEmployeesError(error instanceof Error ? error.message : "No se pudieron cargar los empleados.");
-    } finally {
-      setIsLoadingEmployees(false);
+    if (refreshEmployeesRequest.current) return refreshEmployeesRequest.current;
+    async function load() {
+      if (!can("employees.read")) { setEmployees([]); setEmployeesError(null); setIsLoadingEmployees(false); return; }
+      try {
+        setIsLoadingEmployees(true);
+        setEmployeesError(null);
+  
+        const response = await getEmployeesRequest();
+  
+        setEmployees(sortEmployees(response));
+      } catch (error) {
+        console.error("Error loading employees:", error);
+  
+        setEmployeesError(error instanceof Error ? error.message : "No se pudieron cargar los empleados.");
+      } finally {
+        setIsLoadingEmployees(false);
+      }
     }
-  }, []);
+
+    const request = load();
+    refreshEmployeesRequest.current = request;
+    return request.finally(() => {
+      if (refreshEmployeesRequest.current === request) {
+        refreshEmployeesRequest.current = null;
+      }
+    });
+  }, [can]);
 
   useEffect(() => { 
     void refreshEmployees(); 

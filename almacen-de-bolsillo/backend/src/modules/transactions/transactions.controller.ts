@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
-
+import { getRequestSession } from "../auth/auth.middleware.js";
+import { readId, sendApiError } from "../auth/request.utils.js";
 import {
   getTransactionsFromDatabase,
   getTransactionByIdFromDatabase,
@@ -9,60 +10,56 @@ import {
 } from "./transactions.service.js";
 
 const getTransactions = async (req: Request, res: Response) => {
-  const { from, to } = req.query;
   try {
-    const transactions = await getTransactionsFromDatabase(
-      from as string | undefined,
-      to as string | undefined
-    );
-    res.json(transactions);
+    const session = getRequestSession(res);
+    const result = await getTransactionsFromDatabase(session.commerce.id, req.query.from, req.query.to);
+    res.json(result);
   } catch (error) {
-    console.error("Error fetching transactions:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error);
   }
 };
 
 const getTransactionById = async (req: Request, res: Response) => {
-  const transactionId = Number(req.params.id);
-
   try {
-    const transaction = await getTransactionByIdFromDatabase(transactionId);
-    transaction ? res.json(transaction) : res.status(404).json({ message: "Transaction not found" });
+    const session = getRequestSession(res);
+    const result = await getTransactionByIdFromDatabase(readId(req.params.id), session.commerce.id);
+    if (!result) {
+      res.status(404).json({ message: "Transacción no encontrado en este comercio." });
+      return;
+    }
+    res.json(result);
   } catch (error) {
-    console.error("Error fetching transaction:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error);
   }
 };
 
 const postTransaction = async (req: Request, res: Response) => {
   try {
-    res.status(201).json(await postTransactionToDatabase(req.body));
+    const session = getRequestSession(res);
+    const result = await postTransactionToDatabase(req.body, session.commerce.id);
+    res.status(201).json(result);
   } catch (error) {
-    console.error("Error creating transaction:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error);
   }
 };
 
 const updateTransaction = async (req: Request, res: Response) => {
-  const transactionId = Number(req.params.id);
-
   try {
-    res.json(await updateTransactionFromDatabase(transactionId, req.body));
+    const session = getRequestSession(res);
+    const result = await updateTransactionFromDatabase(readId(req.params.id), req.body, session.commerce.id);
+    res.json(result);
   } catch (error) {
-    console.error("Error updating transaction:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error);
   }
 };
 
 const deleteTransaction = async (req: Request, res: Response) => {
-  const transactionId = Number(req.params.id);
-
   try {
-    await deleteTransactionFromDatabase(transactionId);
+    const session = getRequestSession(res);
+    const result = await deleteTransactionFromDatabase(readId(req.params.id), session.commerce.id);
     res.status(204).send();
   } catch (error) {
-    console.error("Error deleting transaction:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error);
   }
 };
 

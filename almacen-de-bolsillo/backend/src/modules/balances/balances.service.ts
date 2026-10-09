@@ -1,22 +1,38 @@
-import { prisma } from '../../config/prisma.js';
-import type { Prisma } from '../../../generated/prisma/index.js';
+import { prisma } from "../config/prisma.js";
+import { validateBalance } from "./balances.validation.js";
+import { balanceValuesResponse } from "./balances.response.js";
 
-const getBalancesFromDatabase = async () => prisma.balance.findMany();
+const getBalancesFromDatabase = async (commerceId: number) => {
+  const balances = await prisma.balance.findMany({ where: { commerceId }, orderBy: { date: "desc" } });
+  return balances.map(balanceValuesResponse);
+};
 
-const getBalanceByIdFromDatabase = async (balanceId: number) => prisma.balance.findUnique({ where: { id: balanceId } });
+const getBalanceByIdFromDatabase = async (id: number, commerceId: number) => {
+  const balance = await prisma.balance.findUnique({ where: { id, commerceId } });
+  return balance ? balanceValuesResponse(balance) : null;
+};
 
-const postBalanceToDatabase = async (balanceData: Prisma.BalanceCreateInput) =>
-  prisma.balance.create({ data: balanceData });
+const postBalanceToDatabase = async (body: unknown, commerceId: number) => {
+  const data = validateBalance(body, true);
+  const balance = await prisma.balance.create({
+    data: {
+      commerceId, ...(data.date !== undefined && { date: data.date }),
+      opening: data.opening!, cashIn: data.cashIn!, cashOut: data.cashOut!,
+      expectedClosing: data.expectedClosing!, actualClosing: data.actualClosing!, difference: data.difference!,
+    },
+  });
+  return balanceValuesResponse(balance);
+};
 
-const updateBalanceFromDatabase = async (balanceId: number, balanceData: Prisma.BalanceUpdateInput) =>
-  prisma.balance.update({ where: { id: balanceId }, data: balanceData });
+const updateBalanceFromDatabase = async (id: number, body: unknown, commerceId: number) => {
+  const balance = await prisma.balance.update({ where: { id, commerceId }, data: validateBalance(body, false) });
+  return balanceValuesResponse(balance);
+};
 
-const deleteBalanceFromDatabase = async (balanceId: number) => prisma.balance.delete({ where: { id: balanceId } });
+const deleteBalanceFromDatabase = async (id: number, commerceId: number) =>
+  prisma.balance.delete({ where: { id, commerceId } });
 
 export {
-  getBalancesFromDatabase,
-  getBalanceByIdFromDatabase,
-  postBalanceToDatabase,
-  updateBalanceFromDatabase,
-  deleteBalanceFromDatabase,
+  getBalancesFromDatabase, getBalanceByIdFromDatabase, postBalanceToDatabase,
+  updateBalanceFromDatabase, deleteBalanceFromDatabase,
 };

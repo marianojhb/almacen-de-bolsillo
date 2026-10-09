@@ -1,9 +1,9 @@
 import type { CreateSalesOrderDto, SalesOrderDto, SalesOrderWithRelationsDto } from "@almacen/shared";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { apiFetch } from "./apiClient";
 
 export async function getSalesOrdersRequest(): Promise<SalesOrderDto[]> {
-  const response = await fetch(`${API_URL}/sales-orders`, {
+  const response = await apiFetch(`/sales-orders`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export async function getSalesOrdersRequest(): Promise<SalesOrderDto[]> {
 }
 
 export async function getSalesById(salesOrderId: number): Promise<SalesOrderWithRelationsDto> {
-  const response = await fetch(`${API_URL}/sales-orders/${salesOrderId}`, {
+  const response = await apiFetch(`/sales-orders/${salesOrderId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -33,7 +33,7 @@ export async function getSalesById(salesOrderId: number): Promise<SalesOrderWith
 }
 
 export async function createSalesOrderRequest(salesOrder: CreateSalesOrderDto): Promise<SalesOrderDto> {
-  const response = await fetch(`${API_URL}/sales-orders`, {
+  const response = await apiFetch(`/sales-orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export async function createSalesOrderRequest(salesOrder: CreateSalesOrderDto): 
 }
 
 export async function deleteSalesOrderRequest(salesOrderId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/sales-orders/${salesOrderId}`, {
+  const response = await apiFetch(`/sales-orders/${salesOrderId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

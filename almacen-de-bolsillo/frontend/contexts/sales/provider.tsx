@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { SalesContext } from "./context";
 import { SalesOrderDto, CreateSalesOrderDto } from "@almacen/shared";
 import { getSalesOrdersRequest, createSalesOrderRequest, deleteSalesOrderRequest } from "@/services/salesApi";
@@ -8,48 +9,55 @@ interface SalesProviderProps {
 }
 
 export function SalesProvider({ children }: SalesProviderProps) {
+  const { can } = usePermissions();
   const [sales, setSales] = useState<SalesOrderDto[]>([]);
-  const [totalSales, setTotalSales] = useState<number>(0);
-
-  // State to track loading and error states
+  const totalSales = sales.reduce((total, sale) => total + Number(sale.total), 0);
   const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false);
   const [errorSaleOrders, setErrorSaleOrders] = useState<string | null>(null);
 
+  const refreshSalesRequest = useRef<Promise<void> | null>(null);
   const refreshSales = useCallback(async () => {
-    try {
-      setIsLoadingSales(true);
-      setErrorSaleOrders(null);
-
-      const data = await getSalesOrdersRequest();
-
-      setSales(data);
-      setTotalSales(data.reduce((accumulator: number, sale: SalesOrderDto) => accumulator + Number(sale.total), 0));
-    } catch (error) {
-      console.error("Error fetching sales orders with items:", error);
-      setErrorSaleOrders("Error fetching sales orders with items");
-    } finally {
-      setIsLoadingSales(false);
+    if (refreshSalesRequest.current) return refreshSalesRequest.current;
+    async function load() {
+      if (!can("sales.read")) { setSales([]); setErrorSaleOrders(null); setIsLoadingSales(false); return; }
+      try {
+        setIsLoadingSales(true);
+        setErrorSaleOrders(null);
+  
+        const data = await getSalesOrdersRequest();
+  
+        setSales(data);
+      } catch (error) {
+        console.error("Error fetching sales orders with items:", error);
+        setErrorSaleOrders("Error fetching sales orders with items");
+      } finally {
+        setIsLoadingSales(false);
+      }
     }
-  }, []);
+
+    const request = load();
+    refreshSalesRequest.current = request;
+    return request.finally(() => {
+      if (refreshSalesRequest.current === request) {
+        refreshSalesRequest.current = null;
+      }
+    });
+  }, [can]);
 
   useEffect(() => {
     void refreshSales();
   }, [refreshSales]);
 
   async function addSale(sale: CreateSalesOrderDto): Promise<boolean> {
-    // Implement the logic to add a sale
-    try {
-      const newSale = await createSalesOrderRequest(sale);
-      setSales((prevSales) => [...prevSales, newSale]);
-      setTotalSales((prevTotal) => prevTotal + Number(newSale.total));
-      return true;
-    } catch (error) {
-      console.error("Error creating sales order:", error);
-      return false;
-    }
+    if (!can("sales.create")) return false;
+    const newSale = await createSalesOrderRequest(sale);
+    setSales((prevSales) => [...prevSales, newSale]);
+    return true;
+
   }
 
   async function deleteSale(saleId: number): Promise<boolean> {
+    if (!can("sales.delete")) return false;
     try {
       await deleteSalesOrderRequest(saleId);
       setSales((prevSales) => prevSales.filter((sale) => sale.id !== saleId));
@@ -61,9 +69,7 @@ export function SalesProvider({ children }: SalesProviderProps) {
   }
 
   async function clearSales() {
-    // Implement the logic to clear all sales
     setSales([]);
-    setTotalSales(0);
   }
 
   return (

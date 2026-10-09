@@ -1,9 +1,9 @@
 import type { PurchaseOrderWithRelationsDto, CreatePurchaseOrderDto, PurchaseOrderDto, CreatePurchaseOrderItemDto } from "@almacen/shared";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { apiFetch } from "./apiClient";
 
 export async function getPurchaseOrdersRequest(): Promise<PurchaseOrderDto[]> {
-  const response = await fetch(`${API_URL}/purchase-orders`, {
+  const response = await apiFetch(`/purchase-orders`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export async function getPurchaseOrdersRequest(): Promise<PurchaseOrderDto[]> {
 }
 
 export async function getPurchaseByIdRequest(purchaseOrderId: number): Promise<PurchaseOrderWithRelationsDto> {
-  const response = await fetch(`${API_URL}/purchase-orders/${purchaseOrderId}`, {
+  const response = await apiFetch(`/purchase-orders/${purchaseOrderId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -33,7 +33,7 @@ export async function getPurchaseByIdRequest(purchaseOrderId: number): Promise<P
 }
 
 export async function createPurchaseOrderRequest(purchaseOrder: CreatePurchaseOrderDto): Promise<PurchaseOrderDto> {
-  const response = await fetch(`${API_URL}/purchase-orders`, {
+  const response = await apiFetch(`/purchase-orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export async function createPurchaseOrderRequest(purchaseOrder: CreatePurchaseOr
 }
 
 export async function createPurchaseOrderItemRequest(purchaseOrder: CreatePurchaseOrderItemDto): Promise<PurchaseOrderDto> {
-  const response = await fetch(`${API_URL}/purchase-orders`, {
+  const response = await apiFetch(`/purchase-orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -64,7 +64,7 @@ export async function createPurchaseOrderItemRequest(purchaseOrder: CreatePurcha
   return response.json();
 }
 export async function deletePurchaseOrderRequest(purchaseOrderId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/purchase-orders/${purchaseOrderId}`, {
+  const response = await apiFetch(`/purchase-orders/${purchaseOrderId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

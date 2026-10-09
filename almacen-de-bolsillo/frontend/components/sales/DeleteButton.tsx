@@ -1,10 +1,12 @@
+import { PermissionGate } from "@/components/auth/PermissionGate";
+import { router } from "expo-router";
 import { Alert, Pressable, Text } from "react-native";
 import { useSales } from "@/contexts/sales";
 
 export function DeleteButton({ id }: { id: string }) {
   const { deleteSale } = useSales();
   const handleDelete = () => {
-    Alert.alert("Confirmar eliminación", "¿Estás seguro de que quieres eliminar este producto?", [
+    Alert.alert("Confirmar eliminación", "¿Querés eliminar definitivamente esta venta? Esta acción no es una baja lógica.", [
       {
         text: "Cancelar",
         style: "cancel",
@@ -14,8 +16,10 @@ export function DeleteButton({ id }: { id: string }) {
         style: "destructive",
         onPress: async () => {
           try {
-            await deleteSale(Number(id));
-            Alert.alert("Producto eliminado", "El producto ha sido eliminado correctamente.");
+            const deleted = await deleteSale(Number(id));
+            if (!deleted) throw new Error("No se pudo eliminar la venta.");
+            Alert.alert("Venta eliminada", "La venta fue eliminada correctamente.");
+            router.replace("/(tabs)/sales");
           } catch (error) {
             console.error("Error al eliminar la orden de venta:", error);
             Alert.alert("Error", "No se pudo eliminar la orden de venta.");
@@ -25,8 +29,8 @@ export function DeleteButton({ id }: { id: string }) {
     ]);
   };
   return (
-    <Pressable onPress={handleDelete} className="items-center rounded-2xl bg-red-500 px-5 py-3 active:opacity-75">
+    <PermissionGate permission="sales.delete"><Pressable onPress={handleDelete} className="items-center rounded-2xl bg-red-500 px-5 py-3 active:opacity-75">
       <Text className="text-sm font-black text-white">Eliminar</Text>
-    </Pressable>
+    </Pressable></PermissionGate>
   );
 }

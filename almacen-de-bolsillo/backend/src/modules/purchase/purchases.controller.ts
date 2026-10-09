@@ -1,60 +1,66 @@
-import type { Request, Response } from 'express';
-
+import type { Request, Response } from "express";
+import { getRequestSession } from "../auth/auth.middleware.js";
+import { readId, sendApiError, checkPermission } from "../auth/request.utils.js";
 import {
   getPurchaseOrdersFromDatabase,
   getPurchaseOrderByIdFromDatabase,
   postPurchaseOrderToDatabase,
   updatePurchaseOrderFromDatabase,
   deletePurchaseOrderFromDatabase,
-} from './purchase.service.js';
+} from "./purchase.service.js";
 
 const getPurchaseOrders = async (req: Request, res: Response) => {
   try {
-    res.json(await getPurchaseOrdersFromDatabase());
+    const session = getRequestSession(res);
+    const result = await getPurchaseOrdersFromDatabase(session.commerce.id);
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching purchase orders:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    sendApiError(res, error);
   }
 };
 
 const getPurchaseOrderById = async (req: Request, res: Response) => {
-  const purchaseOrderId = Number(req.params.id);
   try {
-    const purchaseOrder = await getPurchaseOrderByIdFromDatabase(purchaseOrderId);
-    purchaseOrder ? res.json(purchaseOrder) : res.status(404).json({ message: 'Purchase order not found' });
+    const session = getRequestSession(res);
+    const result = await getPurchaseOrderByIdFromDatabase(readId(req.params.id), session.commerce.id);
+    if (!result) {
+      res.status(404).json({ message: "Compra no encontrado en este comercio." });
+      return;
+    }
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching purchase order:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    sendApiError(res, error);
   }
 };
 
 const postPurchaseOrder = async (req: Request, res: Response) => {
   try {
-    res.status(201).json(await postPurchaseOrderToDatabase(req.body));
+    const session = getRequestSession(res);
+    const result = await postPurchaseOrderToDatabase(req.body, session.commerce.id, session.user.id);
+    res.status(201).json(result);
   } catch (error) {
-    console.error('Error creating purchase order:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    sendApiError(res, error);
   }
 };
 
 const updatePurchaseOrder = async (req: Request, res: Response) => {
-  const purchaseOrderId = Number(req.params.id);
   try {
-    res.json(await updatePurchaseOrderFromDatabase(purchaseOrderId, req.body));
+    const session = getRequestSession(res);
+    if (req.body?.isActive === false) checkPermission(session.permissions, "purchases.delete");
+    const result = await updatePurchaseOrderFromDatabase(readId(req.params.id), req.body, session.commerce.id);
+    res.json(result);
   } catch (error) {
-    console.error('Error updating purchase order:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    sendApiError(res, error);
   }
 };
 
 const deletePurchaseOrder = async (req: Request, res: Response) => {
-  const purchaseOrderId = Number(req.params.id);
   try {
-    await deletePurchaseOrderFromDatabase(purchaseOrderId);
+    const session = getRequestSession(res);
+    const result = await deletePurchaseOrderFromDatabase(readId(req.params.id), session.commerce.id);
     res.status(204).send();
   } catch (error) {
-    console.error('Error deleting purchase order:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    sendApiError(res, error);
   }
 };
 

@@ -17,7 +17,7 @@ export default function NewEmployeeScreen() {
 
         Alert.alert(
           "Empleado registrado",
-          `${getEmployeeName(employee)} fue registrado con el código ${formatEmployeeCode(employee.id)}.`,
+          `${getEmployeeName(employee)} fue registrado con el código ${formatEmployeeCode(employee.commerceEmployeeId)}.`,
           [
             {
               text: "Aceptar",

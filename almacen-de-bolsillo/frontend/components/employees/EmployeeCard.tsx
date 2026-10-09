@@ -1,3 +1,4 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
 import type { Employee } from "@almacen/shared";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -9,7 +10,6 @@ import { EmployeeStatusButton } from "./buttons/EmployeeStatusButton";
 import {
     employeeGenderLabels,
     formatEmployeeCode,
-    formatEmployeeDate,
     getEmployeeName,
 } from "./employee.utils";
 
@@ -35,15 +35,13 @@ function DetailRow({ label, value }: { label: string; value: string | null; }) {
 }
 
 export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: EmployeeCardProps) {
+  const { formatCurrency, formatDate, formatCalendarDate } = useCommerceFormat();
     const [isChanging, setIsChanging] = useState(false);
     const employeeName = getEmployeeName(employee);
 
     const salary = employee.salary === null
     ? null
-    : Number(employee.salary).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-    });
+    : formatCurrency(employee.salary);
 
     return (
     <Pressable
@@ -88,7 +86,7 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
                 </View>
 
                 <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {formatEmployeeCode(employee.id)} · DNI:{" "}
+                    {formatEmployeeCode(employee.commerceEmployeeId)} · DNI:{" "}
                     {employee.dni ?? "No informado"}
                 </Text>
             </View>
@@ -117,13 +115,15 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
             <View className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
                 <DetailRow
                     label="Código"
-                    value={formatEmployeeCode(employee.id)}
+                    value={formatEmployeeCode(employee.commerceEmployeeId)}
                 />
 
+                <DetailRow label="Usuario" value={employee.account?.username ?? "No tiene usuario"} />
+                {employee.account && <DetailRow label="Rol" value={employee.account.role.name} />}
                 <DetailRow label="CUIL" value={employee.cuil} />
                 <DetailRow
                     label="Fecha de nacimiento"
-                    value={formatEmployeeDate(employee.dob)}
+                    value={formatCalendarDate(employee.dob)}
                 />
                 <DetailRow
                     label="Género"
@@ -131,10 +131,9 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
                 />
                 <DetailRow label="Puesto" value={employee.jobTitle} />
                 <DetailRow label="Salario" value={salary} />
-                <DetailRow label="PTO" value={employee.pto} />
                 <DetailRow
                     label="Fecha de registro"
-                    value={formatEmployeeDate(employee.createdAt)}
+                    value={formatDate(employee.createdAt)}
                 />
                 <DeleteEmployeeButton
                     employee={employee}

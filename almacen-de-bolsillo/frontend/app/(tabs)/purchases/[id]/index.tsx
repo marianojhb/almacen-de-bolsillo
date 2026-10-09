@@ -1,3 +1,6 @@
+import { formatProductQuantity, getMeasurementUnit } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { usePermissions } from "@/hooks/use-permissions";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import type { PurchaseOrderWithRelationsDto } from "@almacen/shared";
@@ -5,6 +8,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { getPurchaseByIdRequest } from "@/services/purchasesApi";
 
 export default function PurchaseDetailScreen() {
+  const { formatCurrency, formatDateTime } = useCommerceFormat();
+  const { can } = usePermissions();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [purchase, setPurchase] = useState<PurchaseOrderWithRelationsDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +79,7 @@ export default function PurchaseDetailScreen() {
               <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Abastecimiento</Text>
               <Text className="mt-1 text-4xl font-black text-white">Compra Nº{purchase.id}</Text>
               <Text className="mt-2 text-sm leading-5 text-slate-300">
-                Fecha: {new Date(purchase.createdAt).toLocaleString("es-AR")}
+                Fecha: {formatDateTime(purchase.createdAt)}
               </Text>
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
                 Proveedor: {purchase.supplier?.name ?? `Proveedor Nº${purchase.supplierId}`}
@@ -94,7 +99,7 @@ export default function PurchaseDetailScreen() {
             Total de la compra
           </Text>
           <Text className="mt-1 text-4xl font-black text-emerald-700 dark:text-emerald-300">
-            {Number(purchase.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+            {formatCurrency(purchase.total)}
           </Text>
         </View>
 
@@ -114,7 +119,7 @@ export default function PurchaseDetailScreen() {
                 Fecha de creación
               </Text>
               <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                {new Date(purchase.createdAt).toLocaleString("es-AR")}
+                {formatDateTime(purchase.createdAt)}
               </Text>
             </View>
 
@@ -145,6 +150,7 @@ export default function PurchaseDetailScreen() {
             <View className="gap-4">
               {purchase.purchaseOrdersItems.map((item) => (
                 <Pressable
+                  disabled={!can("products.read")}
                   key={`${item.purchaseOrderId}-${item.productId}`}
                   onPress={() =>
                     router.push({
@@ -170,23 +176,23 @@ export default function PurchaseDetailScreen() {
                         Subtotal
                       </Text>
                       <Text className="text-base font-black text-emerald-700 dark:text-emerald-300">
-                        {Number(item.subtotal).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                        {formatCurrency(item.subtotal)}
                       </Text>
                     </View>
                   </View>
 
                   <View className="mt-4 flex-row flex-wrap gap-2">
                     <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                      <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Cantidad: {item.quantity}</Text>
+                      <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Cantidad: {formatProductQuantity(item.quantity, item.measurementUnit)}</Text>
                     </View>
                     <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                       <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                        Unitario: {Number(item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                        Por {getMeasurementUnit(item.measurementUnit).priceLabel}: {formatCurrency(item.price)}
                       </Text>
                     </View>
-                    <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
+                    {can("products.read") && (<View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
                       <Text className="text-xs font-bold text-indigo-700 dark:text-indigo-300">Ver producto</Text>
-                    </View>
+                    </View>)}
                   </View>
                 </Pressable>
               ))}

@@ -1,3 +1,4 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
 import type { EmployeeGender } from "@almacen/shared";
 import {
   Pressable,
@@ -7,6 +8,7 @@ import {
   type TextInputProps,
 } from "react-native";
 
+import { BirthDateField } from "./BirthDateField";
 import type { EmployeeFieldsProps } from "./employee-form.utils";
 import { employeeGenderLabels } from "../employee.utils";
 
@@ -33,6 +35,7 @@ function Field({ label, ...props }: FieldProps) {
 const genders: EmployeeGender[] = ["M", "F", "OTHER"];
 
 export function EmployeeFields({ values, onChange, disabled }: EmployeeFieldsProps) {
+  const { currency } = useCommerceFormat();
   return (
     <View className="gap-5">
       <Field
@@ -67,15 +70,7 @@ export function EmployeeFields({ values, onChange, disabled }: EmployeeFieldsPro
         keyboardType="number-pad"
         editable={!disabled}
       />
-      <Field
-        label="Fecha de nacimiento"
-        value={values.dob}
-        onChangeText={(dob) => onChange({ dob })}
-        placeholder="AAAA-MM-DD"
-        autoCapitalize="none"
-        autoCorrect={false}
-        editable={!disabled}
-      />
+      <BirthDateField value={values.dob} onChange={(dob) => onChange({ dob })} disabled={disabled} />
       <Field
         label="Puesto"
         value={values.jobTitle}
@@ -84,19 +79,15 @@ export function EmployeeFields({ values, onChange, disabled }: EmployeeFieldsPro
         autoCapitalize="words"
         editable={!disabled}
       />
+      <Text className="-mt-3 text-xs text-gray-500 dark:text-gray-400">
+        El puesto describe su trabajo. El rol de su cuenta define los permisos de acceso y se asigna desde Usuarios.
+      </Text>
       <Field
-        label="Salario"
+        label={`Salario (${currency})`}
         value={values.salary}
         onChangeText={(salary) => onChange({ salary })}
         placeholder="0,00"
         keyboardType="decimal-pad"
-        editable={!disabled}
-      />
-      <Field
-        label="PTO"
-        value={values.pto}
-        onChangeText={(pto) => onChange({ pto })}
-        placeholder="Información de licencia"
         editable={!disabled}
       />
       <View>

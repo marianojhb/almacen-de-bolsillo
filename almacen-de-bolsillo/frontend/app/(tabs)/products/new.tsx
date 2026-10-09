@@ -39,6 +39,7 @@ export default function NewProductScreen() {
           onSubmit={async (values) => {
             const productWasAdded = await addProduct({
               sku: values.sku,
+              measurementUnit: values.measurementUnit,
               shortname: values.shortname,
               longname: values.longname,
               description: null,

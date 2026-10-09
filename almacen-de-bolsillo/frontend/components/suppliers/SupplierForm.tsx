@@ -1,7 +1,7 @@
-import type {
-  CreateSupplierDto,
-} from "@almacen/shared";
-import { useState } from "react";
+import { PHONE_COUNTRIES, normalizePhoneContact, type CreateSupplierDto } from "@almacen/shared";
+import { SearchSelect } from "@/components/forms/SearchSelect";
+import { useAuth } from "@/contexts/auth";
+import { useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 export type SupplierFormValues = CreateSupplierDto;
@@ -18,6 +18,9 @@ type SupplierFormProps = { initialValues?: Partial<SupplierFormValues>;
 const inputClassName = "h-12 rounded-xl border border-gray-300 bg-white px-3 text-base text-black dark:border-gray-700 dark:bg-gray-900 dark:text-white";
 
 export default function SupplierForm({initialValues, submitLabel = "Guardar", onSubmit, onCancel }: SupplierFormProps) {
+  const { session } = useAuth();
+  const [phoneCountryCode, setPhoneCountryCode] = useState(initialValues?.phoneCountryCode ?? PHONE_COUNTRIES.find((item) => item.country === session?.commerce.country)?.value ?? "+54");
+  const saving = useRef(false);
   const [name, setName] =
     useState(
       initialValues?.name ?? "",
@@ -47,6 +50,7 @@ export default function SupplierForm({initialValues, submitLabel = "Guardar", on
     useState(false);
 
   const handleSubmit = async () => {
+    if (saving.current) return;
     const normalizedName =
       name.trim();
 
@@ -64,14 +68,6 @@ export default function SupplierForm({initialValues, submitLabel = "Guardar", on
       return;
     }
 
-    if (!normalizedCuit) {
-      Alert.alert(
-        "CUIT requerido",
-        "Ingresá el CUIT del proveedor.",
-      );
-      return;
-    }
-
     if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       Alert.alert(
         "Email inválido",
@@ -80,17 +76,24 @@ export default function SupplierForm({initialValues, submitLabel = "Guardar", on
       return;
     }
 
+    let contact: ReturnType<typeof normalizePhoneContact>;
+    try { contact = normalizePhoneContact(phoneCountryCode, phone); }
+    catch (error) { Alert.alert("Teléfono inválido", error instanceof Error ? error.message : "Revisá el teléfono."); return; }
     try {
+      saving.current = true;
       setIsSaving(true);
 
       await onSubmit({
         name: normalizedName,
-        cuit: normalizedCuit,
-        phone: phone.trim() || null,
+        cuit: normalizedCuit || null,
+        ...contact,
         email: normalizedEmail || null,
         address: address.trim() || null,
       });
+    } catch (error) {
+      Alert.alert("No se pudo guardar", error instanceof Error ? error.message : "Revisá los datos del proveedor.");
     } finally {
+      saving.current = false;
       setIsSaving(false);
     }
   };
@@ -124,7 +127,7 @@ export default function SupplierForm({initialValues, submitLabel = "Guardar", on
 
         <View>
           <Text className="mb-2 font-semibold text-gray-950 dark:text-white">
-            CUIT *
+            CUIT (opcional)
           </Text>
 
           <TextInput
@@ -137,15 +140,17 @@ export default function SupplierForm({initialValues, submitLabel = "Guardar", on
           />
         </View>
 
+        <SearchSelect label="Código de país" value={phoneCountryCode} options={PHONE_COUNTRIES} onChange={setPhoneCountryCode} disabled={isSaving} />
         <View>
           <Text className="mb-2 font-semibold text-gray-950 dark:text-white">
-            Teléfono
+            Teléfono nacional
           </Text>
 
           <TextInput
             value={phone}
-            onChangeText={setPhone}
-            placeholder="Teléfono"
+            onChangeText={(value) => setPhone(value.replace(/[^0-9]/g, ""))}
+            maxLength={14}
+            placeholder="Código de área y número"
             keyboardType="phone-pad"
             className={
               inputClassName

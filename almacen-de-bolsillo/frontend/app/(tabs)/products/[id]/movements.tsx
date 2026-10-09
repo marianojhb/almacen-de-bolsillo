@@ -1,11 +1,13 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
 import { useLocalSearchParams } from "expo-router";
 import { useProducts } from "@/contexts/products";
 import { View, Text, FlatList } from "react-native";
 import { getStockMovementsRequest } from "@/services/movementsApi";
 import { useState, useEffect } from "react";
-import type { StockMovement } from "@almacen/shared";
+import { formatProductQuantity, type StockMovement } from "@almacen/shared";
 
 export default function StockMovementsScreen() {
+  const { formatDate } = useCommerceFormat();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { products } = useProducts();
   const [movements, setMovements] = useState<StockMovement[]>([]);
@@ -93,13 +95,13 @@ export default function StockMovementsScreen() {
               <View className="flex-row items-start justify-between gap-3">
                 <View className="flex-1">
                   <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                    {new Date(movement.createdAt).toLocaleDateString("es-AR")}
+                    {formatDate(movement.createdAt)}
                   </Text>
                   <Text className="mt-1 text-lg font-black text-slate-950 dark:text-white">
                     {movement.reason ?? "Sin motivo"}
                   </Text>
                   <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                    Cantidad: {movement.quantity}
+                    Cantidad: {formatProductQuantity(movement.quantity, movement.measurementUnit)}
                   </Text>
                 </View>
                 <Text

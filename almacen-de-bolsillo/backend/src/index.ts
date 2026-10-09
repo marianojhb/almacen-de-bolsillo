@@ -1,4 +1,7 @@
 import express from "express";
+import dashboardRouter from "./modules/dashboard/dashboard.routes.js";
+import rolesRouter from "./modules/roles/roles.routes.js";
+import authRouter from "./modules/auth/auth.routes.js";
 import productsRouter from "./modules/products/products.routes.js";
 import categoriesRouter from "./modules/categories/categories.routes.js";
 import suppliersRouter from "./modules/suppliers/suppliers.routes.js";
@@ -6,6 +9,7 @@ import purchaseOrdersRouter from "./modules/purchase/purchases.routes.js";
 import usersRouter from "./modules/users/users.routes.js";
 import salesOrdersRouter from "./modules/sales/sales.routes.js";
 import employeesRouter from "./modules/employees/employees.routes.js";
+import workShiftsRouter from "./modules/work-shifts/work-shifts.routes.js";
 import balancesRouter from "./modules/balances/balances.routes.js";
 import transactionsRouter from "./modules/transactions/transactions.routes.js";
 import stockMovementsRouter from "./modules/stock-movements/stock-movements.routes.js";
@@ -24,13 +28,17 @@ app.get("/", (req, res) => {
   res.send(`Server is running at http://localhost:${getPORT()}`);
 });
 
+app.use("/dashboard", dashboardRouter);
 app.use("/products", productsRouter);
+app.use("/auth", authRouter);
 app.use("/categories", categoriesRouter);
 app.use("/suppliers", suppliersRouter);
 app.use("/purchase-orders", purchaseOrdersRouter);
 app.use("/users", usersRouter);
+app.use("/roles", rolesRouter);
 app.use("/sales-orders", salesOrdersRouter);
 app.use("/employees", employeesRouter);
+app.use("/work-shifts", workShiftsRouter);
 app.use("/balances", balancesRouter);
 app.use("/transactions", transactionsRouter);
 app.use("/stock-movements", stockMovementsRouter);

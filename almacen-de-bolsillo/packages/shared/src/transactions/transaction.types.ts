@@ -1,4 +1,4 @@
-import type { PaymentMethod } from "@almacen/shared";
+import type { PaymentMethod, WalletProvider } from "./payment-options.js";
 
 export type TransactionType = "PURCHASE" | "SALE" | "MANUAL_ENTRY" | "MANUAL_EXIT" | "ADJUSTMENT";
 
@@ -8,13 +8,11 @@ export type TransactionDto = {
   id: number;
   date: string;
   amount: number;
-  type: TransactionType;
   createdAt: string;
   updatedAt: string;
   paymentMethod: PaymentMethod;
-  salesOrders: number[];
-  purchaseOrders: number[];
+  walletProvider: WalletProvider | null;
   direction: Direction;
 };
 
-export type CreateTransactionDto = Omit<TransactionDto, "id" | "createdAt">;
+export type CreateTransactionDto = Pick<TransactionDto, "amount" | "date" | "paymentMethod" | "walletProvider" | "direction">;

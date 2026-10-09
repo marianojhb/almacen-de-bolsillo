@@ -1,9 +1,9 @@
+import { readId, sendApiError } from "../auth/request.utils.js";
 import type { Request, Response } from "express";
-import type { CreateProductOnSupplierFromSupplierDto } from "@almacen/shared";
-
-// Supplier service
-
+import { getRequestSession } from "../auth/auth.middleware.js";
+import { validateCreateSupplier, validateUpdateSupplier } from "./suppliers.validation.js";
 import {
+  getSupplierOptionsFromDatabase,
   deleteSupplierFromDatabase,
   getSupplierByIdFromDatabase,
   getSuppliersFromDatabase,
@@ -11,162 +11,90 @@ import {
   updateSupplierFromDatabase,
 } from "./suppliers.service.js";
 
-// Manejo de errores de la base de datos
+const getRelatedReadOptions = (permissions: string[]) => ({
+  includeProducts: permissions.includes("products.read"),
+  includePurchases: permissions.includes("purchases.read"),
+});
 
-const sendDatabaseError = (res: Response, error: unknown, action: string) => {
-  const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : null;
-
-  if (code === "P2002") {
-    res.status(409).json({
-      message: "Ya existe un proveedor con ese CUIT.",
-    });
-    return;
-  }
-
-  if (code === "P2025") {
-    res.status(404).json({
-      message: "Proveedor no encontrado.",
-    });
-    return;
-  }
-
-  if (code === "P2003") {
-    res.status(409).json({
-      message: "No se puede eliminar el proveedor porque tiene registros relacionados.",
-    });
-    return;
-  }
-
-  console.error(`Error ${action} supplier:`, error);
-
-  res.status(500).json({
-    message: "Error interno del servidor.",
-  });
+const databaseMessages = {
+  "notFound": "Proveedor no encontrado.",
+  "duplicate": "El CUIT ya está registrado en este comercio.",
+  "related": "Un registro relacionado ya no está disponible. Revisá los datos."
 };
-
-// Validación de ID de proveedor 
-const isValidSupplierId = (supplierId: number) => Number.isInteger(supplierId) && supplierId > 0;
 
 const getSuppliers = async (_req: Request, res: Response) => {
   try {
-    const suppliers = await getSuppliersFromDatabase();
-
+    const session = getRequestSession(res);
+    const suppliers = await getSuppliersFromDatabase(session.commerce.id, getRelatedReadOptions(session.permissions));
     res.json(suppliers);
   } catch (error) {
-    sendDatabaseError(res, error, "fetching");
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const getSupplierById = async (req: Request, res: Response) => {
-  const supplierId = Number(req.params.id);
-
-  // Validación del ID del proveedor
-  if (!isValidSupplierId(supplierId)) {
-    res.status(400).json({
-      message: "El ID del proveedor no es válido.",
-    });
-    return;
-  }
-
   try {
-    const supplier = await getSupplierByIdFromDatabase(supplierId);
-
+    const session = getRequestSession(res);
+    const supplierId = readId(req.params.id);
+    const supplier = await getSupplierByIdFromDatabase(supplierId, session.commerce.id, getRelatedReadOptions(session.permissions));
     if (!supplier) {
-      res.status(404).json({
-        message: "Proveedor no encontrado.",
-      });
+      res.status(404).json({ message: "Proveedor no encontrado." });
       return;
     }
-
     res.json(supplier);
   } catch (error) {
-    sendDatabaseError(res, error, "fetching");
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const postSupplier = async (req: Request, res: Response) => {
   try {
-    const supplier = await postSupplierToDatabase(req.body);
-
+    const session = getRequestSession(res);
+    const data = validateCreateSupplier(req.body);
+    const supplier = await postSupplierToDatabase(data, session.commerce.id, getRelatedReadOptions(session.permissions));
     res.status(201).json(supplier);
   } catch (error) {
-    sendDatabaseError(res, error, "creating");
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const updateSupplier = async (req: Request, res: Response) => {
-  const supplierId = Number(req.params.id);
-
-  if (!isValidSupplierId(supplierId)) {
-    res.status(400).json({
-      message:
-        "El ID del proveedor no es válido.",
-    });
-    return;
-  }
-
-  const supplierData = req.body;
-
-  const { productIds } = supplierData;
-
-  const isValidProductRelation = (product: CreateProductOnSupplierFromSupplierDto) =>
-    Number.isInteger(product.productId) &&
-    product.productId > 0 &&
-    typeof product.pricePerPaq === "number";
-
-  if (
-    productIds !== undefined &&
-    (!Array.isArray(productIds) ||
-      !productIds.every((product) =>
-        typeof product === "number"
-          ? Number.isInteger(product) && product > 0
-          : isValidProductRelation(product),
-      ))
-  ) {
-    res.status(400).json({
-      message: "La lista de productos no es válida.",
-    });
-    return;
-  }
-
   try {
-    const supplier = await updateSupplierFromDatabase(supplierId, supplierData);
-
+    const session = getRequestSession(res);
+    const supplierId = readId(req.params.id);
+    const data = validateUpdateSupplier(req.body);
+    if (data.isActive === false && !session.permissions.includes("suppliers.delete")) {
+      res.status(403).json({ message: "No tenés permiso para dar de baja proveedores." });
+      return;
+    }
+    const supplier = await updateSupplierFromDatabase(supplierId, data, session.commerce.id, getRelatedReadOptions(session.permissions));
+    if (!supplier) {
+      res.status(404).json({ message: "Proveedor no encontrado." });
+      return;
+    }
     res.json(supplier);
   } catch (error) {
-    sendDatabaseError(
-      res,
-      error,
-      "updating",
-    );
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const deleteSupplier = async (req: Request, res: Response) => {
-  const supplierId = Number(req.params.id);
-
-  // Validación del ID del proveedor
-  if (!isValidSupplierId(supplierId)) {
-    res.status(400).json({
-      message: "El ID del proveedor no es válido.",
-    });
-    return;
-  }
-
   try {
-    await deleteSupplierFromDatabase(supplierId);
-
+    const commerceId = getRequestSession(res).commerce.id;
+    const supplierId = readId(req.params.id);
+    await deleteSupplierFromDatabase(supplierId, commerceId);
     res.status(204).send();
   } catch (error) {
-    sendDatabaseError(res, error, "deleting");
+    sendApiError(res, error, databaseMessages);
   }
 };
 
-
-export {
-  getSuppliers,
-  getSupplierById,
-  postSupplier,
-  updateSupplier,
-  deleteSupplier,
+const getSupplierOptions = async (_req: Request, res: Response) => {
+  try {
+    res.json(await getSupplierOptionsFromDatabase(getRequestSession(res).commerce.id));
+  } catch (error) {
+    sendApiError(res, error, databaseMessages);
+  }
 };
+
+export { getSupplierOptions, getSuppliers, getSupplierById, postSupplier, updateSupplier, deleteSupplier };

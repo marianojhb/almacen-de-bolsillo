@@ -1,4 +1,4 @@
-import type { CreateEmployeeDto, EmployeeGender } from "@almacen/shared";
+import { birthDateInputToIso, formatBirthDateDisplay, type CreateEmployeeDto, type EmployeeGender } from "@almacen/shared";
 
 export type EmployeeFormState = {
     firstname: string;
@@ -8,7 +8,6 @@ export type EmployeeFormState = {
     dob: string;
     salary: string;
     jobTitle: string;
-    pto: string;
     gender: EmployeeGender;
 };
 
@@ -26,24 +25,11 @@ export function createEmployeeFormState(values?: Partial<CreateEmployeeDto>): Em
         lastname: values?.lastname ?? "",
         dni: values?.dni ?? "",
         cuil: values?.cuil ?? "",
-        dob: values?.dob?.slice(0, 10) ?? "",
+        dob: formatBirthDateDisplay(values?.dob ?? ""),
         salary: values?.salary?.toString() ?? "",
         jobTitle: values?.jobTitle ?? "",
-        pto: values?.pto ?? "",
         gender: values?.gender ?? "M",
     };
-}
-
-function isValidBirthDate(value: string): boolean {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-
-    const date = new Date(`${value}T00:00:00.000Z`);
-
-    return (
-        !Number.isNaN(date.getTime()) &&
-        date.toISOString().slice(0, 10) === value &&
-        value <= new Date().toISOString().slice(0, 10)
-    );
 }
 
 export function validateEmployeeForm(values: EmployeeFormState): ValidationResult {
@@ -51,7 +37,7 @@ export function validateEmployeeForm(values: EmployeeFormState): ValidationResul
     const lastname = values.lastname.trim();
     const dni = values.dni.replace(/\D/g, "");
     const cuil = values.cuil.replace(/\D/g, "");
-    const dob = values.dob.trim();
+    const dob = birthDateInputToIso(values.dob.trim());
 
     const salaryText = values.salary.trim().replace(",", ".");
     const salary = salaryText ? Number(salaryText) : null;
@@ -84,10 +70,10 @@ export function validateEmployeeForm(values: EmployeeFormState): ValidationResul
         };
     }
 
-    if (dob && !isValidBirthDate(dob)) {
+    if (values.dob.trim() && !dob) {
         return {
             ok: false,
-            message: "Ingresá una fecha válida en formato AAAA-MM-DD que no sea futura.",
+            message: "Ingresá una fecha válida en formato DD/MM/AAAA que no sea futura.",
         };
     }
 
@@ -108,7 +94,6 @@ export function validateEmployeeForm(values: EmployeeFormState): ValidationResul
             dob: dob || null,
             salary,
             jobTitle: values.jobTitle.trim() || null,
-            pto: values.pto.trim() || null,
             gender: values.gender,
         },
     };

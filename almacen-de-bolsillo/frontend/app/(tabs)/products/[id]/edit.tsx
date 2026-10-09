@@ -85,7 +85,8 @@ export default function ProductEditScreen() {
           onCreateCategory={addCategory}
           categories={categories}
           initialValues={{
-            sku: product.sku,
+            sku: product.sku ?? "",
+            measurementUnit: product.measurementUnit,
             shortname: product.shortname,
             longname: product.longname,
             price: product.price.toString(),
@@ -109,17 +110,17 @@ export default function ProductEditScreen() {
           onSubmit={async (values) => {
             const productWasUpdated: boolean = await updateProduct(
               {
-                sku: values.sku.trim(),
+                sku: values.sku,
+                measurementUnit: values.measurementUnit,
                 shortname: values.shortname.trim(),
                 longname: values.longname.trim(),
                 description: product.description,
                 price: values.price,
-                stock: values.stock,
                 stockMin: values.stockMin,
                 discount: product.discount,
                 categoryId: values.categoryId,
                 supplierRelations: values.supplierRelations,
-                isActive: values.isActive,
+                ...(values.isActive !== product.isActive && { isActive: values.isActive }),
               },
               product.id,
             );

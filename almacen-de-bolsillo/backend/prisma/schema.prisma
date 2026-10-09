@@ -7,26 +7,120 @@ datasource db {
   provider = "postgresql"
 }
 
+model Commerce {
+  id                  Int                     @id @default(autoincrement()) @map("id_commerce_c")
+  name                String                  @map("name_c")
+  username            String                  @unique @map("username_c")
+  country             String                  @map("country_c")
+  currency            String                  @map("currency_c")
+  timeZone            String                  @map("time_zone_c")
+  ownerId             Int                     @unique @map("id_owner_c")
+  // La migración debe diferir esta FK hasta el COMMIT para registrar comercio, rol y dueño juntos.
+  owner               User                    @relation("CommerceOwner", fields: [ownerId, id], references: [id, commerceId], onDelete: Restrict, onUpdate: Restrict)
+  // Último número de empleado asignado; no disminuye al eliminar una ficha.
+  lastEmployeeNumber  Int                     @default(0) @map("last_employee_number_c")
+  isActive            Boolean                 @default(true) @map("is_active_c")
+  createdAt           DateTime                @default(now()) @map("created_at")
+  updatedAt           DateTime                @updatedAt @map("updated_at")
+
+  users               User[]
+  roles               CommerceRole[]
+  products            Product[]
+  categories          Category[]
+  suppliers           Supplier[]
+  employees           Employee[]
+  salesOrders         SalesOrder[]
+  purchaseOrders      PurchaseOrder[]
+  transactions        Transaction[]
+  balances            Balance[]
+  workShifts          WorkShift[]
+  workShiftTypes      WorkShiftType[]
+
+  @@unique([ownerId, id])
+  @@map("commerces_c")
+}
+
+model AuthSession {
+  id        Int       @id @default(autoincrement()) @map("id_auth_session_as")
+  tokenHash String    @unique @map("token_hash_as")
+  userId    Int       @unique @map("id_user_as")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at_as")
+  revokedAt DateTime? @map("revoked_at_as")
+  issuedAt  DateTime  @default(now()) @map("issued_at_as")
+
+  @@index([expiresAt])
+  @@map("auth_sessions_as")
+}
+
+model CommerceRole {
+  id          Int              @id @default(autoincrement()) @map("id_commerce_role_cr")
+  name        String           @map("name_cr")
+  description String?          @map("description_cr")
+  commerceId  Int              @map("id_commerce_cr")
+  commerce    Commerce         @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+  isActive    Boolean          @default(true) @map("is_active_cr")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@unique([id, commerceId])
+  @@unique([commerceId, name])
+  @@map("commerce_roles_cr")
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement()) @map("id_permission_p")
+  code        String           @unique @map("code_p")
+  name        String           @map("name_p")
+  description String?          @map("description_p")
+
+  roles       RolePermission[]
+
+  @@map("permissions_p")
+}
+
+model RolePermission {
+  roleId       Int          @map("id_role_rp")
+  permissionId Int          @map("id_permission_rp")
+  role         CommerceRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions_rp")
+}
+
 model Product {
   id                  Int                  @id @default(autoincrement()) @map("id_product_p")
-  sku                 String?              @unique @map("sku_p")
+  sku                 String?              @map("sku_p")
   shortname           String               @map("shortname_p")
   longname            String               @map("longname_p")
   description         String?              @map("description_p")
-  price               Decimal              @map("price_p") @db.Decimal(10, 2)
+  // Precio por una unidad de medida; UNIT y BOX requieren cantidades enteras en la API.
+  measurementUnit     MeasurementUnit      @default(UNIT) @map("measurement_unit_p")
+  price               Decimal              @map("price_p") @db.Decimal(12, 2)
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @updatedAt @map("updated_at")
-  stock               Int                  @default(0) @map("stock_p")
-  stockMin            Int                  @default(0) @map("stock_min_p")
+  stock               Decimal              @default(0) @map("stock_p") @db.Decimal(12, 3)
+  stockMin            Decimal              @default(0) @map("stock_min_p") @db.Decimal(12, 3)
   discount            Decimal              @default(0) @map("discount_p") @db.Decimal(10, 2)
   categoryId          Int                  @map("id_category_p")
-  category            Category             @relation(fields: [categoryId], references: [id])
+  category            Category             @relation(fields: [categoryId, commerceId], references: [id, commerceId], onDelete: Restrict)
   purchaseOrdersItems PurchaseOrdersItem[]
   salesOrderItems     SalesOrderItem[]
   stockMovements      StockMovement[]
   suppliers           ProductOnSupplier[]
   isActive            Boolean              @default(true) @map("is_active_p")
 
+  commerceId          Int                  @map("id_commerce_p")
+  commerce            Commerce             @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
+  @@unique([id, commerceId])
+  @@unique([commerceId, sku])
   @@map("products_p")
 }
 
@@ -39,35 +133,49 @@ model Category {
   products    Product[]
   isActive    Boolean   @default(true) @map("is_active_c")
 
+  commerceId  Int       @map("id_commerce_c")
+  commerce    Commerce  @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
+  @@unique([id, commerceId])
   @@map("categories_c")
 }
 
 model Supplier {
-  id             Int                 @id @default(autoincrement()) @map("id_supplier_s")
-  name           String              @map("name_s")
-  cuit           String?             @unique @map("cuit_s")
-  phone          String?             @map("phone_s")
-  email          String?             @map("email_s")
-  address        String?             @map("address_s")
-  createdAt      DateTime            @default(now()) @map("created_at")
-  updatedAt      DateTime            @updatedAt @map("updated_at")
-  isActive       Boolean             @default(true) @map("is_active_s")
-  purchaseOrders PurchaseOrder[]
-  products       ProductOnSupplier[]
+  id               Int                 @id @default(autoincrement()) @map("id_supplier_s")
+  name             String              @map("name_s")
+  cuit             String?             @map("cuit_s")
+  phoneCountryCode String?             @map("phone_country_code_s") @db.VarChar(4)
+  // Número nacional, con código de área y sin el prefijo internacional.
+  phone            String?             @map("phone_s")
+  email            String?             @map("email_s")
+  address          String?             @map("address_s")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  isActive         Boolean             @default(true) @map("is_active_s")
+  purchaseOrders   PurchaseOrder[]
+  products         ProductOnSupplier[]
 
+  commerceId       Int                 @map("id_commerce_s")
+  commerce         Commerce            @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
+  @@unique([id, commerceId])
+  @@unique([commerceId, cuit])
   @@map("suppliers_s")
 }
 
 model ProductOnSupplier {
-  price            Decimal? @map("price_pos")
-  supplier         Supplier @relation(fields: [supplierId], references: [id])
+  commerceId       Int      @map("id_commerce_pos")
+  price            Decimal? @map("price_pos") @db.Decimal(12, 2)
+  supplier         Supplier @relation(fields: [supplierId, commerceId], references: [id, commerceId], onDelete: Restrict)
   supplierId       Int
-  product          Product  @relation(fields: [productId], references: [id])
+  product          Product  @relation(fields: [productId, commerceId], references: [id, commerceId], onDelete: Restrict)
   productId        Int
   supplierCategory String?  @map("supplier_category_pos")
   unitsPerPaq      Int?     @default(1) @map("units_per_paq_pos")
-  pricePerPaq      Decimal  @map("price_per_paq_pos")
-  minimumQuantity  Decimal? @default(1) @map("minimum_quantity_pos")
+  pricePerPaq      Decimal  @map("price_per_paq_pos") @db.Decimal(12, 2)
+  minimumQuantity  Decimal? @default(1) @map("minimum_quantity_pos") @db.Decimal(12, 3)
   salesTerms       String?  @map("sales_terms_pos")
   leadTimeDays     Int?     @map("lead_time_days_pos")
 
@@ -78,82 +186,120 @@ model ProductOnSupplier {
 model PurchaseOrder {
   id                  Int                  @id @default(autoincrement()) @map("id_purchase_order_po")
   date                DateTime             @default(now()) @map("date_po")
-  total               Decimal              @default(0) @map("total_po") @db.Decimal(10, 2)
+  total               Decimal              @default(0) @map("total_po") @db.Decimal(12, 2)
   supplierId          Int                  @map("id_supplier_po")
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @updatedAt @map("updated_at")
   purchaseOrdersItems PurchaseOrdersItem[]
-  userId              Int                  @default(3) @map("id_user_po")
+  userId              Int                  @map("id_user_po")
   isActive            Boolean              @default(true) @map("is_active_po")
 
-  supplier      Supplier     @relation(fields: [supplierId], references: [id])
-  buyer         User         @relation(fields: [userId], references: [id])
-  transaction   Transaction? @relation(fields: [transactionId], references: [id])
-  transactionId Int          @map("id_transaction_po")
-  ivaPurchase   Decimal      @default(0) @map("iva_purchase_order_po") @db.Decimal(10, 2)
+  supplier            Supplier             @relation(fields: [supplierId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  buyer               User                 @relation(fields: [userId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  transaction         Transaction          @relation(fields: [transactionId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  transactionId       Int                  @unique @map("id_transaction_po")
+  ivaPurchase         Decimal              @default(0) @map("iva_purchase_order_po") @db.Decimal(12, 2)
 
+  commerceId          Int                  @map("id_commerce_po")
+  commerce            Commerce             @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
+  @@unique([id, commerceId])
+  @@unique([transactionId, commerceId])
   @@map("purchase_orders_po")
 }
 
 model PurchaseOrdersItem {
+  commerceId      Int             @map("id_commerce_poi")
   productId       Int             @map("id_product_poi")
   purchaseOrderId Int             @map("id_purchase_order_poi")
-  quantity        Int             @default(0) @map("quantity_poi")
-  price           Decimal         @default(0) @map("price_poi") @db.Decimal(10, 2)
+  measurementUnit MeasurementUnit @map("measurement_unit_poi")
+  quantity        Decimal         @default(0) @map("quantity_poi") @db.Decimal(12, 3)
+  price           Decimal         @default(0) @map("price_poi") @db.Decimal(12, 2)
   discount        Decimal         @default(0) @map("discount_poi") @db.Decimal(10, 2)
-  subtotal        Decimal         @default(0) @map("subtotal_poi") @db.Decimal(10, 2)
+  subtotal        Decimal         @default(0) @map("subtotal_poi") @db.Decimal(12, 2)
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
-  product         Product         @relation(fields: [productId], references: [id])
-  purchaseOrder   PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id])
-  stockMovements  StockMovement[]
+  product         Product         @relation(fields: [productId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  purchaseOrder   PurchaseOrder   @relation(fields: [purchaseOrderId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  stockMovements  StockMovement?
 
   @@id([productId, purchaseOrderId])
+  @@unique([productId, purchaseOrderId, commerceId])
   @@map("purchase_orders_items_poi")
 }
 
 model Transaction {
   id             Int             @id @default(autoincrement()) @map("id_transaction_t")
   date           DateTime        @default(now()) @map("date_t")
-  amount         Decimal         @map("amount_t") @db.Decimal(10, 2)
+  amount         Decimal         @map("amount_t") @db.Decimal(12, 2)
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
-  paymentMethod  PaymentMethod   @default(EFECTIVO) @map("payment_method_t")
-  salesOrders    SalesOrder[]
-  purchaseOrders PurchaseOrder[]
-  direction      Direction?      @map("direction_t")
+  paymentMethod  PaymentMethod   @default(CASH) @map("payment_method_t")
+  salesOrder     SalesOrder?
+  purchaseOrder  PurchaseOrder?
+  walletProvider WalletProvider? @map("wallet_provider_t")
+  // Solo VIRTUAL_WALLET admite proveedor. La exclusividad compra/venta requiere validación adicional.
+  direction      Direction       @map("direction_t")
 
+  commerceId     Int             @map("id_commerce_t")
+  commerce       Commerce        @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
+  @@unique([id, commerceId])
   @@map("transactions_t")
 }
 
 model Balance {
   id              Int      @id @default(autoincrement()) @map("id_balance_b")
   date            DateTime @default(now()) @map("date_b")
-  cashIn          Decimal  @map("cash_in_b") @db.Decimal(10, 2)
-  cashOut         Decimal  @map("cash_out_b") @db.Decimal(10, 2)
-  expectedClosing Decimal  @map("expected_closing_b")
-  actualClosing   Decimal  @map("actual_closing_b")
-  difference      Decimal  @map("difference_b")
+  cashIn          Decimal  @map("cash_in_b") @db.Decimal(12, 2)
+  cashOut         Decimal  @map("cash_out_b") @db.Decimal(12, 2)
+  expectedClosing Decimal  @map("expected_closing_b") @db.Decimal(12, 2)
+  actualClosing   Decimal  @map("actual_closing_b") @db.Decimal(12, 2)
+  difference      Decimal  @map("difference_b") @db.Decimal(12, 2)
   createdAt       DateTime @default(now()) @map("created_at")
-  opening         Decimal  @map("opening_b") @db.Decimal(10, 2)
+  opening         Decimal  @map("opening_b") @db.Decimal(12, 2)
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  commerceId      Int      @map("id_commerce_b")
+  commerce        Commerce @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
   @@map("balance_b")
 }
 
 model User {
-  id             Int             @id @default(autoincrement()) @map("id_user_u")
-  username       String          @unique @map("username_u")
-  email          String          @unique @map("email_u")
-  last_access    DateTime        @map("last_access_u")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  isActive       Boolean         @default(true) @map("is_active_u")
-  passwordHash   String          @map("password_hash_u")
-  role           Role            @default(EMPLOYEE) @map("role_u")
-  salesOrders    SalesOrder[]
-  purchaseOrders PurchaseOrder[]
+  id                    Int                     @id @default(autoincrement()) @map("id_user_u")
+  // El dueño usa las credenciales del comercio, no un usuario personal.
+  username              String?                 @map("username_u")
+  email                 String                  @map("email_u")
+  firstname             String?                 @map("firstname_u")
+  lastname              String?                 @map("lastname_u")
+  dni                   String?                 @map("dni_u")
+  last_access           DateTime?               @map("last_access_u")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  isActive              Boolean                 @default(true) @map("is_active_u")
+  passwordHash          String                  @map("password_hash_u")
+  ownedCommerce         Commerce?               @relation("CommerceOwner")
+  commerceId            Int                     @map("id_commerce_u")
+  roleId                Int                     @map("id_role_u")
+  employeeId            Int?                    @map("id_employee_u")
+  commerce              Commerce                @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+  role                  CommerceRole            @relation(fields: [roleId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  employee              Employee?               @relation(fields: [employeeId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  session               AuthSession?
+  salesOrders           SalesOrder[]
+  purchaseOrders        PurchaseOrder[]
+  createdWorkShifts     WorkShift[]             @relation("WorkShiftCreator")
 
+  @@unique([id, commerceId])
+  @@unique([employeeId, commerceId])
+  @@unique([commerceId, username])
+  @@unique([commerceId, email])
+  @@index([commerceId])
+  @@index([roleId, commerceId])
   @@map("users_u")
 }
 
@@ -161,80 +307,192 @@ model SalesOrder {
   id              Int              @id @default(autoincrement()) @map("id_sales_order_so")
   invoice         String?          @map("invoice_so")
   date            DateTime         @default(now()) @map("date_so")
-  sellerId        Int              @default(3) @map("id_user_so")
+  sellerId        Int              @map("id_user_so")
   createdAt       DateTime         @default(now()) @map("created_at")
   discount        Decimal          @default(0) @map("discount_so") @db.Decimal(10, 2)
-  ivaSales        Decimal          @default(0) @map("iva_sales_order_so") @db.Decimal(10, 2)
+  ivaSales        Decimal          @default(0) @map("iva_sales_order_so") @db.Decimal(12, 2)
   isActive        Boolean          @default(true) @map("is_active_so")
-  taxableBase     Decimal          @default(0) @map("taxable_base_so")
-  subtotal        Decimal          @default(0) @map("subtotal_so") @db.Decimal(10, 2)
-  total           Decimal          @default(0) @map("total_so") @db.Decimal(10, 2)
+  taxableBase     Decimal          @default(0) @map("taxable_base_so") @db.Decimal(12, 2)
+  subtotal        Decimal          @default(0) @map("subtotal_so") @db.Decimal(12, 2)
+  total           Decimal          @default(0) @map("total_so") @db.Decimal(12, 2)
   updatedAt       DateTime         @updatedAt @map("updated_at")
-  paymentMethod   PaymentMethod    @default(EFECTIVO) @map("payment_method_so")
   salesOrderItems SalesOrderItem[]
-  seller          User             @relation(fields: [sellerId], references: [id])
-  transaction     Transaction      @relation(fields: [transactionId], references: [id])
-  transactionId   Int              @map("id_transaction_so")
+  seller          User             @relation(fields: [sellerId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  transaction     Transaction      @relation(fields: [transactionId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  transactionId   Int              @unique @map("id_transaction_so")
 
+  commerceId      Int              @map("id_commerce_so")
+  commerce        Commerce         @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+
+  @@index([commerceId])
+  @@unique([id, commerceId])
+  @@unique([transactionId, commerceId])
   @@map("sales_orders_so")
 }
 
 model SalesOrderItem {
-  salesOrderId   Int            @map("id_sales_order_soi")
-  productId      Int            @map("id_product_soi")
-  quantity       Int            @default(0) @map("quantity_soi")
-  shortname      String         @map("shortname_soi")
-  longname       String?        @map("longname_soi")
-  price          Decimal        @default(0) @map("price_soi") @db.Decimal(10, 2)
-  subtotal       Decimal        @default(0) @map("subtotal_soi") @db.Decimal(10, 2)
-  discount       Decimal        @default(0) @map("discount_soi") @db.Decimal(10, 2)
-  createdAt      DateTime       @default(now()) @map("created_at")
-  updatedAt      DateTime       @updatedAt @map("updated_at")
-  product        Product        @relation(fields: [productId], references: [id])
-  salesOrder     SalesOrder     @relation(fields: [salesOrderId], references: [id])
-  stockMovements StockMovement?
+  commerceId      Int             @map("id_commerce_soi")
+  salesOrderId    Int             @map("id_sales_order_soi")
+  productId       Int             @map("id_product_soi")
+  measurementUnit MeasurementUnit @map("measurement_unit_soi")
+  quantity        Decimal         @default(0) @map("quantity_soi") @db.Decimal(12, 3)
+  shortname       String          @map("shortname_soi")
+  longname        String?         @map("longname_soi")
+  price           Decimal         @default(0) @map("price_soi") @db.Decimal(12, 2)
+  subtotal        Decimal         @default(0) @map("subtotal_soi") @db.Decimal(12, 2)
+  discount        Decimal         @default(0) @map("discount_soi") @db.Decimal(10, 2)
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  product         Product         @relation(fields: [productId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  salesOrder      SalesOrder      @relation(fields: [salesOrderId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  stockMovements  StockMovement?
 
   @@id([salesOrderId, productId])
+  @@unique([salesOrderId, productId, commerceId])
   @@map("sales_orders_items_soi")
 }
 
 model Employee {
-  id        Int       @id @default(autoincrement()) @map("id_employee_e")
-  firstname String?   @map("firstname_e")
-  lastname  String?   @map("lastname_e")
-  fullname  String?   @map("fullname_e")
-  dni       String?   @unique @map("dni_e")
-  cuil      String?   @map("cuil_e")
-  dob       DateTime? @map("dob_e")
-  salary    Decimal?  @map("salary_e") @db.Decimal(10, 2)
-  jobTitle  String?   @map("job_title_e")
-  pto       String?   @map("pto_e")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  isActive  Boolean   @default(true) @map("is_active_e")
-  gender    Gender    @default(M) @map("gender_e")
+  id                 Int                     @id @default(autoincrement()) @map("id_employee_e")
+  // Numeración asignada por comercio de forma atómica; no usa la secuencia global del ID.
+  commerceEmployeeId Int                     @map("id_employe_commerce_e")
+  firstname          String?                 @map("firstname_e")
+  lastname           String?                 @map("lastname_e")
+  fullname           String?                 @map("fullname_e")
+  dni                String?                 @map("dni_e")
+  cuil               String?                 @map("cuil_e")
+  dob                DateTime?               @map("dob_e")
+  salary             Decimal?                @map("salary_e") @db.Decimal(12, 2)
+  jobTitle           String?                 @map("job_title_e")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime                @updatedAt @map("updated_at")
+  isActive           Boolean                 @default(true) @map("is_active_e")
+  gender             Gender                  @default(M) @map("gender_e")
 
+  commerceId         Int                     @map("id_commerce_e")
+  commerce           Commerce                @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+  user               User?
+  workShifts         WorkShift[]
+
+  @@unique([id, commerceId])
+  @@index([commerceId])
+  @@unique([commerceId, commerceEmployeeId])
+  @@unique([commerceId, dni])
   @@map("employees_e")
 }
 
+model WorkShiftType {
+  id                   Int                     @id @default(autoincrement()) @map("id_work_shift_type_wst")
+  commerceId           Int                     @map("id_commerce_wst")
+  name                 String                  @map("name_wst")
+  icon                 String                  @map("icon_wst")
+  iconColor            String                  @default("#FFFFFF") @map("icon_color_wst")
+  color                String                  @map("color_wst")
+  isWorkingDay         Boolean                 @default(true) @map("is_working_day_wst")
+  startTime            String?                 @map("start_time_wst") @db.VarChar(5)
+  endTime              String?                 @map("end_time_wst") @db.VarChar(5)
+  endsNextDay          Boolean                 @default(false) @map("ends_next_day_wst")
+  lateToleranceMinutes Int                     @default(0) @map("late_tolerance_minutes_wst")
+  isActive             Boolean                 @default(true) @map("is_active_wst")
+  createdAt            DateTime                @default(now()) @map("created_at")
+  updatedAt            DateTime                @updatedAt @map("updated_at")
+
+  // Horarios locales HH:mm; se convierten a instantes al asignar una fecha.
+  // Un tipo no laboral ocupa todo el día y no admite horarios, descansos ni tolerancia.
+  commerce             Commerce                @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+  breaks               WorkShiftTypeBreak[]
+  workShifts           WorkShift[]
+
+  @@unique([id, commerceId])
+  @@index([commerceId, isActive])
+  @@map("work_shift_types_wst")
+}
+
+model WorkShiftTypeBreak {
+  id              Int                @id @default(autoincrement()) @map("id_work_shift_type_break_wstb")
+  commerceId      Int                @map("id_commerce_wstb")
+  workShiftTypeId Int                @map("id_work_shift_type_wstb")
+  mode            WorkShiftBreakMode @map("mode_wstb")
+  durationMinutes Int?               @map("duration_minutes_wstb")
+  startTime       String?            @map("start_time_wstb") @db.VarChar(5)
+  endTime         String?            @map("end_time_wstb") @db.VarChar(5)
+  startsNextDay   Boolean            @default(false) @map("starts_next_day_wstb")
+  endsNextDay     Boolean            @default(false) @map("ends_next_day_wstb")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  // Flexible: duración. Fijo: horarios y día relativo al inicio de la jornada.
+  workShiftType   WorkShiftType      @relation(fields: [workShiftTypeId, commerceId], references: [id, commerceId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([workShiftTypeId, commerceId])
+  @@map("work_shift_type_breaks_wstb")
+}
+
+model WorkShift {
+  id              Int              @id @default(autoincrement()) @map("id_work_shift_ws")
+  commerceId      Int              @map("id_commerce_ws")
+  employeeId      Int              @map("id_employee_ws")
+  workShiftTypeId Int              @map("id_work_shift_type_ws")
+  date            DateTime         @map("date_ws") @db.Date
+  startsAt        DateTime?        @map("starts_at_ws")
+  endsAt          DateTime?        @map("ends_at_ws")
+  actualStartedAt DateTime?        @map("actual_started_at_ws")
+  actualEndedAt   DateTime?        @map("actual_ended_at_ws")
+  status          WorkShiftStatus  @default(SCHEDULED) @map("status_ws")
+  notes           String?          @map("notes_ws")
+  createdById     Int              @map("id_created_by_ws")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Nombre, icono, color y tolerancia se consultan en el tipo, también para el historial.
+  commerce        Commerce         @relation(fields: [commerceId], references: [id], onDelete: Restrict)
+  employee        Employee         @relation(fields: [employeeId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  createdBy       User             @relation("WorkShiftCreator", fields: [createdById, commerceId], references: [id, commerceId], onDelete: Restrict)
+  workShiftType   WorkShiftType    @relation(fields: [workShiftTypeId, commerceId], references: [id, commerceId], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([id, commerceId])
+  @@index([commerceId, date])
+  @@index([commerceId, employeeId, date])
+  @@index([workShiftTypeId, commerceId])
+  @@index([createdById])
+  @@map("work_shifts_ws")
+}
+
 model StockMovement {
+  commerceId        Int                 @map("id_commerce_sm")
   id                Int                 @id @default(autoincrement()) @map("id_stockmovement_sm")
   type              StockMovementType   @map("type_sm")
   productId         Int                 @map("product_id_sm")
-  quantity          Int                 @map("quantity_sm")
-  previousStock     Int                 @map("previous_stock_sm")
-  newStock          Int                 @map("new_stock_sm")
+  measurementUnit   MeasurementUnit     @map("measurement_unit_sm")
+  quantity          Decimal             @map("quantity_sm") @db.Decimal(12, 3)
+  previousStock     Decimal             @map("previous_stock_sm") @db.Decimal(12, 3)
+  newStock          Decimal             @map("new_stock_sm") @db.Decimal(12, 3)
   reason            String?             @map("reason_sm")
   createdAt         DateTime            @default(now()) @map("created_at_sm")
-  product           Product             @relation(fields: [productId], references: [id])
-  salesOrderItem    SalesOrderItem?     @relation(fields: [salesOrderId, productId], references: [salesOrderId, productId])
+  product           Product             @relation(fields: [productId, commerceId], references: [id, commerceId], onDelete: Restrict)
+  salesOrderItem    SalesOrderItem?     @relation(fields: [salesOrderId, productId, commerceId], references: [salesOrderId, productId, commerceId], onDelete: Restrict)
   salesOrderId      Int?                @map("id_sales_order_sm")
-  purchaseOrderItem PurchaseOrdersItem? @relation(fields: [productId, purchaseOrderId], references: [productId, purchaseOrderId])
+  purchaseOrderItem PurchaseOrdersItem? @relation(fields: [productId, purchaseOrderId, commerceId], references: [productId, purchaseOrderId, commerceId], onDelete: Restrict)
   purchaseOrderId   Int?                @map("id_purchase_order_sm")
 
   @@unique([salesOrderId, productId])
   @@unique([productId, purchaseOrderId])
+  @@unique([salesOrderId, productId, commerceId])
+  @@unique([productId, purchaseOrderId, commerceId])
+  @@index([commerceId])
   @@map("stock_movements_sm")
+}
+
+enum WorkShiftBreakMode {
+  FLEXIBLE
+  FIXED
+}
+
+enum WorkShiftStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 enum StockMovementType {
@@ -246,16 +504,24 @@ enum StockMovementType {
 }
 
 enum PaymentMethod {
-  EFECTIVO
-  MERCADOPAGO
-  UALA
+  CASH
+  BANK_TRANSFER
+  VIRTUAL_WALLET
+  CREDIT_CARD
+  DEBIT_CARD
 }
 
-enum Role {
-  ADMIN
-  BUSINESS_OWNER
-  SUPERVISOR
-  EMPLOYEE
+enum WalletProvider {
+  MERCADOPAGO
+  UALA
+  OTHER
+}
+
+enum MeasurementUnit {
+  UNIT
+  BOX
+  KILOGRAM
+  LITER
 }
 
 enum Gender {

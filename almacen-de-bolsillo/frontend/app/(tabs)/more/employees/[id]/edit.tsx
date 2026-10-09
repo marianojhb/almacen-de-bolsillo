@@ -44,9 +44,7 @@ export default function EditEmployeeScreen() {
         dob: employee.dob ? employee.dob.slice(0, 10) : null,
         salary:
           employee.salary === null ? null : Number(employee.salary),
-        jobTitle: employee.jobTitle,
-        pto: employee.pto,
-        gender: employee.gender,
+        jobTitle: employee.jobTitle,        gender: employee.gender,
       }}
       onCancel={() => router.back()}
       onSubmit={async (values) => {

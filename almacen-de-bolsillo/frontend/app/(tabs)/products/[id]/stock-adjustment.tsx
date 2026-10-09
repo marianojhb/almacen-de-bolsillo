@@ -2,7 +2,7 @@ import { useProducts } from "@/contexts/products";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import type { CreateStockMovementDto } from "@almacen/shared";
+import { allowsFractionalQuantity, formatProductQuantity, isValidProductQuantity, parseDecimalInput, type CreateStockMovementDto } from "@almacen/shared";
 import { postStockMovementRequest } from "@/services/movementsApi";
 
 const stockAdjustmentSignClassName = "w-8 text-center text-3xl font-black leading-8 text-slate-950 dark:text-white";
@@ -41,9 +41,9 @@ export default function StockAdjustmentScreen() {
       return false;
     }
 
-    const quantity = Number(inputAdjustmentValue);
+    const quantity = parseDecimalInput(inputAdjustmentValue);
 
-    if (!Number.isInteger(quantity) || quantity < 0) {
+    if (!isValidProductQuantity(quantity, product.measurementUnit)) {
       return false;
     }
 
@@ -67,6 +67,10 @@ export default function StockAdjustmentScreen() {
         break;
     }
 
+    // Operar en milésimas evita residuos como 0.1 + 0.2 en el cuerpo de la API.
+    newStock = Math.round(newStock * 1000) / 1000;
+    stockDifference = Math.round(stockDifference * 1000) / 1000;
+    if (!isValidProductQuantity(newStock, product.measurementUnit) || stockDifference === 0) return false;
     const newStockMovement: CreateStockMovementDto = {
       type: movementType,
       productId: product.id,
@@ -102,7 +106,7 @@ export default function StockAdjustmentScreen() {
           <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Stock</Text>
           <Text className="mt-1 text-3xl font-black text-white">Ajustar inventario</Text>
           <Text className="mt-2 text-sm leading-5 text-slate-300">
-            {product.shortname} · stock actual {currentStock}
+            {product.shortname} · stock actual {formatProductQuantity(currentStock, product.measurementUnit)}
           </Text>
         </View>
 
@@ -166,7 +170,7 @@ export default function StockAdjustmentScreen() {
               </Text>
             </View>
             <TextInput
-              keyboardType="numeric"
+              keyboardType={allowsFractionalQuantity(product.measurementUnit) ? "decimal-pad" : "number-pad"}
               value={inputAdjustmentValue}
               onChangeText={(text) => setInputAdjustmentValue(text)}
               placeholder="Valor"
@@ -209,7 +213,7 @@ export default function StockAdjustmentScreen() {
               if (!isSaving) {
                 Alert.alert(
                   "Error",
-                  "Por favor, ingrese un valor válido para el ajuste de stock. Debe ser un número entero no negativo.",
+                  "Por favor, ingrese un valor válido para el ajuste de stock. Unidades y cajas requieren enteros; kg y litros admiten hasta tres decimales. El resultado no puede ser negativo y debe cambiar el stock.",
                   [{ text: "Aceptar" }],
                 );
               }

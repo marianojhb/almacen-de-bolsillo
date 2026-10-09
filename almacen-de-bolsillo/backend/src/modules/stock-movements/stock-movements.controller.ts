@@ -1,113 +1,42 @@
 import type { Request, Response } from "express";
+import { getRequestSession } from "../auth/auth.middleware.js";
+import { readId, readText, sendApiError } from "../auth/request.utils.js";
 import {
-  getStockMovementsFromDatabase,
-  getStockMovementByIdFromDatabase,
-  getStockMovementsByProductIdFromDatabase,
-  getStockMovementsByProductSkuFromDatabase,
+  getStockMovementsFromDatabase, getStockMovementByIdFromDatabase,
+  getStockMovementsByProductIdFromDatabase, getStockMovementsByProductSkuFromDatabase,
   postStockMovementToDatabase,
-  updateStockMovementFromDatabase,
-  deleteStockMovementFromDatabase,
 } from "./stock-movements.service.js";
 
-const getStockMovements = async (req: Request, res: Response) => {
-  try {
-    const stockMovements = await getStockMovementsFromDatabase();
-    res.json(stockMovements);
-  } catch (error) {
-    console.error("Error fetching stock movements:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+const getStockMovements = async (_req: Request, res: Response) => {
+  try { res.json(await getStockMovementsFromDatabase(getRequestSession(res).commerce.id)); }
+  catch (error) { sendApiError(res, error); }
 };
-
 const getStockMovementById = async (req: Request, res: Response) => {
-  const stockMovementId = Number(req.params.id);
-
   try {
-    const stockMovement = await getStockMovementByIdFromDatabase(stockMovementId);
-
-    if (stockMovement) {
-      res.json(stockMovement);
-    } else {
-      res.status(404).json({ message: "Stock movement not found" });
-    }
-  } catch (error) {
-    console.error("Error fetching stock movement:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+    const movement = await getStockMovementByIdFromDatabase(readId(req.params.id), getRequestSession(res).commerce.id);
+    if (!movement) { res.status(404).json({ message: "Movimiento no encontrado en este comercio." }); return; }
+    res.json(movement);
+  } catch (error) { sendApiError(res, error); }
 };
-
 const getStockMovementsByProductId = async (req: Request, res: Response) => {
-  const productId = Number(req.params.productId);
-
-  try {
-    const stockMovements = await getStockMovementsByProductIdFromDatabase(productId);
-    res.json(stockMovements);
-  } catch (error) {
-    console.error("Error fetching stock movements by product ID:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+  try { res.json(await getStockMovementsByProductIdFromDatabase(readId(req.params.productId), getRequestSession(res).commerce.id)); }
+  catch (error) { sendApiError(res, error); }
 };
-
 const getStockMovementsByProductSku = async (req: Request, res: Response) => {
-  const productSku = req.params.productSku;
-
-  if (typeof productSku !== "string" || productSku.trim() === "") {
-    res.status(400).json({ message: "Invalid product SKU" });
-    return;
-  }
-
-  try {
-    const stockMovements = await getStockMovementsByProductSkuFromDatabase(productSku);
-    res.json(stockMovements);
-  } catch (error) {
-    console.error("Error fetching stock movements by product SKU:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+  try { res.json(await getStockMovementsByProductSkuFromDatabase(readText(req.params.productSku, "SKU"), getRequestSession(res).commerce.id)); }
+  catch (error) { sendApiError(res, error); }
 };
-
 const postStockMovement = async (req: Request, res: Response) => {
-  const stockMovementData = req.body;
-
-  try {
-    const newStockMovement = await postStockMovementToDatabase(stockMovementData);
-    res.status(201).json(newStockMovement);
-  } catch (error) {
-    console.error("Error creating stock movement:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+  try { res.status(201).json(await postStockMovementToDatabase(req.body, getRequestSession(res).commerce.id)); }
+  catch (error) { sendApiError(res, error); }
 };
-
-const updateStockMovement = async (req: Request, res: Response) => {
-  const stockMovementId = Number(req.params.id);
-  const stockMovementData = req.body;
-
-  try {
-    const updatedStockMovement = await updateStockMovementFromDatabase(stockMovementId, stockMovementData);
-    res.json(updatedStockMovement);
-  } catch (error) {
-    console.error("Error updating stock movement:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+const updateStockMovement = (_req: Request, res: Response) => {
+  res.set("Allow", "GET").status(405).json({ message: "El historial no se edita. Registrá un nuevo ajuste de stock." });
 };
-
-const deleteStockMovement = async (req: Request, res: Response) => {
-  const stockMovementId = Number(req.params.id);
-
-  try {
-    const deletedStockMovement = await deleteStockMovementFromDatabase(stockMovementId);
-    res.json(deletedStockMovement);
-  } catch (error) {
-    console.error("Error deleting stock movement:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
+const deleteStockMovement = (_req: Request, res: Response) => {
+  res.set("Allow", "GET").status(405).json({ message: "El historial de movimientos de stock no se elimina." });
 };
-
 export {
-  getStockMovements,
-  getStockMovementById,
-  getStockMovementsByProductId,
-  getStockMovementsByProductSku,
-  postStockMovement,
-  updateStockMovement,
-  deleteStockMovement,
+  getStockMovements, getStockMovementById, getStockMovementsByProductId,
+  getStockMovementsByProductSku, postStockMovement, updateStockMovement, deleteStockMovement,
 };

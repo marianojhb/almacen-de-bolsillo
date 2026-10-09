@@ -1,3 +1,5 @@
+import { formatProductQuantity, getMeasurementUnit } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
 import { FlatList, Keyboard, Text, View, Pressable, TextInput, RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { NewProductButton } from "@/components/products";
@@ -5,6 +7,7 @@ import { useProducts } from "@/contexts/products";
 import { useState, useMemo } from "react";
 
 export default function ProductsScreen() {
+  const { formatCurrency } = useCommerceFormat();
   const {
     products,
     categories,
@@ -191,7 +194,7 @@ export default function ProductsScreen() {
               <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
-                    <Text className="text-2xl font-black text-slate-950 dark:text-white">{product.shortname}</Text>
+                    <Text className="text-2xl font-black text-slate-950 dark:text-white">{product.shortname} · {getMeasurementUnit(product.measurementUnit).symbol}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
                       #{product.id} · {product.longname}
                     </Text>
@@ -202,18 +205,18 @@ export default function ProductsScreen() {
                       Precio
                     </Text>
                     <Text className="text-xl font-black text-emerald-700 dark:text-emerald-300">
-                      {Number(product.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      {formatCurrency(product.price)} / {getMeasurementUnit(product.measurementUnit).priceLabel}
                     </Text>
                   </View>
                 </View>
 
                 <View className="mt-4 flex-row flex-wrap gap-2">
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Stock: {product.stock}</Text>
+                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Stock: {formatProductQuantity(product.stock, product.measurementUnit)}</Text>
                   </View>
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      Mín: {product.stockMin}
+                      Mín: {formatProductQuantity(product.stockMin, product.measurementUnit)}
                     </Text>
                   </View>
                   <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">

@@ -1,9 +1,11 @@
+import type { MeasurementUnit } from "../products/measurement-unit.utils.js";
 export type StockMovementType = "PURCHASE" | "SALE" | "MANUAL_ENTRY" | "MANUAL_EXIT" | "ADJUSTMENT";
 
 export type StockMovement = {
   id: number;
   type: StockMovementType;
   productId: number;
+  measurementUnit: MeasurementUnit;
   quantity: number;
   previousStock: number;
   newStock: number;
@@ -11,4 +13,4 @@ export type StockMovement = {
   createdAt: string;
 };
 
-export type CreateStockMovementDto = Omit<StockMovement, "id" | "createdAt">;
+export type CreateStockMovementDto = Omit<StockMovement, "id" | "createdAt" | "measurementUnit">;

@@ -1,9 +1,13 @@
+import { formatProductQuantity, getMeasurementUnit } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { EditProductButton, DeleteProductButton } from "@/components/products";
 
 export default function ProductDetailScreen() {
+  const { formatCurrency } = useCommerceFormat();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { products } = useProducts();
 
@@ -41,7 +45,7 @@ export default function ProductDetailScreen() {
           <View className="flex-row items-start justify-between gap-4">
             <View className="flex-1">
               <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Producto</Text>
-              <Text className="mt-1 text-4xl font-black text-white">{product.shortname}</Text>
+              <Text className="mt-1 text-4xl font-black text-white">{product.shortname} · {getMeasurementUnit(product.measurementUnit).symbol}</Text>
               <Text className="mt-2 text-sm leading-5 text-slate-300" numberOfLines={2}>
                 #{product.id} · {product.longname}
               </Text>
@@ -59,10 +63,10 @@ export default function ProductDetailScreen() {
 
         <View className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
           <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-            Precio
+            Precio por {getMeasurementUnit(product.measurementUnit).priceLabel}
           </Text>
           <Text className="mt-1 text-4xl font-black text-emerald-700 dark:text-emerald-300">
-            ${product.price.toLocaleString("es-AR")}
+            {formatCurrency(product.price)}
           </Text>
         </View>
 
@@ -72,22 +76,22 @@ export default function ProductDetailScreen() {
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
                 Stock actual
               </Text>
-              <Text className="mt-1 text-3xl font-black text-slate-950 dark:text-white">{product.stock}</Text>
+              <Text className="mt-1 text-3xl font-black text-slate-950 dark:text-white">{formatProductQuantity(product.stock, product.measurementUnit)}</Text>
               <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">
-                Mínimo: {product.stockMin}
+                Mínimo: {formatProductQuantity(product.stockMin, product.measurementUnit)}
               </Text>
             </View>
             <View className="gap-2">
-              <Pressable
+              <PermissionGate permission="stock_movements.create"><Pressable
                 onPress={() => router.push(`/products/${product.id}/stock-adjustment`)}
                 className="items-center rounded-2xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
                 <Text className="text-sm font-black text-white dark:text-[#111A1A]">Ajustar</Text>
-              </Pressable>
-              <Pressable
+              </Pressable></PermissionGate>
+              <PermissionGate permission="stock_movements.read"><Pressable
                 onPress={() => router.push(`/products/${product.id}/movements`)}
                 className="items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 active:opacity-75 dark:border-slate-800 dark:bg-slate-900">
                 <Text className="text-sm font-black text-slate-950 dark:text-white">Historial</Text>
-              </Pressable>
+              </Pressable></PermissionGate>
             </View>
           </View>
 
@@ -116,7 +120,7 @@ export default function ProductDetailScreen() {
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
                 SKU
               </Text>
-              <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">{product.sku}</Text>
+              <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">{product.sku ?? "Sin SKU"}</Text>
             </View>
             <View>
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">

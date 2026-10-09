@@ -51,6 +51,7 @@ export default function EditSupplierScreen() {
         name: supplier.name,
         cuit:
           supplier.cuit ?? "",
+        phoneCountryCode: supplier.phoneCountryCode,
         phone: supplier.phone,
         email: supplier.email,
         address:

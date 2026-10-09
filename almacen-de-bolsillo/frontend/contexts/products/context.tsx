@@ -4,14 +4,14 @@ import type {
   Category,
   CreateCategoryDto,
   UpdateProductDto,
-  Supplier,
+  SupplierOption,
   ProductWithRelations,
 } from "@almacen/shared";
 
 interface ProductsContextType {
   products: ProductWithRelations[];
   categories: Category[];
-  suppliers: Supplier[]; // Cambiado a any[] para evitar el error de tipo
+  suppliers: SupplierOption[];
   isLoadingProducts: boolean;
   isLoadingCategories: boolean;
   isLoadingSuppliers: boolean;

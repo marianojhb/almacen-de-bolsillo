@@ -1,3 +1,6 @@
+import { formatPhoneContact } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
@@ -38,6 +41,7 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
 }
 
 export default function SuppliersScreen() {
+  const { formatDate } = useCommerceFormat();
   const { suppliers, isLoadingSuppliers, suppliersError, refreshSuppliers, deleteSupplier, updateSupplier } = useSuppliers();
 
   const [ search, setSearch ] = useState("");
@@ -186,7 +190,7 @@ const visibleSuppliers = useMemo(() => {
           </Text>
         </View>
 
-        <Pressable
+        <PermissionGate permission="suppliers.create"><Pressable
           onPress={() =>
             router.push("/more/suppliers/new")
           }
@@ -197,7 +201,7 @@ const visibleSuppliers = useMemo(() => {
           <Text className="font-semibold text-white dark:text-black">
             Nuevo
           </Text>
-        </Pressable>
+        </Pressable></PermissionGate>
       </View>
 
       <View className="mb-4 flex-row items-center rounded-xl border border-gray-200 bg-white px-3 dark:border-gray-700 dark:bg-gray-900">
@@ -345,7 +349,7 @@ const visibleSuppliers = useMemo(() => {
                 </View>
 
                 <View className="flex-row items-center gap-2">
-                  <Pressable
+                  <PermissionGate permission="suppliers.update"><Pressable
                     disabled={isDeleting}
                     onPress={(event) => {
                       event.stopPropagation();
@@ -366,12 +370,12 @@ const visibleSuppliers = useMemo(() => {
                       size={21}
                       color="#4b5563"
                     />
-                  </Pressable>
+                  </Pressable></PermissionGate>
                   
 
 
               {supplier.isActive ? (
-                <Pressable
+                <PermissionGate permission="suppliers.delete"><Pressable
                   disabled={isChangingStatus}
                   onPress={(event) => {
                     event.stopPropagation();
@@ -386,9 +390,9 @@ const visibleSuppliers = useMemo(() => {
                     size={22}
                     color="#dc2626"
                   />
-                </Pressable>
+                </Pressable></PermissionGate>
               ) : (
-                <Pressable
+                <PermissionGate permission="suppliers.update"><Pressable
                   disabled={isChangingStatus}
                   onPress={(event) => {
                     event.stopPropagation();
@@ -403,7 +407,7 @@ const visibleSuppliers = useMemo(() => {
                     size={22}
                     color="#16a34a"
                   />
-                </Pressable>
+                </Pressable></PermissionGate>
               )}
                   
                   <Ionicons
@@ -422,7 +426,7 @@ const visibleSuppliers = useMemo(() => {
                 <View className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
                   <DetailRow
                     label="Teléfono"
-                    value={supplier.phone}
+                    value={formatPhoneContact(supplier.phoneCountryCode, supplier.phone)}
                   />
 
                   <DetailRow
@@ -438,10 +442,10 @@ const visibleSuppliers = useMemo(() => {
                   <DetailRow
                     label="Fecha de registro"
                     value={
-                      new Date(supplier.createdAt).toLocaleDateString("es-AR")
+                      formatDate(supplier.createdAt)
                     }
                   />
-                  <Pressable
+                  <PermissionGate permission="products.read"><Pressable
                     onPress={(event) => {
                     event.stopPropagation();
 
@@ -459,7 +463,7 @@ const visibleSuppliers = useMemo(() => {
                     <Text className="font-semibold text-white dark:text-black">
                       Ver productos 
                     </Text>
-                  </Pressable>
+                  </Pressable></PermissionGate>
                 </View>
               )}
             </Pressable>
