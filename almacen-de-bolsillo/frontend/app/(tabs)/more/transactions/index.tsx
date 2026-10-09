@@ -1,8 +1,11 @@
+import { paymentLabel } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
 import { useMemo, useState } from "react";
 import { FlatList, Keyboard, RefreshControl, Text, TextInput, View } from "react-native";
 import { useTransactions } from "@/contexts/transactions";
 
 export default function TransactionsScreen() {
+  const { formatCurrency, formatDate, formatTime } = useCommerceFormat();
   const { transactions, isLoadingTransactions, transactionsError, refreshTransactions } = useTransactions();
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -17,7 +20,6 @@ export default function TransactionsScreen() {
     return transactions.filter((transaction) => {
       return [
         transaction.amount.toString(),
-        transaction.type,
         transaction.direction,
         transaction.paymentMethod,
         `#${transaction.id}`,
@@ -73,13 +75,7 @@ export default function TransactionsScreen() {
             </Text>
             <Text className="mt-2 text-sm leading-5 text-slate-300">
               Total:{" "}
-              {Number(transactions.reduce((acc, transaction) => acc + Number(transaction.amount), 0)).toLocaleString(
-                "es-AR",
-                {
-                  style: "currency",
-                  currency: "ARS",
-                },
-              )}
+              {formatCurrency(transactions.reduce((acc, transaction) => acc + Number(transaction.amount), 0))}
             </Text>
           </View>
         </View>
@@ -147,12 +143,7 @@ export default function TransactionsScreen() {
             const directionTextClass = isIncome
               ? "text-emerald-700 dark:text-emerald-300"
               : "text-red-700 dark:text-red-300";
-            const paymentMethodLabel =
-              transaction.paymentMethod === "EFECTIVO"
-                ? "Efectivo"
-                : transaction.paymentMethod === "MERCADOPAGO"
-                  ? "Mercado Pago"
-                  : "Ualá";
+            const paymentMethodLabel = paymentLabel(transaction.paymentMethod, transaction.walletProvider);
 
             return (
               <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
@@ -162,11 +153,7 @@ export default function TransactionsScreen() {
                       Transacción #{transaction.id}
                     </Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
-                      {new Date(transaction.date).toLocaleDateString("es-AR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
+                      {formatDate(transaction.date)}
                     </Text>
                   </View>
 
@@ -175,14 +162,14 @@ export default function TransactionsScreen() {
                       {isIncome ? "Ingreso" : "Egreso"}
                     </Text>
                     <Text className={`text-xl font-black ${directionTextClass}`}>
-                      {Number(transaction.amount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      {formatCurrency(transaction.amount)}
                     </Text>
                   </View>
                 </View>
 
                 <View className="mt-4 flex-row flex-wrap gap-2">
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">{transaction.type}</Text>
+                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">{transaction.direction === "INCOME" ? "Ingreso" : "Egreso"}</Text>
                   </View>
                   <View className={`rounded-full px-3 py-1.5 ${directionBadgeClass}`}>
                     <Text className={`text-xs font-bold ${directionTextClass}`}>{isIncome ? "INCOME" : "EXPENSE"}</Text>
@@ -192,10 +179,7 @@ export default function TransactionsScreen() {
                   </View>
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {new Date(transaction.createdAt).toLocaleTimeString("es-AR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatTime(transaction.createdAt)}
                     </Text>
                   </View>
                 </View>

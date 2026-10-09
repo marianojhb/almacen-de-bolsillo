@@ -1,9 +1,12 @@
+import { formatProductQuantity, getMeasurementUnit, paymentLabel } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
 import { useSales } from "@/contexts/sales";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Text, View, ScrollView } from "react-native";
 import { DeleteButton } from "@/components/sales/DeleteButton";
 
 export default function SalesDetailScreen() {
+  const { formatCurrency, formatDateTime } = useCommerceFormat();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { sales } = useSales();
 
@@ -37,10 +40,10 @@ export default function SalesDetailScreen() {
               <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Ventas</Text>
               <Text className="mt-1 text-4xl font-black text-white">Venta Nº{sale.id}</Text>
               <Text className="mt-2 text-sm leading-5 text-slate-300" numberOfLines={2}>
-                Fecha: {new Date(sale.createdAt).toLocaleString("es-AR")}
+                Fecha: {formatDateTime(sale.createdAt)}
               </Text>
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                Vendedor: {sale.seller.username}
+                Vendedor: {sale.seller.name}
               </Text>
             </View>
 
@@ -53,8 +56,8 @@ export default function SalesDetailScreen() {
                 <Text className="text-xs font-black text-[#111A1A]">{sale.isActive ? "Activo" : "Inactivo"}</Text>
               </View>
               <View
-                className={`rounded-full px-3 py-1.5 ${sale.paymentMethod === "EFECTIVO" ? "bg-emerald-400" : sale.paymentMethod === "MERCADOPAGO" ? "bg-amber-400" : "bg-blue-500"}`}>
-                <Text className="text-xs font-black text-black">{sale.paymentMethod}</Text>
+                className={`rounded-full px-3 py-1.5 ${sale.paymentMethod === "CASH" ? "bg-emerald-400" : sale.paymentMethod === "VIRTUAL_WALLET" ? "bg-amber-400" : "bg-blue-500"}`}>
+                <Text className="text-xs font-black text-black">{paymentLabel(sale.paymentMethod, sale.walletProvider)}</Text>
               </View>
             </View>
           </View>
@@ -69,7 +72,7 @@ export default function SalesDetailScreen() {
             Total de la venta
           </Text>
           <Text className="mt-1 text-4xl font-black text-emerald-700 dark:text-emerald-300">
-            {Number(sale.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+            {formatCurrency(sale.total)}
           </Text>
         </View>
 
@@ -83,7 +86,7 @@ export default function SalesDetailScreen() {
                   Subtotal
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.subtotal).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {formatCurrency(sale.subtotal)}
                 </Text>
               </View>
 
@@ -92,7 +95,7 @@ export default function SalesDetailScreen() {
                   Descuento
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.discount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {formatCurrency(sale.discount)}
                 </Text>
               </View>
 
@@ -101,7 +104,7 @@ export default function SalesDetailScreen() {
                   Total sin IVA
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.taxableBase).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {formatCurrency(sale.taxableBase)}
                 </Text>
               </View>
 
@@ -110,7 +113,7 @@ export default function SalesDetailScreen() {
                   IVA
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.ivaSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {formatCurrency(sale.ivaSales)}
                 </Text>
               </View>
 
@@ -119,7 +122,7 @@ export default function SalesDetailScreen() {
                   Total
                 </Text>
                 <Text className="mt-1 text-base font-semibold text-slate-800 dark:text-slate-100">
-                  {Number(sale.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {formatCurrency(sale.total)}
                 </Text>
               </View>
             </View>
@@ -140,14 +143,11 @@ export default function SalesDetailScreen() {
                       {item.product?.shortname ?? "Producto no encontrado"}
                     </Text>
                     <Text className="dark:text-white">
-                      {Number(item.quantity)} x{" "}
-                      {Number(item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      {formatProductQuantity(item.quantity, item.measurementUnit)} ×{" "}
+                      {formatCurrency(item.price)} / {getMeasurementUnit(item.measurementUnit).priceLabel}
                     </Text>
                     <Text className="dark:text-white">
-                      {Number(item.price * item.quantity).toLocaleString("es-AR", {
-                        style: "currency",
-                        currency: "ARS",
-                      })}{" "}
+                      {formatCurrency(item.subtotal)}{" "}
                     </Text>
                   </View>
                 );

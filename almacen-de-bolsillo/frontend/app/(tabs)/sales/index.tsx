@@ -1,9 +1,13 @@
+import { paymentLabel } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { useSales } from "@/contexts/sales";
 
 export default function SalesScreen() {
+  const { formatCurrency, formatDate, formatTime } = useCommerceFormat();
   const { totalSales, sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -16,8 +20,7 @@ export default function SalesScreen() {
     }
 
     return sales.filter((sale) => {
-      const formattedPaymentMethod =
-        sale.paymentMethod === "EFECTIVO" ? "eft" : sale.paymentMethod === "MERCADOPAGO" ? "mp" : "ual";
+      const formattedPaymentMethod = paymentLabel(sale.paymentMethod, sale.walletProvider);
 
       return [`venta ${sale.id}`, `#${sale.id}`, sale.invoice, sale.paymentMethod, formattedPaymentMethod]
         .filter((value): value is string => value !== undefined)
@@ -55,19 +58,19 @@ export default function SalesScreen() {
             <Text className="mt-1 text-4xl font-black text-white">Ventas</Text>
           </View>
 
-          <Pressable
+          <PermissionGate permission="sales.create"><Pressable
             className="min-w-[124px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
             onPress={() => {
               Keyboard.dismiss();
               router.push("/sales/new");
             }}>
             <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Nueva venta</Text>
-          </Pressable>
+          </Pressable></PermissionGate>
         </View>
         <View>
           <Text className="mt-2 text-sm leading-5 text-slate-300">
             {filteredSales.length} de {sales.length} ventas visibles · Total{" "}
-            {Number(totalSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+            {formatCurrency(totalSales)}
           </Text>
         </View>
       </View>
@@ -133,24 +136,19 @@ export default function SalesScreen() {
         }
         refreshControl={<RefreshControl refreshing={isLoadingSales} onRefresh={refreshSales} />}
         renderItem={({ item: sale }) => {
-          const paymentMethodLabel =
-            sale.paymentMethod === "EFECTIVO"
-              ? "Efectivo"
-              : sale.paymentMethod === "MERCADOPAGO"
-                ? "Mercado Pago"
-                : "Ualá";
+          const paymentMethodLabel = paymentLabel(sale.paymentMethod, sale.walletProvider);
 
           const paymentMethodBadgeClass =
-            sale.paymentMethod === "EFECTIVO"
+            sale.paymentMethod === "CASH"
               ? "bg-emerald-50 dark:bg-emerald-950/60"
-              : sale.paymentMethod === "MERCADOPAGO"
+              : sale.paymentMethod === "VIRTUAL_WALLET"
                 ? "bg-amber-50 dark:bg-amber-950/60"
                 : "bg-blue-50 dark:bg-blue-950/60";
 
           const paymentMethodTextClass =
-            sale.paymentMethod === "EFECTIVO"
+            sale.paymentMethod === "CASH"
               ? "text-emerald-700 dark:text-emerald-300"
-              : sale.paymentMethod === "MERCADOPAGO"
+              : sale.paymentMethod === "VIRTUAL_WALLET"
                 ? "text-amber-700 dark:text-amber-300"
                 : "text-blue-700 dark:text-blue-300";
 
@@ -178,7 +176,7 @@ export default function SalesScreen() {
                       Total
                     </Text>
                     <Text className="text-xl font-black text-emerald-700 dark:text-emerald-300">
-                      {Number(sale.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      {formatCurrency(sale.total)}
                     </Text>
                   </View>
                 </View>
@@ -186,16 +184,12 @@ export default function SalesScreen() {
                 <View className="mt-4 flex-row flex-wrap gap-2">
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {new Date(sale.createdAt).toLocaleDateString("es-AR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
+                      {formatDate(sale.createdAt)}
                     </Text>
                   </View>
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {new Date(sale.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                      {formatTime(sale.createdAt)}
                     </Text>
                   </View>
                   <View className={`rounded-full px-3 py-1.5 ${paymentMethodBadgeClass}`}>

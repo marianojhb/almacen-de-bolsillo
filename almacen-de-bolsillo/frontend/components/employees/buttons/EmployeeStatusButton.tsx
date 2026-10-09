@@ -1,3 +1,4 @@
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import type { Employee } from "@almacen/shared";
 import { Ionicons } from "@expo/vector-icons";
 import { Alert, Pressable } from "react-native";
@@ -28,7 +29,7 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
 
                 Alert.alert(
                     "Empleado activado",
-                    `${employeeName} fue dado de alta correctamente.`,
+                    `${employeeName} fue dado de alta. Si tenía una cuenta desactivada, reactivá su acceso desde Usuarios cuando corresponda.`,
                 );
             }
         } catch (error) {
@@ -45,7 +46,7 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
         Alert.alert(
             isActive ? "Dar de baja empleado" : "Dar de alta empleado",
             isActive
-            ? `¿Querés dar de baja a ${employeeName}? Podrás volver a activarlo.`
+            ? `¿Querés dar de baja a ${employeeName}? Si tiene una cuenta vinculada, se desactivará su acceso a este comercio y se cerrarán sus sesiones. Podrás volver a activar la ficha.`
             : `¿Querés volver a activar a ${employeeName}?`,
             [
                 {
@@ -62,6 +63,7 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
     };
 
     return (
+    <PermissionGate permission={isActive ? "employees.deactivate" : "employees.update"}>
     <Pressable
         disabled={disabled}
         accessibilityRole="button"
@@ -84,5 +86,6 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
             color={isActive ? "#dc2626" : "#16a34a"}
         />
     </Pressable>
+    </PermissionGate>
     );
 }

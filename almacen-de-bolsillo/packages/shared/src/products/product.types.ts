@@ -1,13 +1,15 @@
+import type { MeasurementUnit } from "./measurement-unit.utils.js";
 import type { Category } from "../categories/category.types.js";
 import type {
   CreateProductOnSupplierDto,
   CreateProductOnSupplierFromProductDto,
 } from "../product-suppliers/product-supplier.types.js";
-import type { Supplier } from "../suppliers/supplier.types.js";
+import type { SupplierOption } from "../suppliers/supplier.types.js";
 
 export type Product = {
   id: number;
-  sku: string;
+  sku: string | null;
+  measurementUnit: MeasurementUnit;
   shortname: string;
   longname: string;
   description: string | null;
@@ -22,11 +24,12 @@ export type Product = {
 };
 
 export type ProductOnSupplierWithSupplierDto = CreateProductOnSupplierDto & {
-  supplier: Supplier;
+  supplier: SupplierOption;
 };
 
 export type CreateProductDto = {
-  sku: string;
+  sku: string | null;
+  measurementUnit: MeasurementUnit;
   shortname: string;
   longname: string;
   price: number;

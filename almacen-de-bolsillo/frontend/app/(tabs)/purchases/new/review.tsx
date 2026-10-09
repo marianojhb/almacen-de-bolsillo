@@ -1,15 +1,18 @@
-import type { CreatePurchaseOrderDto } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PAYMENT_METHODS, WALLET_PROVIDERS, formatProductQuantity, getMeasurementUnit, isValidProductQuantity, lineAmount, sumAmounts, type MeasurementUnit, type PaymentMethod, type WalletProvider, type CreatePurchaseOrderDto } from "@almacen/shared";
+import { SearchSelect } from "@/components/forms/SearchSelect";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
 import { usePurchases } from "@/contexts/purchases";
-import { useSuppliers } from "@/contexts/suppliers";
+import { usePurchaseSuppliers } from "@/hooks/use-purchase-suppliers";
 
 type SupplierReviewItem = {
   productId: number;
   shortname: string;
+  measurementUnit: MeasurementUnit;
   quantity: number;
   price: number;
   discount: number;
@@ -23,18 +26,15 @@ type SupplierReviewGroup = {
   total: number;
 };
 
-const formatCurrency = (value: number) =>
-  value.toLocaleString("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 2,
-  });
-
 export default function ReviewPurchaseScreen() {
-  const { items, purchaseQuantities, clearPurchase } = usePurchaseDraft();
-  const { suppliers } = useSuppliers();
+  const { formatCurrency } = useCommerceFormat();
+  const { items, purchaseQuantities, clearPurchase, updatePurchaseQuantity } = usePurchaseDraft();
+  const { suppliers } = usePurchaseSuppliers();
   const { addPurchase, refreshPurchases } = usePurchases();
   const [isCreatingOrders, setIsCreatingOrders] = useState(false);
+  const saving = useRef(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
+  const [walletProvider, setWalletProvider] = useState<WalletProvider>("MERCADOPAGO");
   const [creationError, setCreationError] = useState<string | null>(null);
 
   const supplierGroups = useMemo<SupplierReviewGroup[]>(() => {
@@ -44,23 +44,24 @@ export default function ReviewPurchaseScreen() {
       suppliers.forEach((supplier) => {
         const quantity = purchaseQuantities[`${draftItem.productId}-${supplier.id}`] ?? 0;
 
-        if (quantity <= 0) {
+        if (quantity <= 0 || !isValidProductQuantity(quantity, draftItem.measurementUnit)) {
           return;
         }
 
         const supplierProduct = supplier.products.find((product) => product.productId === draftItem.productId);
 
-        if (!supplierProduct) {
+        if (!supplierProduct || supplierProduct.price === null) {
           return;
         }
 
         const price = Number(supplierProduct.price ?? 0);
         const discount = Number(draftItem.discount ?? 0);
-        const subtotal = price * quantity;
+        const subtotal = lineAmount(quantity, price, discount);
         const reviewItem: SupplierReviewItem = {
           productId: draftItem.productId,
           shortname: draftItem.shortname ?? "Producto sin nombre",
           quantity,
+          measurementUnit: draftItem.measurementUnit,
           price,
           discount,
           subtotal,
@@ -69,7 +70,7 @@ export default function ReviewPurchaseScreen() {
 
         if (currentGroup) {
           currentGroup.items.push(reviewItem);
-          currentGroup.total += subtotal;
+          currentGroup.total = sumAmounts([currentGroup.total, subtotal]);
           return;
         }
 
@@ -92,21 +93,22 @@ export default function ReviewPurchaseScreen() {
       .sort((firstGroup, secondGroup) => firstGroup.supplierName.localeCompare(secondGroup.supplierName, "es"));
   }, [items, purchaseQuantities, suppliers]);
 
-  const grandTotal = supplierGroups.reduce((total, group) => total + group.total, 0);
-  const totalUnits = supplierGroups.reduce(
-    (total, group) => total + group.items.reduce((groupTotal, item) => groupTotal + item.quantity, 0),
-    0,
-  );
-  const isCreateDisabled = supplierGroups.length === 0 || isCreatingOrders;
+  const grandTotal = sumAmounts(supplierGroups.map((group) => group.total));
+  const hasInvalidQuantity = Object.entries(purchaseQuantities).some(([key, quantity]) => {
+    const item = items.find((entry) => entry.productId === Number(key.split("-")[0]));
+    return item && !isValidProductQuantity(quantity, item.measurementUnit);
+  });
+  const isCreateDisabled = supplierGroups.length === 0 || isCreatingOrders || hasInvalidQuantity;
 
   const handleCreateOrders = async () => {
-    if (isCreateDisabled) {
+    if (saving.current || isCreateDisabled) {
       return;
     }
 
     const orders: CreatePurchaseOrderDto[] = supplierGroups.map((group) => ({
       supplierId: group.supplierId,
-      userId: 3,
+      paymentMethod,
+      walletProvider: paymentMethod === "VIRTUAL_WALLET" ? walletProvider : null,
       total: group.total,
       items: group.items.map((item) => ({
         productId: item.productId,
@@ -116,23 +118,24 @@ export default function ReviewPurchaseScreen() {
       })),
     }));
 
+    saving.current = true;
     setIsCreatingOrders(true);
     setCreationError(null);
 
     try {
-      const results = await Promise.all(orders.map((order) => addPurchase(order)));
-
-      if (results.some((wasCreated) => !wasCreated)) {
-        setCreationError("No se pudieron generar todas las órdenes. Volvé a intentarlo.");
-        return;
+      // Conservar solo lo pendiente si falla una de varias órdenes.
+      for (const order of orders) {
+        if (!(await addPurchase(order))) throw new Error("No se pudo guardar una orden. Las anteriores ya guardadas no se repetirán.");
+        for (const item of order.items) updatePurchaseQuantity(item.productId, order.supplierId, 0);
       }
 
       clearPurchase();
       await refreshPurchases();
       router.dismissTo("/(tabs)/purchases");
-    } catch {
-      setCreationError("Ocurrió un error al generar las órdenes de compra.");
+    } catch (error) {
+      setCreationError(error instanceof Error ? error.message : "Ocurrió un error al generar las órdenes de compra.");
     } finally {
+      saving.current = false;
       setIsCreatingOrders(false);
     }
   };
@@ -162,6 +165,8 @@ export default function ReviewPurchaseScreen() {
       </View>
 
       <ScrollView className="mt-4 flex-1" contentContainerClassName="gap-3 px-4 pb-4">
+        <SearchSelect label="Medio de pago" value={paymentMethod} options={PAYMENT_METHODS} disabled={isCreatingOrders} onChange={(value) => setPaymentMethod(value as PaymentMethod)} />
+        {paymentMethod === "VIRTUAL_WALLET" && <SearchSelect label="Billetera virtual" value={walletProvider} options={WALLET_PROVIDERS} disabled={isCreatingOrders} onChange={(value) => setWalletProvider(value as WalletProvider)} />}
         {supplierGroups.length === 0 ? (
           <View className="mt-4 items-center rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-10 dark:border-slate-700 dark:bg-slate-950">
             <View className="h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
@@ -212,7 +217,7 @@ export default function ReviewPurchaseScreen() {
                     <View className="flex-1">
                       <Text className="text-sm font-black text-slate-900 dark:text-white">{item.shortname}</Text>
                       <Text className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                        {item.quantity} × {formatCurrency(item.price)}
+                        {formatProductQuantity(item.quantity, item.measurementUnit)} × {formatCurrency(item.price)} / {getMeasurementUnit(item.measurementUnit).priceLabel}
                       </Text>
                     </View>
                     <Text className="text-sm font-black text-slate-950 dark:text-white">
@@ -238,7 +243,7 @@ export default function ReviewPurchaseScreen() {
               </Text>
               {supplierGroups.length > 0 && (
                 <Text className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                  {totalUnits} {totalUnits === 1 ? "unidad" : "unidades"} · Total general {formatCurrency(grandTotal)}
+                  Total general {formatCurrency(grandTotal)}
                 </Text>
               )}
             </View>
@@ -247,10 +252,10 @@ export default function ReviewPurchaseScreen() {
       </ScrollView>
 
       <View className="border-t border-slate-200 bg-white px-4 pb-4 pt-3 dark:border-slate-800 dark:bg-slate-950">
-        {creationError && (
+        {(creationError || hasInvalidQuantity) && (
           <View className="mb-3 flex-row items-center gap-2 rounded-2xl bg-red-50 px-3 py-3 dark:bg-red-950/30">
             <Ionicons name="alert-circle-outline" size={18} color="#dc2626" />
-            <Text className="flex-1 text-sm font-bold text-red-600 dark:text-red-300">{creationError}</Text>
+            <Text className="flex-1 text-sm font-bold text-red-600 dark:text-red-300">{creationError || "Hay cantidades inválidas. Volvé al paso anterior para corregirlas."}</Text>
           </View>
         )}
 

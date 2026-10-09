@@ -1,9 +1,9 @@
 import type { StockMovement, CreateStockMovementDto } from "@almacen/shared";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { apiFetch } from "./apiClient";
 
 export async function getStockMovementsRequest(id: number): Promise<StockMovement[]> {
-  const response = await fetch(`${API_URL}/stock-movements/product/id/${id}`, {
+  const response = await apiFetch(`/stock-movements/product/id/${id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -18,7 +18,7 @@ export async function getStockMovementsRequest(id: number): Promise<StockMovemen
 }
 
 export async function postStockMovementRequest(newStockMovement: CreateStockMovementDto): Promise<StockMovement> {
-  const response = await fetch(`${API_URL}/stock-movements`, {
+  const response = await apiFetch(`/stock-movements`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -1,21 +1,19 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { allowsFractionalQuantity, formatProductQuantity, getMeasurementUnit, isValidProductQuantity, lineAmount, parseDecimalInput } from "@almacen/shared";
+import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
-import { useSuppliers } from "@/contexts/suppliers";
-
-const formatCurrency = (value: number) =>
-  value.toLocaleString("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 2,
-  });
+import { usePurchaseSuppliers } from "@/hooks/use-purchase-suppliers";
 
 export default function SelectSuppliersScreen() {
+  const { formatCurrency } = useCommerceFormat();
+  const [quantityTexts, setQuantityTexts] = useState<Record<string, string>>({});
   const { items, purchaseQuantities, updatePurchaseQuantity } = usePurchaseDraft();
   const { products, isLoadingProducts, productsError } = useProducts();
-  const { suppliers, isLoadingSuppliers, suppliersError } = useSuppliers();
+  const { suppliers, isLoadingSuppliers, suppliersError } = usePurchaseSuppliers();
 
   const isLoading = isLoadingProducts || isLoadingSuppliers;
   const loadingError = productsError || suppliersError;
@@ -86,13 +84,13 @@ export default function SelectSuppliersScreen() {
                       (currentProduct) => currentProduct.productId === item.productId,
                     );
 
-                    return Number(supplierProduct?.price ?? 0);
+                    return supplierProduct?.price ?? Infinity;
                   }),
                 )
               : null;
           const stockNeeded =
             product?.stockMin != null && product?.stock != null && product.stock < product.stockMin
-              ? product.stockMin - product.stock
+              ? Math.round((product.stockMin - product.stock) * 1000) / 1000
               : 0;
 
           return (
@@ -103,7 +101,7 @@ export default function SelectSuppliersScreen() {
                 </View>
 
                 <View className="flex-1">
-                  <Text className="text-base font-black text-slate-950 dark:text-white">{item.shortname}</Text>
+                  <Text className="text-base font-black text-slate-950 dark:text-white">{item.shortname} · {getMeasurementUnit(item.measurementUnit).symbol}</Text>
                   <View className="mt-1 flex-row items-center gap-1.5">
                     <Ionicons
                       name={stockNeeded > 0 ? "alert-circle-outline" : "checkmark-circle-outline"}
@@ -116,7 +114,7 @@ export default function SelectSuppliersScreen() {
                           ? "text-red-600 dark:text-red-300"
                           : "text-emerald-600 dark:text-emerald-300"
                       }`}>
-                      {stockNeeded > 0 ? `Necesitás ${stockNeeded} unidades` : "El stock actual es suficiente"}
+                      {stockNeeded > 0 ? `Necesitás ${formatProductQuantity(stockNeeded, item.measurementUnit)}` : "El stock actual es suficiente"}
                     </Text>
                   </View>
                 </View>
@@ -142,9 +140,9 @@ export default function SelectSuppliersScreen() {
                       const supplierProduct = supplier.products.find(
                         (currentProduct) => currentProduct.productId === item.productId,
                       );
-                      const price = Number(supplierProduct?.price ?? 0);
-                      const subtotal = price * quantity;
-                      const isBestPrice = bestPrice !== null && price === bestPrice;
+                      const price = supplierProduct?.price ?? null;
+                      const subtotal = price === null || !isValidProductQuantity(quantity, item.measurementUnit) ? 0 : lineAmount(quantity, price);
+                      const isBestPrice = bestPrice !== null && price !== null && price === bestPrice;
 
                       return (
                         <View key={supplier.id} className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
@@ -162,7 +160,7 @@ export default function SelectSuppliersScreen() {
                                 )}
                               </View>
                               <Text className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                                {formatCurrency(price)} por unidad
+                                {price === null ? "Configurá el precio de compra en el proveedor" : formatCurrency(price) + " por " + getMeasurementUnit(item.measurementUnit).priceLabel}
                               </Text>
                             </View>
 
@@ -171,31 +169,30 @@ export default function SelectSuppliersScreen() {
                                 accessibilityRole="button"
                                 accessibilityLabel={`Restar una unidad de ${supplier.name}`}
                                 className="h-10 w-10 items-center justify-center active:bg-slate-100 dark:active:bg-slate-800"
-                                onPress={() =>
-                                  updatePurchaseQuantity(item.productId, supplier.id, Math.max(0, quantity - 1))
-                                }>
+                                disabled={price === null}
+                                onPress={() => { const next = Math.round(Math.max(0, (Number.isFinite(quantity) ? quantity : 0) - 1) * 1000) / 1000; setQuantityTexts((current) => ({ ...current, [key]: String(next) })); updatePurchaseQuantity(item.productId, supplier.id, next); }}>
                                 <Ionicons name="remove" size={18} color="#64748b" />
                               </Pressable>
                               <TextInput
                                 accessibilityLabel={`Cantidad para ${supplier.name}`}
-                                className="h-10 w-11 border-x border-slate-200 text-center text-sm font-black text-slate-950 dark:border-slate-700 dark:text-white"
+                                className="h-10 min-w-16 border-x border-slate-200 text-center text-sm font-black text-slate-950 dark:border-slate-700 dark:text-white"
                                 placeholder="0"
                                 placeholderTextColor="#94a3b8"
-                                value={quantity > 0 ? String(quantity) : ""}
-                                keyboardType="numeric"
-                                onChangeText={(value) =>
-                                  updatePurchaseQuantity(
-                                    item.productId,
-                                    supplier.id,
-                                    Math.max(0, Number(value) || 0),
-                                  )
-                                }
+                                editable={price !== null}
+                                value={quantityTexts[key] ?? (quantity > 0 ? String(quantity) : "")}
+                                keyboardType={allowsFractionalQuantity(item.measurementUnit) ? "decimal-pad" : "number-pad"}
+                                onChangeText={(value) => {
+                                  setQuantityTexts((current) => ({ ...current, [key]: value }));
+                                  const parsed = value.trim() ? parseDecimalInput(value) : 0;
+                                  updatePurchaseQuantity(item.productId, supplier.id, parsed);
+                                }}
                               />
                               <Pressable
                                 accessibilityRole="button"
                                 accessibilityLabel={`Agregar una unidad de ${supplier.name}`}
                                 className="h-10 w-10 items-center justify-center active:bg-slate-100 dark:active:bg-slate-800"
-                                onPress={() => updatePurchaseQuantity(item.productId, supplier.id, quantity + 1)}>
+                                disabled={price === null}
+                                onPress={() => { const next = Math.round(((Number.isFinite(quantity) ? quantity : 0) + 1) * 1000) / 1000; setQuantityTexts((current) => ({ ...current, [key]: String(next) })); updatePurchaseQuantity(item.productId, supplier.id, next); }}>
                                 <Ionicons name="add" size={18} color="#047857" />
                               </Pressable>
                             </View>
@@ -239,7 +236,18 @@ export default function SelectSuppliersScreen() {
           accessibilityRole="button"
           accessibilityLabel="Continuar a revisar la compra"
           className="mt-3 flex-row items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-5 py-4 active:opacity-80 dark:bg-emerald-600"
-          onPress={() => router.push("/(tabs)/purchases/new/review")}>
+          onPress={() => {
+            const invalid = Object.entries(purchaseQuantities).some(([key, value]) => {
+              const productId = Number(key.split("-")[0]);
+              const item = items.find((entry) => entry.productId === productId);
+              return item && !isValidProductQuantity(value, item.measurementUnit);
+            });
+            if (invalid) { Alert.alert("Cantidad inválida", "Unidades y cajas requieren enteros; kg y litros admiten hasta tres decimales."); return; }
+            if (items.some((item) => !Object.entries(purchaseQuantities).some(([key, value]) => key.startsWith(item.productId + "-") && value > 0))) {
+              Alert.alert("Faltan cantidades", "Asigná al menos una cantidad a cada producto seleccionado."); return;
+            }
+            router.push("/(tabs)/purchases/new/review");
+          }}>
           <Text className="text-base font-black text-white">Continuar</Text>
           <Ionicons name="arrow-forward" size={19} color="white" />
         </Pressable>

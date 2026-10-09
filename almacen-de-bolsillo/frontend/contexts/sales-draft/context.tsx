@@ -1,10 +1,10 @@
 import { createContext } from "react";
-import type { CreateSalesOrderItemDto } from "@almacen/shared";
+import type { SalesDraftItem } from "@almacen/shared";
 
 interface SalesDraftContextType {
-  items: CreateSalesOrderItemDto[];
+  items: SalesDraftItem[];
   totalAmount: number;
-  addItem: (item: CreateSalesOrderItemDto) => void;
+  addItem: (item: SalesDraftItem) => void;
   removeItem: (productId: number) => void;
   clearSales: () => void;
 }

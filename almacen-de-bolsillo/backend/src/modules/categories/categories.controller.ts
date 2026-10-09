@@ -1,5 +1,7 @@
+import { readId, sendApiError } from "../auth/request.utils.js";
 import type { Request, Response } from "express";
-
+import { getRequestSession } from "../auth/auth.middleware.js";
+import { validateCategory } from "./categories.validation.js";
 import {
   getCategoriesFromDatabase,
   getCategoryByIdFromDatabase,
@@ -8,67 +10,71 @@ import {
   deleteCategoryFromDatabase,
 } from "./categories.service.js";
 
-const getCategories = async (req: Request, res: Response) => {
+const databaseMessages = {
+  "notFound": "Categoría no encontrada.",
+  "related": "No se puede eliminar una categoría que tiene productos asociados."
+};
+
+const getCategories = async (_req: Request, res: Response) => {
   try {
-    const categories = await getCategoriesFromDatabase();
+    const commerceId = getRequestSession(res).commerce.id;
+    const categories = await getCategoriesFromDatabase(commerceId);
     res.json(categories.sort((a, b) => a.name.localeCompare(b.name)));
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const getCategoryById = async (req: Request, res: Response) => {
-  const categoryId = Number(req.params.id);
-
   try {
-    const category = await getCategoryByIdFromDatabase(categoryId);
-
-    if (category) {
-      res.json(category);
-    } else {
-      res.status(404).json({ message: "Category not found" });
+    const commerceId = getRequestSession(res).commerce.id;
+    const categoryId = readId(req.params.id);
+    const category = await getCategoryByIdFromDatabase(categoryId, commerceId);
+    if (!category) {
+      res.status(404).json({ message: "Categoría no encontrada." });
+      return;
     }
+    res.json(category);
   } catch (error) {
-    console.error("Error fetching category:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const postCategory = async (req: Request, res: Response) => {
-  const categoryData = req.body;
-
   try {
-    const newCategory = await postCategoryToDatabase(categoryData);
-    res.status(201).json(newCategory);
+    const commerceId = getRequestSession(res).commerce.id;
+    const data = validateCategory(req.body);
+    const category = await postCategoryToDatabase(data, commerceId);
+    res.status(201).json(category);
   } catch (error) {
-    console.error("Error creating category:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const updateCategory = async (req: Request, res: Response) => {
-  const categoryId = Number(req.params.id);
-  const categoryData = req.body;
-
   try {
-    const updatedCategory = await updateCategoryFromDatabase(categoryId, categoryData);
-    res.json(updatedCategory);
+    const commerceId = getRequestSession(res).commerce.id;
+    const categoryId = readId(req.params.id);
+    const data = validateCategory(req.body);
+    const category = await updateCategoryFromDatabase(categoryId, data, commerceId);
+    res.json(category);
   } catch (error) {
-    console.error("Error updating category:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error, databaseMessages);
   }
 };
 
 const deleteCategory = async (req: Request, res: Response) => {
-  const categoryId = Number(req.params.id);
-
   try {
-    await deleteCategoryFromDatabase(categoryId);
+    const commerceId = getRequestSession(res).commerce.id;
+    const categoryId = readId(req.params.id);
+    const category = await deleteCategoryFromDatabase(categoryId, commerceId);
+    if (!category) {
+      res.status(404).json({ message: "Categoría no encontrada." });
+      return;
+    }
     res.status(204).send();
   } catch (error) {
-    console.error("Error deleting category:", error);
-    res.status(500).json({ message: "Internal server error" });
+    sendApiError(res, error, databaseMessages);
   }
 };
 

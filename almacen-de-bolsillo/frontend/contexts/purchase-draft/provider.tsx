@@ -1,15 +1,14 @@
+import { lineAmount, sumAmounts } from "@almacen/shared";
 import { ReactNode, useState } from "react";
 import { PurchaseDraftContext, type PurchaseDraftItem } from "./context";
 
-type PurchaseDraftProviderProps = {
-  children: ReactNode;
-};
+type PurchaseDraftProviderProps = { children: ReactNode; };
 
 export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) {
   const [items, setItems] = useState<PurchaseDraftItem[]>([]);
   const [purchaseQuantities, setPurchaseQuantities] = useState<Record<string, number>>({});
 
-  const totalAmount = items.reduce((total, item) => total + (item.subtotal || 0), 0);
+  const totalAmount = sumAmounts(items.map((item) => item.subtotal || 0));
 
   function addItem(item: PurchaseDraftItem) {
     setItems((currentItems) => {
@@ -20,14 +19,14 @@ export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) 
           currentItem.productId === item.productId
             ? {
                 ...currentItem,
-                quantity: (currentItem.quantity ?? 0) + (item.quantity ?? 0),
-                subtotal: ((currentItem.quantity ?? 0) + (item.quantity ?? 0)) * (item.price ?? 0),
+                quantity: Math.round(((currentItem.quantity ?? 0) + (item.quantity ?? 0)) * 1000) / 1000,
+                subtotal: lineAmount(Math.round(((currentItem.quantity ?? 0) + (item.quantity ?? 0)) * 1000) / 1000, item.price ?? 0, item.discount ?? 0),
               }
             : currentItem,
         );
       }
 
-      return [...currentItems, { ...item, subtotal: (item.quantity ?? 0) * (item.price ?? 0) }];
+      return [...currentItems, { ...item, subtotal: lineAmount(item.quantity ?? 0, item.price ?? 0, item.discount ?? 0) }];
     });
   }
 
@@ -57,7 +56,7 @@ export function PurchaseDraftProvider({ children }: PurchaseDraftProviderProps) 
 
         return {
           ...updatedItem,
-          subtotal: (updatedItem.quantity ?? 0) * (updatedItem.price ?? 0),
+          subtotal: lineAmount(updatedItem.quantity ?? 0, updatedItem.price ?? 0, updatedItem.discount ?? 0),
         };
       }),
     );

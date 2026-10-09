@@ -3,17 +3,20 @@ import type {
   CreateProductOnSupplierDto,
   CreateProductOnSupplierFromSupplierDto,
 } from "../product-suppliers/product-supplier.types.js";
-import type { ProductWithRelations } from "../products/product.types.js";
+import type { Product } from "../products/product.types.js";
 
 export type ProductOnSupplierWithProductDto = CreateProductOnSupplierDto & {
-  product: ProductWithRelations;
+  product: Product;
 };
+
+export type SupplierOption = { id: number; name: string; isActive: boolean };
 
 // Read
 export type Supplier = {
   id: number;
   name: string;
-  cuit: string;
+  cuit: string | null;
+  phoneCountryCode: string | null;
   phone: string | null;
   email: string | null;
   address: string | null;
@@ -30,7 +33,8 @@ export type SupplierWithRelations = Supplier & {
 // Create
 export type CreateSupplierDto = {
   name: string;
-  cuit: string;
+  cuit: string | null;
+  phoneCountryCode?: string | null;
   phone?: string | null;
   email?: string | null;
   address?: string | null;

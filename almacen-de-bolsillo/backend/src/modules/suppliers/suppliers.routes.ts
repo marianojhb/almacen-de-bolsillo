@@ -2,18 +2,23 @@ import { Router } from "express";
 
 // Supplier controller
 
-import { deleteSupplier, getSupplierById, getSuppliers, postSupplier, updateSupplier } from "./suppliers.controller.js";
+import { deleteSupplier, getSupplierOptions, getSupplierById, getSuppliers, postSupplier, updateSupplier } from "./suppliers.controller.js";
+import { requireAuth, requirePermission, requireAnyPermission } from "../auth/auth.middleware.js";
 
 const suppliersRouter: Router = Router();
+suppliersRouter.use(requireAuth);
 
-suppliersRouter.get("/", getSuppliers);
+// Datos mínimos para productos y compras; no habilita la gestión de proveedores.
+suppliersRouter.get("/options", requireAnyPermission("products.read", "suppliers.read"), getSupplierOptions);
 
-suppliersRouter.get("/:id", getSupplierById);
+suppliersRouter.get("/", requirePermission("suppliers.read"), getSuppliers);
 
-suppliersRouter.post("/", postSupplier);
+suppliersRouter.get("/:id", requirePermission("suppliers.read"), getSupplierById);
 
-suppliersRouter.patch("/:id", updateSupplier);
+suppliersRouter.post("/", requirePermission("suppliers.create"), postSupplier);
 
-suppliersRouter.delete("/:id", deleteSupplier);
+suppliersRouter.patch("/:id", requirePermission("suppliers.update"), updateSupplier);
+
+suppliersRouter.delete("/:id", requirePermission("suppliers.delete"), deleteSupplier);
 
 export default suppliersRouter;

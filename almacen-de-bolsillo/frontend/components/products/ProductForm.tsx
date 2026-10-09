@@ -1,7 +1,11 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 // Product Form
-import { useState, useEffect } from "react";
-import * as SuppliersAPI from "@/services/suppliersApi";
-import type { Category, CreateCategoryDto, CreateProductOnSupplierFromProductDto, Supplier } from "@almacen/shared";
+import { useRef, useState } from "react";
+import { useProducts } from "@/contexts/products";
+import { usePermissions } from "@/hooks/use-permissions";
+import { MEASUREMENT_UNITS, allowsFractionalQuantity, getMeasurementUnit, isValidDecimal, isValidProductQuantity, parseDecimalInput, type MeasurementUnit, type Category, type CreateCategoryDto, type CreateProductOnSupplierFromProductDto } from "@almacen/shared";
+import { SearchSelect } from "@/components/forms/SearchSelect";
 import {
   Text,
   TextInput,
@@ -19,6 +23,7 @@ import {
 
 export type ProductFormValues = {
   sku: string;
+  measurementUnit: MeasurementUnit;
   shortname: string;
   longname: string;
   price: string;
@@ -30,7 +35,8 @@ export type ProductFormValues = {
 };
 
 export type ParsedProductFormValues = {
-  sku: string;
+  sku: string | null;
+  measurementUnit: MeasurementUnit;
   shortname: string;
   longname: string;
   price: number;
@@ -76,7 +82,7 @@ const emptySupplierRelation = (supplierId: number): ProductSupplierRelationFormV
   leadTimeDays: "",
 });
 
-const optionalNumber = (value: string) => (value.trim() === "" ? null : Number(value));
+const optionalNumber = (value: string) => (value.trim() === "" ? null : parseDecimalInput(value));
 
 const optionalText = (value: string) => {
   const normalizedValue = value.trim();
@@ -91,6 +97,10 @@ export function ProductForm({
   onCancel,
   onCreateCategory,
 }: ProductFormProps) {
+  const { currency } = useCommerceFormat();
+  const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>(initialValues?.measurementUnit ?? "UNIT");
+  const unit = getMeasurementUnit(measurementUnit);
+  const saving = useRef(false);
   const [sku, setSku] = useState(initialValues?.sku ?? "");
   const [shortname, setShortname] = useState(initialValues?.shortname ?? "");
   const [longname, setLongname] = useState(initialValues?.longname ?? "");
@@ -104,28 +114,17 @@ export function ProductForm({
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const { suppliers, isLoadingSuppliers, suppliersError, refreshSuppliers } = useProducts();
+  const { can } = usePermissions();
   const [isSupplierModalVisible, setIsSupplierModalVisible] = useState(false);
   const [supplierRelations, setSupplierRelations] = useState<ProductSupplierRelationFormValues[]>(
     initialValues?.supplierRelations ?? [],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function loadSuppliers() {
-      try {
-        const fetchedSuppliers = await SuppliersAPI.getSuppliers();
-        setSuppliers(fetchedSuppliers);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    loadSuppliers();
-  }, []);
-
   const handleSubmit = async () => {
+    if (saving.current) return;
     if (
-      !sku.trim() ||
       !shortname.trim() ||
       !longname.trim() ||
       !price.trim() ||
@@ -133,12 +132,12 @@ export function ProductForm({
       !stockMin.trim() ||
       !categoryId
     ) {
-      Alert.alert("Campos incompletos", "Todos los campos son obligatorios.");
+      Alert.alert("Campos incompletos", "Completá los campos obligatorios. El SKU es opcional.");
       return;
     }
 
     const trimmedSku = sku.trim();
-    if (trimmedSku.length < 3 || trimmedSku.length > 20) {
+    if (trimmedSku && (trimmedSku.length < 3 || trimmedSku.length > 20)) {
       Alert.alert("SKU inválido", "El SKU debe tener entre 3 y 20 caracteres.");
       return;
     }
@@ -155,9 +154,9 @@ export function ProductForm({
       return;
     }
 
-    const numericPrice = Number(price.trim());
-    const numericStock = Number(stock.trim());
-    const numericMinimumStock = Number(stockMin.trim());
+    const numericPrice = parseDecimalInput(price);
+    const numericStock = parseDecimalInput(stock);
+    const numericMinimumStock = parseDecimalInput(stockMin);
     const numericCategoryId = Number(categoryId.trim());
 
     if (Number.isNaN(numericPrice) || Number.isNaN(numericStock) || Number.isNaN(numericMinimumStock)) {
@@ -170,21 +169,21 @@ export function ProductForm({
       return;
     }
 
-    if (!Number.isInteger(numericStock) || !Number.isInteger(numericMinimumStock)) {
-      Alert.alert("Datos inválidos", "Las cantidades de stock deben ser números enteros.");
+    if (!isValidDecimal(numericPrice, 2) || !isValidProductQuantity(numericStock, measurementUnit) || !isValidProductQuantity(numericMinimumStock, measurementUnit)) {
+      Alert.alert("Datos inválidos", "El precio admite hasta dos decimales. Unidades y cajas requieren stock entero; kg y litros admiten hasta tres decimales.");
       return;
     }
 
     const parsedSupplierRelations: CreateProductOnSupplierFromProductDto[] = [];
 
     for (const relation of supplierRelations) {
-      const pricePerPaq = Number(relation.pricePerPaq.trim());
+      const pricePerPaq = parseDecimalInput(relation.pricePerPaq);
       const price = optionalNumber(relation.price);
       const unitsPerPaq = optionalNumber(relation.unitsPerPaq);
       const minimumQuantity = optionalNumber(relation.minimumQuantity);
       const leadTimeDays = optionalNumber(relation.leadTimeDays);
 
-      if (!relation.pricePerPaq.trim() || !Number.isFinite(pricePerPaq) || pricePerPaq < 0) {
+      if (!relation.pricePerPaq.trim() || !isValidDecimal(pricePerPaq, 2)) {
         Alert.alert("Proveedor incompleto", "Cada proveedor debe tener un precio por paquete válido.");
         return;
       }
@@ -199,13 +198,16 @@ export function ProductForm({
       }
 
       if (
-        (unitsPerPaq !== null && !Number.isInteger(unitsPerPaq)) ||
+        (unitsPerPaq !== null && (!Number.isInteger(unitsPerPaq) || unitsPerPaq < 1)) ||
         (leadTimeDays !== null && !Number.isInteger(leadTimeDays))
       ) {
         Alert.alert("Proveedor inválido", "Las unidades por paquete y los días de entrega deben ser enteros.");
         return;
       }
 
+      if ((price !== null && !isValidDecimal(price, 2)) || (minimumQuantity !== null && !isValidProductQuantity(minimumQuantity, measurementUnit))) {
+        Alert.alert("Proveedor inválido", "Revisá la precisión del precio y la compra mínima según la unidad de medida."); return;
+      }
       parsedSupplierRelations.push({
         supplierId: relation.supplierId,
         price,
@@ -219,9 +221,11 @@ export function ProductForm({
     }
 
     try {
+      saving.current = true;
       setIsSubmitting(true);
       await onSubmit({
-        sku: trimmedSku,
+        sku: trimmedSku ? trimmedSku.toUpperCase() : null,
+        measurementUnit,
         shortname: trimmedShortName,
         longname: trimmedLongName,
         price: numericPrice,
@@ -231,12 +235,16 @@ export function ProductForm({
         supplierRelations: parsedSupplierRelations,
         isActive,
       });
+    } catch (error) {
+      Alert.alert("No se pudo guardar", error instanceof Error ? error.message : "Revisá los datos del producto.");
     } finally {
+      saving.current = false;
       setIsSubmitting(false);
     }
   };
 
   const handleCreateCategory = async () => {
+    if (!can("categories.create")) return;
     const trimmedName = newCategoryName.trim();
 
     if (!trimmedName) {
@@ -333,23 +341,27 @@ export function ProductForm({
             className={inputClassName}
           />
 
-          <Text className={`${labelClassName} mt-4`}>SKU</Text>
+          <Text className={`${labelClassName} mt-4`}>SKU (opcional)</Text>
           <TextInput
             placeholder="Código SKU"
             placeholderTextColor="#94a3b8"
             value={sku}
-            onChangeText={setSku}
+            onChangeText={(value) => setSku(value.toUpperCase())}
+            autoCapitalize="characters"
             textAlignVertical="center"
             returnKeyType="next"
             className={inputClassName}
           />
 
-          <Text className={`${labelClassName} mt-4`}>Precio</Text>
+          <View className="mt-4"><SearchSelect label="Unidad de medida" value={measurementUnit} options={MEASUREMENT_UNITS}
+            disabled={isSubmitting} onChange={(value) => setMeasurementUnit(value as MeasurementUnit)} /></View>
+          <Text className={`${labelClassName} mt-4`}>Precio por {unit.priceLabel} ({currency})</Text>
           <TextInput
             placeholder="Precio"
             placeholderTextColor="#94a3b8"
             value={price}
             onChangeText={setPrice}
+            maxLength={13}
             keyboardType="decimal-pad"
             textAlignVertical="center"
             returnKeyType="done"
@@ -360,15 +372,17 @@ export function ProductForm({
 
         <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
           <Text className="mb-4 text-lg font-black text-slate-950 dark:text-white">Stock</Text>
+          {!!initialValues && <Text className="mb-3 text-sm text-slate-500 dark:text-slate-400">El stock actual se modifica desde Ajustar stock en el detalle del producto.</Text>}
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <Text className={labelClassName}>Actual</Text>
+              <Text className={labelClassName}>Actual ({unit.symbol})</Text>
               <TextInput
                 placeholder="0"
                 placeholderTextColor="#94a3b8"
+                editable={!initialValues}
                 value={stock}
                 onChangeText={setStock}
-                keyboardType="number-pad"
+                keyboardType={allowsFractionalQuantity(measurementUnit) ? "decimal-pad" : "number-pad"}
                 textAlignVertical="center"
                 returnKeyType="done"
                 onSubmitEditing={Keyboard.dismiss}
@@ -376,13 +390,13 @@ export function ProductForm({
               />
             </View>
             <View className="flex-1">
-              <Text className={labelClassName}>Mínimo</Text>
+              <Text className={labelClassName}>Mínimo ({unit.symbol})</Text>
               <TextInput
                 placeholder="0"
                 placeholderTextColor="#94a3b8"
                 value={stockMin}
                 onChangeText={setStockMin}
-                keyboardType="number-pad"
+                keyboardType={allowsFractionalQuantity(measurementUnit) ? "decimal-pad" : "number-pad"}
                 textAlignVertical="center"
                 returnKeyType="done"
                 onSubmitEditing={Keyboard.dismiss}
@@ -415,11 +429,11 @@ export function ProductForm({
               );
             })}
 
-            <Pressable
+            <PermissionGate permission="categories.create"><Pressable
               className="rounded-full border border-dashed border-emerald-300 bg-emerald-50 px-4 py-2 active:opacity-75 dark:border-emerald-800 dark:bg-emerald-950/50"
               onPress={() => setIsCategoryModalVisible(true)}>
               <Text className="text-sm font-bold text-emerald-700 dark:text-emerald-300">+ Agregar</Text>
-            </Pressable>
+            </Pressable></PermissionGate>
           </View>
         </View>
 
@@ -451,7 +465,7 @@ export function ProductForm({
                 {isActive ? "Producto activo" : "Producto inactivo"}
               </Text>
             </View>
-            <Switch value={isActive} onValueChange={setIsActive} />
+            <PermissionGate permission="products.delete"><Switch value={isActive} onValueChange={setIsActive} /></PermissionGate>
           </View>
         </View>
 
@@ -533,13 +547,14 @@ export function ProductForm({
             <Text className="mb-4 mt-1 text-sm text-slate-500 dark:text-slate-400">
               Seleccionar proveedores es opcional. Cada proveedor conserva sus propios precios y condiciones.
             </Text>
+            {!!suppliersError && <Pressable onPress={() => void refreshSuppliers()} className="mb-3 py-3"><Text className="text-red-600 dark:text-red-400">Reintentar carga de proveedores</Text></Pressable>}
             <FlatList
               data={suppliers}
               keyExtractor={(item) => item.id.toString()}
               contentContainerClassName="gap-2"
               ListEmptyComponent={
                 <Text className="text-center text-sm text-slate-500 dark:text-slate-400">
-                  No hay proveedores disponibles.
+                  {isLoadingSuppliers ? "Cargando proveedores..." : suppliersError ?? "No hay proveedores disponibles."}
                 </Text>
               }
               renderItem={({ item: supplier }) => {
@@ -569,7 +584,7 @@ export function ProductForm({
                     {relation && (
                       <View className="mt-4 gap-3 border-t border-emerald-200 pt-4 dark:border-emerald-800">
                         <View>
-                          <Text className={labelClassName}>Precio por paquete *</Text>
+                          <Text className={labelClassName}>Precio por paquete ({currency}) *</Text>
                           <TextInput
                             className={inputClassName}
                             value={relation.pricePerPaq}
@@ -581,7 +596,7 @@ export function ProductForm({
                         </View>
 
                         <View>
-                          <Text className={labelClassName}>Precio de costo unitario</Text>
+                          <Text className={labelClassName}>Precio de costo por {unit.priceLabel} ({currency})</Text>
                           <TextInput
                             className={inputClassName}
                             value={relation.price}
@@ -594,7 +609,7 @@ export function ProductForm({
 
                         <View className="flex-row gap-3">
                           <View className="flex-1">
-                            <Text className={labelClassName}>Unidades por paquete</Text>
+                            <Text className={labelClassName}>Cantidad por paquete</Text>
                             <TextInput
                               className={inputClassName}
                               value={relation.unitsPerPaq}
@@ -605,7 +620,7 @@ export function ProductForm({
                             />
                           </View>
                           <View className="flex-1">
-                            <Text className={labelClassName}>Compra mínima</Text>
+                            <Text className={labelClassName}>Compra mínima ({unit.symbol})</Text>
                             <TextInput
                               className={inputClassName}
                               value={relation.minimumQuantity}

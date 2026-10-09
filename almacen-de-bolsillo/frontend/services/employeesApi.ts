@@ -1,6 +1,6 @@
 import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { apiFetch } from "./apiClient";
 
 async function getErrorMessage(response: Response, fallback: string) {
   try {
@@ -13,7 +13,7 @@ async function getErrorMessage(response: Response, fallback: string) {
 }
 
 export async function getEmployeesRequest(): Promise<Employee[]> {
-  const response = await fetch(`${API_URL}/employees?includeInactive=true`,);
+  const response = await apiFetch(`/employees?includeInactive=true`,);
 
   if (!response.ok) {
     throw new Error(
@@ -25,7 +25,7 @@ export async function getEmployeesRequest(): Promise<Employee[]> {
 }
 
 export async function createEmployeeRequest(employee: CreateEmployeeDto): Promise<Employee> {
-  const response = await fetch(`${API_URL}/employees`,
+  const response = await apiFetch(`/employees`,
     {
       method: "POST",
       headers: {
@@ -45,7 +45,7 @@ export async function createEmployeeRequest(employee: CreateEmployeeDto): Promis
 }
 
 export async function updateEmployeeRequest(employeeId: number, employee: UpdateEmployeeDto): Promise<Employee> {
-  const response = await fetch(`${API_URL}/employees/${employeeId}`,
+  const response = await apiFetch(`/employees/${employeeId}`,
     {
       method: "PATCH",
       headers: {
@@ -64,7 +64,7 @@ export async function updateEmployeeRequest(employeeId: number, employee: Update
 }
 
 export async function deactivateEmployeeRequest(employeeId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/employees/${employeeId}`,
+  const response = await apiFetch(`/employees/${employeeId}`,
     {
       method: "DELETE",
     },
@@ -77,7 +77,7 @@ export async function deactivateEmployeeRequest(employeeId: number): Promise<voi
 }
 
 export async function permanentlyDeleteEmployeeRequest(employeeId: number): Promise<void> {
-  const response = await fetch(`${API_URL}/employees/${employeeId}/permanent`,
+  const response = await apiFetch(`/employees/${employeeId}/permanent`,
     {
       method: "DELETE",
     },

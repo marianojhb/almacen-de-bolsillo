@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, RefreshControl, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import type { ProductWithRelations, PurchaseDraftItem } from "@almacen/shared";
+import { formatProductQuantity, getMeasurementUnit, type ProductWithRelations, type PurchaseDraftItem } from "@almacen/shared";
 import { useProducts } from "@/contexts/products";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
 
@@ -45,6 +45,7 @@ export default function NewPurchaseScreen() {
   const toggleProductSelected = (product: ProductWithRelations) => {
     const draftItem: PurchaseDraftItem = {
       productId: product.id,
+      measurementUnit: product.measurementUnit,
       shortname: product.shortname,
       longname: product.longname,
       supplierId: null,
@@ -221,7 +222,7 @@ export default function NewPurchaseScreen() {
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: selected }}
-                accessibilityLabel={`${product.shortname}, stock ${product.stock}`}
+                accessibilityLabel={`${product.shortname} · {getMeasurementUnit(product.measurementUnit).symbol}, stock ${formatProductQuantity(product.stock, product.measurementUnit)}`}
                 onPress={() => toggleProductSelected(product)}
                 className={`overflow-hidden rounded-[24px] border bg-white p-4 active:opacity-80 dark:bg-slate-950 ${
                   selected ? "border-emerald-500 dark:border-emerald-600" : "border-slate-200 dark:border-slate-800"
@@ -282,7 +283,7 @@ export default function NewPurchaseScreen() {
                       Stock mínimo
                     </Text>
                     <Text className="mt-0.5 text-lg font-black text-slate-700 dark:text-slate-200">
-                      {product.stockMin}
+                      {formatProductQuantity(product.stockMin, product.measurementUnit)}
                     </Text>
                   </View>
                 </View>
@@ -291,7 +292,7 @@ export default function NewPurchaseScreen() {
                   <View className="mt-3 flex-row items-center gap-2">
                     <Ionicons name="trending-down-outline" size={15} color="#dc2626" />
                     <Text className="text-xs font-bold text-red-600 dark:text-red-300">
-                      Faltan {missingUnits} {missingUnits === 1 ? "unidad" : "unidades"} para alcanzar el mínimo
+                      Faltan {formatProductQuantity(missingUnits, product.measurementUnit)} para alcanzar el mínimo
                     </Text>
                   </View>
                 )}

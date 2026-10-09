@@ -1,9 +1,12 @@
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { usePurchases } from "@/contexts/purchases";
 
 const PurchasesScreen = () => {
+  const { formatCurrency, formatDate, formatTime } = useCommerceFormat();
   const { purchases, totalPurchases, isLoadingPurchases, errorPurchases } = usePurchases();
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -65,18 +68,18 @@ const PurchasesScreen = () => {
             <Text className="mt-1 text-4xl font-black text-white">Compras</Text>
             <Text className="mt-2 text-sm leading-5 text-slate-300">
               {filteredPurchases.length} de {purchases.length} compras visibles · Total{" "}
-              {Number(totalPurchases).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+              {formatCurrency(totalPurchases)}
             </Text>
           </View>
 
-          <Pressable
+          <PermissionGate permission="purchases.create"><Pressable
             className="min-w-[132px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
             onPress={() => {
               Keyboard.dismiss();
               router.push("/(tabs)/purchases/new");
             }}>
             <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Nueva compra</Text>
-          </Pressable>
+          </Pressable></PermissionGate>
         </View>
       </View>
 
@@ -144,11 +147,7 @@ const PurchasesScreen = () => {
                     <Text className="text-2xl font-black text-slate-950 dark:text-white">Compra Nº{purchase.id}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
                       Orden registrada el{" "}
-                      {new Date(purchase.createdAt).toLocaleDateString("es-AR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
+                      {formatDate(purchase.createdAt)}
                     </Text>
                   </View>
 
@@ -157,7 +156,7 @@ const PurchasesScreen = () => {
                       Total
                     </Text>
                     <Text className="text-xl font-black text-emerald-700 dark:text-emerald-300">
-                      {Number(purchase.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                      {formatCurrency(purchase.total)}
                     </Text>
                   </View>
                 </View>
@@ -165,7 +164,7 @@ const PurchasesScreen = () => {
                 <View className="mt-4 flex-row flex-wrap gap-2">
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {new Date(purchase.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                      {formatTime(purchase.createdAt)}
                     </Text>
                   </View>
                   <View

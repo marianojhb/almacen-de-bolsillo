@@ -1,3 +1,4 @@
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { router } from "expo-router";
 import { Alert, Pressable, Text } from "react-native";
 import { deleteProductRequest } from "@/services/productsApi";
@@ -7,13 +8,13 @@ export function DeleteProductButton({ id }: { id: string }) {
   const { products, deleteProduct } = useProducts();
   const product = products.find((currentProduct) => currentProduct.id === Number(id));
   const handleDelete = () => {
-    Alert.alert("Confirmar eliminación", "¿Estás seguro de que quieres eliminar este producto?", [
+    Alert.alert("Confirmar baja", "¿Querés dar de baja este producto? Se conservará su historial.", [
       {
         text: "Cancelar",
         style: "cancel",
       },
       {
-        text: "Eliminar",
+        text: "Dar de baja",
         style: "destructive",
         onPress: async () => {
           try {
@@ -30,8 +31,8 @@ export function DeleteProductButton({ id }: { id: string }) {
     ]);
   };
   return (
-    <Pressable onPress={handleDelete} className="items-center rounded-2xl bg-red-500 px-5 py-3 active:opacity-75">
-      <Text className="text-sm font-black text-white">Eliminar</Text>
-    </Pressable>
+    <PermissionGate permission="products.delete"><Pressable onPress={handleDelete} className="items-center rounded-2xl bg-red-500 px-5 py-3 active:opacity-75">
+      <Text className="text-sm font-black text-white">Dar de baja</Text>
+    </Pressable></PermissionGate>
   );
 }

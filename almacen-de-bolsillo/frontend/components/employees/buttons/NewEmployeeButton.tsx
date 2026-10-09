@@ -1,3 +1,4 @@
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, Text, useColorScheme } from "react-native";
@@ -6,7 +7,7 @@ export function NewEmployeeButton() {
     const isDark = useColorScheme() === "dark";
 
     return (
-    <Pressable
+    <PermissionGate permission="employees.create"><Pressable
         onPress={() => router.push("/more/employees/new")}
         accessibilityRole="button"
         accessibilityLabel="Registrar empleado"
@@ -21,6 +22,6 @@ export function NewEmployeeButton() {
         <Text className="font-semibold text-white dark:text-black">
             Nuevo
         </Text>
-    </Pressable>
+    </Pressable></PermissionGate>
     );
 }

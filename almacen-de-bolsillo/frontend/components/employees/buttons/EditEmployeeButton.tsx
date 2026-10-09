@@ -1,3 +1,4 @@
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, useColorScheme } from "react-native";
@@ -12,7 +13,7 @@ export function EditEmployeeButton({ id, employeeName, disabled = false }: EditE
     const isDark = useColorScheme() === "dark";
 
     return (
-    <Pressable
+    <PermissionGate permission="employees.update"><Pressable
         disabled={disabled}
         accessibilityRole="button"
         accessibilityLabel={`Editar ${employeeName}`}
@@ -33,6 +34,6 @@ export function EditEmployeeButton({ id, employeeName, disabled = false }: EditE
             size={21}
             color={isDark ? "#d1d5db" : "#4b5563"}
         />
-    </Pressable>
+    </Pressable></PermissionGate>
   );
 }

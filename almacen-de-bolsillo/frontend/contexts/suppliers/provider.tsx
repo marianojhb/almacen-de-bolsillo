@@ -1,5 +1,6 @@
+import { usePermissions } from "@/hooks/use-permissions";
 import type { CreateSupplierDto, SupplierWithRelations, UpdateSupplierDto } from "@almacen/shared";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { useRef, type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { SuppliersContext } from "./context";
 import { createSupplierRequest, deleteSupplierRequest, getSuppliers, updateSupplierRequest } from "@/services/suppliersApi";
@@ -17,32 +18,40 @@ const sortSuppliers = (suppliers: SupplierWithRelations[]) =>
   );
 
 export function SuppliersProvider({children,}: Props) {
+  const { can } = usePermissions();
   const [suppliers, setSuppliers] = useState<SupplierWithRelations[]>([]);
 
   const [ isLoadingSuppliers, setIsLoadingSuppliers ] = useState(true);
 
   const [ suppliersError, setSuppliersError ] = useState<string | null>(null);
 
+  const refreshSuppliersRequest = useRef<Promise<void> | null>(null);
   const refreshSuppliers = useCallback(async () => {
-      try {
-        setIsLoadingSuppliers(true);
-        setSuppliersError(null);
-
-        const response = await getSuppliers();
-
-        setSuppliers(sortSuppliers(response));
-      } catch (error) {
-        console.error( "Error loading suppliers:", error);
-
-        setSuppliersError(
-          error instanceof Error
-            ? error.message
-            : "No se pudieron cargar los proveedores."
-        );
-      } finally {
-        setIsLoadingSuppliers(false);
-      }
-  }, []);
+    if (refreshSuppliersRequest.current) return refreshSuppliersRequest.current;
+    const request = (async () => {
+      if (!can("suppliers.read")) { setSuppliers([]); setSuppliersError(null); setIsLoadingSuppliers(false); return; }
+        try {
+          setIsLoadingSuppliers(true);
+          setSuppliersError(null);
+  
+          const response = await getSuppliers();
+  
+          setSuppliers(sortSuppliers(response));
+        } catch (error) {
+          console.error( "Error loading suppliers:", error);
+  
+          setSuppliersError(
+            error instanceof Error
+              ? error.message
+              : "No se pudieron cargar los proveedores."
+          );
+        } finally {
+          setIsLoadingSuppliers(false);
+        }
+    })();
+    refreshSuppliersRequest.current = request;
+    try { await request; } finally { if (refreshSuppliersRequest.current === request) refreshSuppliersRequest.current = null; }
+  }, [can]);
 
   useEffect(() => {
     void refreshSuppliers();

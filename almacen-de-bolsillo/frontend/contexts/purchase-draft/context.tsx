@@ -1,14 +1,7 @@
 import { createContext } from "react";
+import type { PurchaseDraftItem } from "@almacen/shared";
 
-export type PurchaseDraftItem = {
-  productId: number;
-  quantity: number | null;
-  shortname: string | null;
-  longname: string | null;
-  price: number | null;
-  discount: number | null;
-  subtotal: number | null;
-};
+export type { PurchaseDraftItem } from "@almacen/shared";
 
 interface PurchaseDraftContextType {
   items: PurchaseDraftItem[];

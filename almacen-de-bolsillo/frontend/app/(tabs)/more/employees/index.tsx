@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 
 import {
@@ -13,6 +14,14 @@ import { useEmployees } from "@/contexts/employees";
 
 export default function EmployeesScreen() {
   const { employees, isLoadingEmployees, employeesError, refreshEmployees } = useEmployees();
+
+  useFocusEffect(useCallback(() => { void refreshEmployees(); }, [refreshEmployees]));
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try { await refreshEmployees(); } finally { setIsRefreshing(false); }
+  };
 
   const [search, setSearch] = useState("");
   const [employeeFilter, setEmployeeFilter] = useState<EmployeeFilter>("active");
@@ -29,13 +38,14 @@ export default function EmployeesScreen() {
 
       const matchesSearch = !normalizedSearch ||
         [
-          formatEmployeeCode(employee.id),
+          formatEmployeeCode(employee.commerceEmployeeId),
           employee.fullname,
           employee.firstname,
           employee.lastname,
           employee.dni,
           employee.cuil,
           employee.jobTitle,
+          employee.account?.username,
         ].some((value) =>
           value?.toLowerCase().includes(normalizedSearch),
         );
@@ -100,8 +110,8 @@ export default function EmployeesScreen() {
         contentContainerClassName="gap-3 pb-8"
         refreshControl={
           <RefreshControl
-            refreshing={isLoadingEmployees}
-            onRefresh={refreshEmployees}
+            refreshing={isRefreshing}
+            onRefresh={() => void handleRefresh()}
           />
         }
         ListEmptyComponent={

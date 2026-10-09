@@ -1,13 +1,18 @@
+import { addCalendarDays, getCommerceDashboardPeriods } from "@almacen/shared";
+import { useCommerceFormat } from "@/hooks/use-commerce-format";
+import { PermissionGate } from "@/components/auth/PermissionGate";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
-import { useProducts } from "@/contexts/products";
-import { usePurchases } from "@/contexts/purchases";
-import { useSales } from "@/contexts/sales";
+import { useDashboard } from "@/hooks/use-dashboard";
+import { usePermissions } from "@/hooks/use-permissions";
+
+
 
 type FinancialRecord = {
   createdAt: string;
+  dateKey: string;
   total: number;
   isActive: boolean;
 };
@@ -18,59 +23,29 @@ type PeriodSummary = {
   outcome: number;
 };
 
-const formatCurrency = (value: number) =>
-  value.toLocaleString("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  });
+const isWithinPeriod = (day: string, from: string, to: string) => day >= from && day < to;
 
-const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-const addDays = (date: Date, days: number) => {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-};
-
-const startOfWeek = (date: Date) => {
-  const result = startOfDay(date);
-  const daysSinceMonday = (result.getDay() + 6) % 7;
-  result.setDate(result.getDate() - daysSinceMonday);
-  return result;
-};
-
-const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-
-const isWithinPeriod = (dateValue: string, from: Date, to: Date) => {
-  const date = new Date(dateValue);
-  return date >= from && date < to;
-};
-
-const sumRecords = (records: FinancialRecord[], from: Date, to: Date) =>
+const sumRecords = (records: FinancialRecord[], from: string, to: string) =>
   records.reduce(
     (total, record) =>
-      record.isActive && isWithinPeriod(record.createdAt, from, to) ? total + Number(record.total) : total,
+      record.isActive && isWithinPeriod(record.dateKey, from, to) ? total + Number(record.total) : total,
     0,
   );
 
 function EmployeeDashboard() {
-  const { products, isLoadingProducts, productsError, refreshProducts } = useProducts();
-  const { sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
-  const { purchases, isLoadingPurchases, errorPurchases, refreshPurchases } = usePurchases();
+  const { formatCurrency, formatDate, formatTime, formatCalendarDate, dateKey, timeZone } = useCommerceFormat();
+  const { summary: { products, sales, purchases }, isLoading: loading, error: dashboardError, refresh } = useDashboard();
+  const { can } = usePermissions();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const now = new Date();
-  const today = startOfDay(now);
-  const tomorrow = addDays(today, 1);
-  const weekStart = startOfWeek(now);
-  const monthStart = startOfMonth(now);
+  const { today, tomorrow, weekStart, monthStart, firstChartDay } = getCommerceDashboardPeriods(timeZone, now);
 
-  const activeSales = useMemo(() => sales.filter((sale) => sale.isActive), [sales]);
-  const activePurchases = useMemo(() => purchases.filter((purchase) => purchase.isActive), [purchases]);
+  const activeSales = useMemo(() => sales.filter((sale) => sale.isActive).map((sale) => ({ ...sale, dateKey: dateKey(sale.createdAt) })), [sales, dateKey]);
+  const activePurchases = useMemo(() => purchases.filter((purchase) => purchase.isActive).map((purchase) => ({ ...purchase, dateKey: dateKey(purchase.createdAt) })), [purchases, dateKey]);
 
   const todaySales = activeSales
-    .filter((sale) => isWithinPeriod(sale.createdAt, today, tomorrow))
+    .filter((sale) => isWithinPeriod(sale.dateKey, today, tomorrow))
     .sort(
       (firstSale, secondSale) =>
         new Date(secondSale.createdAt).getTime() - new Date(firstSale.createdAt).getTime(),
@@ -88,21 +63,19 @@ function EmployeeDashboard() {
     [products],
   );
 
-  const firstChartDay = addDays(today, -6);
   const weeklyEvolution = Array.from({ length: 7 }, (_, index) => {
-    const dayStart = addDays(firstChartDay, index);
-    const dayEnd = addDays(dayStart, 1);
+    const dayStart = addCalendarDays(firstChartDay, index);
+    const dayEnd = addCalendarDays(dayStart, 1);
 
     return {
-      key: dayStart.toISOString(),
-      label: dayStart
-        .toLocaleDateString("es-AR", { weekday: "short" })
+      key: dayStart,
+      label: formatCalendarDate(dayStart, { weekday: "short" })
         .replace(".", "")
         .slice(0, 2)
         .toUpperCase(),
       income: sumRecords(activeSales, dayStart, dayEnd),
       outcome: sumRecords(activePurchases, dayStart, dayEnd),
-      isToday: dayStart.getTime() === today.getTime(),
+      isToday: dayStart === today,
     };
   });
 
@@ -130,12 +103,11 @@ function EmployeeDashboard() {
     1,
     ...weeklyEvolution.flatMap((day) => [day.income, day.outcome]),
   );
-  const loading = isLoadingProducts || isLoadingSales || isLoadingPurchases;
-  const dashboardError = productsError || errorSaleOrders || errorPurchases;
+
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refreshProducts(), refreshSales(), refreshPurchases()]);
+    await refresh();
     setIsRefreshing(false);
   };
 
@@ -152,7 +124,7 @@ function EmployeeDashboard() {
               <Text className="text-xs font-black uppercase tracking-[2px] text-emerald-300">Panel del equipo</Text>
               <Text className="mt-2 text-3xl font-black text-white">Resumen de hoy</Text>
               <Text className="mt-1 text-sm font-medium capitalize text-slate-300">
-                {now.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })}
+                {formatDate(now, { weekday: "long", day: "numeric", month: "long" })}
               </Text>
             </View>
             {loading ? (
@@ -210,7 +182,7 @@ function EmployeeDashboard() {
             </View>
           </View>
           <View className="flex-row gap-3">
-            <Pressable
+            <PermissionGate permission="sales.create"><Pressable
               className="flex-1 rounded-[22px] bg-emerald-700 p-4 active:opacity-80 dark:bg-emerald-600"
               onPress={() => router.push("/(tabs)/sales/new")}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-white/15">
@@ -218,8 +190,8 @@ function EmployeeDashboard() {
               </View>
               <Text className="mt-4 text-sm font-black text-white">Nueva venta</Text>
               <Text className="mt-1 text-xs text-emerald-100">Registrar cobro</Text>
-            </Pressable>
-            <Pressable
+            </Pressable></PermissionGate>
+            <PermissionGate permission="purchases.create"><Pressable
               className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/purchases/new")}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40">
@@ -227,8 +199,8 @@ function EmployeeDashboard() {
               </View>
               <Text className="mt-4 text-sm font-black text-slate-950 dark:text-white">Nueva compra</Text>
               <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Reponer stock</Text>
-            </Pressable>
-            <Pressable
+            </Pressable></PermissionGate>
+            <PermissionGate permission="products.read"><Pressable
               className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/products")}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
@@ -236,7 +208,7 @@ function EmployeeDashboard() {
               </View>
               <Text className="mt-4 text-sm font-black text-slate-950 dark:text-white">Productos</Text>
               <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Ver inventario</Text>
-            </Pressable>
+            </Pressable></PermissionGate>
           </View>
         </View>
 
@@ -368,6 +340,7 @@ function EmployeeDashboard() {
 
                 return (
                   <Pressable
+                    disabled={!can("products.read")}
                     key={product.id}
                     className="flex-row items-center gap-3 rounded-2xl bg-slate-50 p-3 active:opacity-75 dark:bg-slate-900"
                     onPress={() =>
@@ -399,20 +372,20 @@ function EmployeeDashboard() {
                         }`}>
                         {isOutOfStock ? "Sin stock" : missingUnits > 0 ? `Faltan ${missingUnits}` : "En mínimo"}
                       </Text>
-                      <Ionicons name="chevron-forward" size={17} color="#94a3b8" />
+                      {can("products.read") && <Ionicons name="chevron-forward" size={17} color="#94a3b8" />}
                     </View>
                   </Pressable>
                 );
               })}
 
               {lowStockProducts.length > 5 && (
-                <Pressable
+                <PermissionGate permission="products.read"><Pressable
                   className="items-center rounded-2xl border border-slate-200 py-3 active:opacity-75 dark:border-slate-700"
                   onPress={() => router.push("/(tabs)/products")}>
                   <Text className="text-sm font-black text-emerald-700 dark:text-emerald-300">
                     Ver {lowStockProducts.length - 5} alertas más
                   </Text>
-                </Pressable>
+                </Pressable></PermissionGate>
               )}
             </View>
           )}
@@ -424,11 +397,11 @@ function EmployeeDashboard() {
               <Text className="text-lg font-black text-slate-950 dark:text-white">Ventas de hoy</Text>
               <Text className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">Últimos movimientos del turno</Text>
             </View>
-            <Pressable onPress={() => router.push("/(tabs)/sales")}>
+            <PermissionGate permission="sales.read"><Pressable onPress={() => router.push("/(tabs)/sales")}>
               <Text className="text-xs font-black uppercase tracking-[1px] text-emerald-700 dark:text-emerald-300">
                 Ver todas
               </Text>
-            </Pressable>
+            </Pressable></PermissionGate>
           </View>
 
           {todaySales.length === 0 ? (
@@ -442,6 +415,7 @@ function EmployeeDashboard() {
             <View className="mt-4 gap-2">
               {todaySales.slice(0, 4).map((sale) => (
                 <Pressable
+                  disabled={!can("sales.read")}
                   key={sale.id}
                   className="flex-row items-center gap-3 rounded-2xl bg-slate-50 p-3 active:opacity-75 dark:bg-slate-900"
                   onPress={() =>
@@ -453,7 +427,7 @@ function EmployeeDashboard() {
                   <View className="flex-1">
                     <Text className="text-sm font-black text-slate-950 dark:text-white">Venta Nº{sale.id}</Text>
                     <Text className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                      {new Date(sale.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                      {formatTime(sale.createdAt)}
                     </Text>
                   </View>
                   <Text className="text-sm font-black text-emerald-700 dark:text-emerald-300">

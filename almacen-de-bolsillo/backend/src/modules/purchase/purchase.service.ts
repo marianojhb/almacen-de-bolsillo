@@ -1,168 +1,75 @@
-import { prisma } from "../../config/prisma.js";
+import { prisma } from "../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
-import type { CreatePurchaseOrderDto } from "@almacen/shared";
+import { ApiError, readBody, readBoolean } from "../auth/request.utils.js";
+import { assertProductQuantity } from "../products/products.rules.js";
+import { productValuesResponse } from "../products/products.response.js";
+import { validatePurchase } from "./purchases.validation.js";
 
-const getPurchaseOrdersFromDatabase = async () =>
-  prisma.purchaseOrder.findMany({
-    include: {
-      supplier: true,
-      purchaseOrdersItems: {
-        include: {
-          product: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+const purchaseArgs = (commerceId: number) => ({
+  include: {
+    supplier: { select: { id: true, name: true, isActive: true } },
+    purchaseOrdersItems: { where: { commerceId, product: { commerceId } }, include: { product: true } },
+    transaction: { select: { paymentMethod: true, walletProvider: true } },
+  },
+} satisfies Prisma.PurchaseOrderDefaultArgs);
 
-const getPurchaseOrderByIdFromDatabase = async (purchaseOrderId: number) =>
-  prisma.purchaseOrder.findUnique({
-    where: {
-      id: purchaseOrderId,
-    },
-    include: {
-      supplier: true,
-      purchaseOrdersItems: {
-        include: {
-          product: true,
-        },
-      },
-    },
-  });
+type PurchaseRecord = Prisma.PurchaseOrderGetPayload<ReturnType<typeof purchaseArgs>>;
+const purchaseResponse = ({ transaction, ...order }: PurchaseRecord) => ({
+  ...order, ...transaction, total: Number(order.total), ivaPurchase: Number(order.ivaPurchase),
+  purchaseOrdersItems: order.purchaseOrdersItems.map((item) => ({
+    ...item, quantity: Number(item.quantity), price: Number(item.price), discount: Number(item.discount),
+    subtotal: Number(item.subtotal), product: productValuesResponse(item.product),
+  })),
+});
 
-const roundCurrency = (value: number) => Math.round(value * 100) / 100;
+const getPurchaseOrdersFromDatabase = (commerceId: number) =>
+  prisma.purchaseOrder.findMany({ ...purchaseArgs(commerceId), where: { commerceId, supplier: { commerceId } }, orderBy: { createdAt: "desc" } }).then((orders) => orders.map(purchaseResponse));
 
-const postPurchaseOrderToDatabase = async (purchaseOrderData: CreatePurchaseOrderDto) => {
-  const { items, supplierId, userId } = purchaseOrderData;
+const getPurchaseOrderByIdFromDatabase = (id: number, commerceId: number) =>
+  prisma.purchaseOrder.findUnique({ ...purchaseArgs(commerceId), where: { id, commerceId, supplier: { commerceId } } }).then((order) => order ? purchaseResponse(order) : null);
 
-  if (!Array.isArray(items) || items.length === 0) {
-    throw new Error("A purchase order must contain at least one item");
-  }
-
-  if (!Number.isInteger(supplierId) || supplierId <= 0) {
-    throw new Error("A valid supplier is required");
-  }
-
-  if (!Number.isInteger(userId) || userId <= 0) {
-    throw new Error("A valid user is required");
-  }
-
-  const normalizedItems = items.map((item) => {
-    const quantity = Number(item.quantity);
-    const price = Number(item.price);
-    const discount = Number(item.discount ?? 0);
-
-    if (!Number.isInteger(item.productId) || item.productId <= 0) {
-      throw new Error("Every purchase item must have a valid product");
-    }
-
-    if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new Error(`Quantity for product ${item.productId} must be a positive integer`);
-    }
-
-    if (!Number.isFinite(price) || price < 0) {
-      throw new Error(`Price for product ${item.productId} must be zero or greater`);
-    }
-
-    if (!Number.isFinite(discount) || discount < 0) {
-      throw new Error(`Discount for product ${item.productId} must be zero or greater`);
-    }
-
-    return {
-      productId: item.productId,
-      quantity,
-      price: roundCurrency(price),
-      discount: roundCurrency(discount),
-      subtotal: roundCurrency(Math.max(0, quantity * price - discount)),
-    };
-  });
-
-  const productIds = normalizedItems.map((item) => item.productId);
-
-  if (new Set(productIds).size !== productIds.length) {
-    throw new Error("A product cannot be repeated in the same purchase order");
-  }
-
-  const total = roundCurrency(normalizedItems.reduce((orderTotal, item) => orderTotal + item.subtotal, 0));
-
+const postPurchaseOrderToDatabase = async (body: unknown, commerceId: number, userId: number) => {
+  const { items, supplierId, total, paymentMethod, walletProvider } = validatePurchase(body);
+  const productIds = items.map((item) => item.productId);
   return prisma.$transaction(async (tx) => {
+    await tx.user.findUniqueOrThrow({ where: { id: userId, commerceId, isActive: true }, select: { id: true } });
+    await tx.supplier.findUniqueOrThrow({ where: { id: supplierId, commerceId, isActive: true }, select: { id: true } });
+    for (const id of [...productIds].sort((a, b) => a - b)) {
+      await tx.$queryRaw`SELECT "id_product_p" FROM "products_p" WHERE "id_product_p" = ${id} AND "id_commerce_p" = ${commerceId} FOR UPDATE`;
+    }
     const supplierProducts = await tx.productOnSupplier.findMany({
-      where: {
-        supplierId,
-        productId: { in: productIds },
-        product: { isActive: true },
-      },
-      select: { productId: true },
+      where: { commerceId, supplierId, productId: { in: productIds }, product: { commerceId, isActive: true } },
+      include: { product: true },
     });
-    const availableProductIds = new Set(supplierProducts.map((supplierProduct) => supplierProduct.productId));
-    const unavailableProductId = productIds.find((productId) => !availableProductIds.has(productId));
-
-    if (unavailableProductId !== undefined) {
-      throw new Error(`Product ${unavailableProductId} is inactive or unavailable from supplier ${supplierId}`);
+    if (supplierProducts.length !== productIds.length) throw new ApiError(400, "Uno o más productos no están activos o no pertenecen al proveedor de este comercio.");
+    const productsById = new Map(supplierProducts.map((relation) => [relation.productId, relation.product]));
+    for (const item of items) {
+      const product = productsById.get(item.productId)!;
+      assertProductQuantity(item.quantity, product.measurementUnit);
+      if (product.stock.plus(item.quantity).greaterThan("999999999.999")) throw new ApiError(409, "La compra supera el máximo de stock permitido.");
     }
-
-    const purchaseOrder = await tx.purchaseOrder.create({
-      data: {
-        total,
-        supplier: { connect: { id: supplierId } },
-        buyer: { connect: { id: userId } },
-        transaction: {
-          create: {
-            amount: total,
-            direction: "EXPENSE",
-          },
-        },
-        purchaseOrdersItems: {
-          create: normalizedItems,
-        },
-      },
-      include: {
-        supplier: true,
-        purchaseOrdersItems: {
-          include: { product: true },
-        },
-        transaction: true,
-      },
-    });
-
-    for (const item of normalizedItems) {
-      const updatedProduct = await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { increment: item.quantity } },
-        select: { stock: true },
-      });
-      const previousStock = updatedProduct.stock - item.quantity;
-
-      await tx.stockMovement.create({
-        data: {
-          type: "PURCHASE",
-          productId: item.productId,
-          quantity: item.quantity,
-          previousStock,
-          newStock: updatedProduct.stock,
-          reason: `Purchase order #${purchaseOrder.id}`,
-          purchaseOrderId: purchaseOrder.id,
-        },
-      });
+    const transaction = await tx.transaction.create({ data: { commerceId, amount: total, direction: "EXPENSE", paymentMethod, walletProvider } });
+    const order = await tx.purchaseOrder.create({ data: { total, commerceId, supplierId, userId, transactionId: transaction.id } });
+    await tx.purchaseOrdersItem.createMany({ data: items.map((item) => ({ ...item, commerceId, purchaseOrderId: order.id, measurementUnit: productsById.get(item.productId)!.measurementUnit })) });
+    for (const item of items) {
+      const product = productsById.get(item.productId)!;
+      const newStock = product.stock.plus(item.quantity);
+      await tx.product.update({ where: { id: product.id, commerceId }, data: { stock: newStock } });
+      await tx.stockMovement.create({ data: {
+        commerceId, type: "PURCHASE", productId: product.id, measurementUnit: product.measurementUnit, quantity: item.quantity,
+        previousStock: product.stock, newStock, reason: "Compra #" + order.id, purchaseOrderId: order.id,
+      } });
     }
-
-    return purchaseOrder;
+    return purchaseResponse(await tx.purchaseOrder.findUniqueOrThrow({ where: { id: order.id, commerceId }, ...purchaseArgs(commerceId) }));
   });
 };
 
-const updatePurchaseOrderFromDatabase = async (
-  purchaseOrderId: number,
-  purchaseOrderData: Prisma.PurchaseOrderUpdateInput,
-) => prisma.purchaseOrder.update({ where: { id: purchaseOrderId }, data: purchaseOrderData });
-const deletePurchaseOrderFromDatabase = async (purchaseOrderId: number) =>
-  prisma.purchaseOrder.delete({ where: { id: purchaseOrderId } });
-
-export {
-  getPurchaseOrdersFromDatabase,
-  getPurchaseOrderByIdFromDatabase,
-  postPurchaseOrderToDatabase,
-  updatePurchaseOrderFromDatabase,
-  deletePurchaseOrderFromDatabase,
+const updatePurchaseOrderFromDatabase = (id: number, body: unknown, commerceId: number) => {
+  const source = readBody(body, ["isActive"]);
+  return prisma.purchaseOrder.update({ where: { id, commerceId }, ...purchaseArgs(commerceId), data: { isActive: readBoolean(source.isActive) } }).then(purchaseResponse);
 };
+
+const deletePurchaseOrderFromDatabase = (id: number, commerceId: number) =>
+  prisma.purchaseOrder.delete({ where: { id, commerceId } });
+
+export { getPurchaseOrdersFromDatabase, getPurchaseOrderByIdFromDatabase, postPurchaseOrderToDatabase, updatePurchaseOrderFromDatabase, deletePurchaseOrderFromDatabase };
