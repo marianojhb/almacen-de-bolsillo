@@ -7,10 +7,14 @@ import { SuppliersProvider } from "@/contexts/suppliers/provider";
 import { ProductsProvider } from "@/contexts/products/provider";
 import { useColorScheme } from "react-native";
 import { EmployeesProvider } from "@/contexts/employees";
+import { WorkShiftsProvider } from "@/contexts/work-shifts";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function TabScreen() {
   const { can } = usePermissions();
+  const { user } = useAuth();
+  const isEmployee = user?.role === "EMPLOYEE";
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   return (
@@ -18,82 +22,90 @@ export default function TabScreen() {
       <SuppliersProvider>
         <EmployeesProvider>
           <PurchasesProvider>
-            <SalesProvider>
-              <Tabs
-              screenOptions={{
-                headerStyle: {
-                  backgroundColor: isDark ? "#111A1A" : "#ffffff",
-                },
-                headerTintColor: isDark ? "#ffffff" : "#111111",
+              <SalesProvider>
+                <WorkShiftsProvider>
+                <Tabs initialRouteName="index"
+                screenOptions={{
 
-                tabBarStyle: {
-                  backgroundColor: isDark ? "#111A1A" : "#ffffff",
-                  borderTopColor: isDark ? "#263333" : "#dddddd",
-                },
+                  headerStyle: {
+                    backgroundColor: isDark ? "#111A1A" : "#ffffff",
+                  },
+                  headerTintColor: isDark ? "#ffffff" : "#111111",
 
-                tabBarActiveTintColor: isDark ? "#ffffff" : "#111111",
-                tabBarInactiveTintColor: isDark ? "#8A9999" : "#777777",
+                  tabBarStyle: {
+                    backgroundColor: isDark ? "#111A1A" : "#ffffff",
+                    borderTopColor: isDark ? "#263333" : "#dddddd",
+                  },
 
-                headerTitleStyle: {
-                  fontWeight: "900",
-                },
-              }}>
-              <Tabs.Protected guard={can("sales", "read") && can("purchases", "read")}>
-              <Tabs.Screen
-                name="index"
-                options={{
-                  title: "Dashboard",
-                  tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
-                  headerBackButtonDisplayMode: "minimal",
-                  headerStyle: { backgroundColor: "#111A1A" },
-                  headerTintColor: "#fff",
-                  headerTitleStyle: { fontWeight: "900" },
-                }}
-              />
+                  tabBarActiveTintColor: isDark ? "#ffffff" : "#111111",
+                  tabBarInactiveTintColor: isDark ? "#8A9999" : "#777777",
 
-              </Tabs.Protected>
-              <Tabs.Protected guard={can("sales", "read")}>
-              <Tabs.Screen
-                name="sales"
-                options={{
-                  title: "Ventas",
-                  headerShown: false,
-                  tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
-                }}
-              />
-              </Tabs.Protected>
-              <Tabs.Protected guard={can("products", "read")}>
-              <Tabs.Screen
-                name="products"
-                options={{
-                  title: "Productos",
-                  headerShown: false,
-                  tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
-                }}
-              />
-              </Tabs.Protected>
-              <Tabs.Protected guard={can("purchases", "read")}>
-              <Tabs.Screen
-                name="purchases"
-                options={{
-                  title: "Compras",
-                  headerShown: false,
-                  tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
-                }}
-              />
-              </Tabs.Protected>
-              <Tabs.Screen
-                name="more"
-                options={{
-                  title: "Más",
-                  headerShown: false,
-                  tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
-                }}
-              />
-              </Tabs>
+                  headerTitleStyle: {
+                    fontWeight: "900",
+                  },
+
+                }}>
+
+                <Tabs.Screen
+                  name="index"
+
+
+                  options={{
+                    title: isEmployee ? "Turnos" : "Dashboard",
+
+                    ...(user?.role === "BUSINESS_OWNER" || isEmployee ? {} : { href: null }),
+                    tabBarIcon: ({ color, size }) => <Ionicons name={isEmployee ? "calendar-outline" : "storefront-outline"} color={color} size={size} />,
+                    headerBackButtonDisplayMode: "minimal",
+                    headerStyle: { backgroundColor: "#111A1A" },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: { fontWeight: "900" },
+                  }}
+                />
+
+
+                <Tabs.Protected guard={can("sales", "read")}>
+                <Tabs.Screen
+                  name="sales"
+                  options={{
+                    title: "Ventas",
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
+                  }}
+                />
+                </Tabs.Protected>
+                <Tabs.Protected guard={can("products", "read")}>
+                <Tabs.Screen
+                  name="products"
+                  options={{
+                    title: "Productos",
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
+                  }}
+                />
+                </Tabs.Protected>
+                <Tabs.Protected guard={can("purchases", "read")}>
+                <Tabs.Screen
+                  name="purchases"
+                  options={{
+                    title: "Compras",
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
+                  }}
+                />
+                </Tabs.Protected>
+                <Tabs.Screen
+                  name="more"
+                  options={{
+                    title: "Más",
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
+                  }}
+                />
+                </Tabs>
+              </WorkShiftsProvider>
             </SalesProvider>
           </PurchasesProvider>
-        </EmployeesProvider>    
+        </EmployeesProvider>
       </SuppliersProvider>
     </ProductsProvider>
   );

@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { LoginDto } from "@almacen/shared";
+import type { CreateOwnerDto, EmployeeGender, LoginDto } from "@almacen/shared";
 
 import {
   AuthError,
@@ -68,6 +68,25 @@ function readCredentials(
   };
 }
 
+export function readOwnerRegistration(body: unknown): CreateOwnerDto {
+  const credentials = readCredentials(body, true);
+  const source = body as Record<string, unknown>;
+  if (typeof source.firstname !== "string" || !source.firstname.trim() || source.firstname.trim().length > 100) {
+    throw new AuthError(400, "Ingresá el nombre del creador (hasta 100 caracteres).");
+  }
+  if (typeof source.lastname !== "string" || !source.lastname.trim() || source.lastname.trim().length > 100) {
+    throw new AuthError(400, "Ingresá el apellido del creador (hasta 100 caracteres).");
+  }
+  const dni = typeof source.dni === "string" ? source.dni.replace(/[.\s]/g, "") : "";
+  if (!/^\d{7,8}$/.test(dni)) {
+    throw new AuthError(400, "Ingresá un DNI válido de 7 u 8 dígitos.");
+  }
+  if (source.gender !== "M" && source.gender !== "F" && source.gender !== "OTHER") {
+    throw new AuthError(400, "Seleccioná el género del creador.");
+  }
+  return { ...credentials, firstname: source.firstname.trim(), lastname: source.lastname.trim(), dni, gender: source.gender as EmployeeGender };
+}
+
 function respondWithError(
   res: Response,
   error: unknown,
@@ -103,7 +122,7 @@ export async function createOwnerController(
   res: Response,
 ): Promise<void> {
   try {
-    const credentials = readCredentials(req.body, true);
+    const credentials = readOwnerRegistration(req.body);
     const user = await createOwner(credentials);
 
     res.status(201).json({

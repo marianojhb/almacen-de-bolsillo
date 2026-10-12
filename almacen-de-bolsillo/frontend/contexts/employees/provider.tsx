@@ -39,7 +39,7 @@ export function EmployeesProvider({children}: Props) {
 
       const response = await getEmployeesRequest();
 
-      setEmployees(sortEmployees(response));
+      setEmployees(sortEmployees(response.filter((employee) => employee.user?.role !== "BUSINESS_OWNER")));
     } catch (error) {
       console.error("Error loading employees:", error);
 
@@ -50,6 +50,8 @@ export function EmployeesProvider({children}: Props) {
   }, []);
 
   useEffect(() => { 
+    // Sincroniza el listado con la API al montar el provider.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshEmployees(); 
   }, [refreshEmployees]);
 

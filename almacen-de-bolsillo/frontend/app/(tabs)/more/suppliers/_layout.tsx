@@ -40,6 +40,9 @@ export default function SuppliersLayout() {
         />
         <Stack.Screen name="[id]/products" options={{ title: "Productos del proveedor" }} />
         </Stack.Protected>
+        <Stack.Protected guard={can("purchases", "read")}>
+          <Stack.Screen name="[id]/purchases" options={{ title: "Compras del proveedor" }} />
+        </Stack.Protected>
       </Stack>
   );
 }

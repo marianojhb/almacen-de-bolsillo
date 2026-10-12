@@ -1,4 +1,4 @@
-import type { AuthResponse, LoginDto, SetupStatus } from "@almacen/shared";
+import type { AuthResponse, CreateOwnerDto, LoginDto, SetupStatus } from "@almacen/shared";
 import { apiRequest } from "./apiClient";
 
 export function getSetupStatusRequest(): Promise<SetupStatus> {
@@ -13,7 +13,7 @@ export function loginRequest(credentials: LoginDto): Promise<AuthResponse> {
   });
 }
 
-export function createOwnerRequest(credentials: LoginDto): Promise<AuthResponse> {
+export function createOwnerRequest(credentials: CreateOwnerDto): Promise<AuthResponse> {
   return apiRequest("/auth/create-owner", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

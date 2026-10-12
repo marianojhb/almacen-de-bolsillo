@@ -5,7 +5,9 @@ export type Resource =
   | "products"
   | "suppliers"
   | "purchases"
-  | "employees";
+  | "employees"
+  | "workShifts"
+  | "workShiftTypes";
 
 export type Action =
   | "create"
@@ -22,6 +24,8 @@ export const permissions: Permissions = {
     suppliers: ["create", "read", "update", "delete"],
     purchases: ["create", "read", "update", "delete"],
     employees: ["create", "read", "update", "delete"],
+    workShifts: ["create", "read", "update", "delete"],
+    workShiftTypes: ["create", "read", "update", "delete"],
   },
 
   BUSINESS_OWNER: {
@@ -30,6 +34,8 @@ export const permissions: Permissions = {
     suppliers: ["create", "read", "update", "delete"],
     purchases: ["create", "read", "update", "delete"],
     employees: ["create", "read", "update", "delete"],
+    workShifts: ["create", "read", "update", "delete"],
+    workShiftTypes: ["create", "read", "update", "delete"],
   },
 
   SUPERVISOR: {
@@ -38,11 +44,14 @@ export const permissions: Permissions = {
     suppliers: ["create", "read", "update"],
     purchases: ["create", "read", "update"],
     employees: ["read"],
+    workShifts: ["create", "read", "update", "delete"],
+    workShiftTypes: ["create", "read", "update", "delete"],
   },
 
   EMPLOYEE: {
     sales: ["create", "read"],
     products: ["create", "read", "update"],
+    workShifts: ["read"],
   },
 };
 

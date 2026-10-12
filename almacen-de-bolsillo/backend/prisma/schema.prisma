@@ -217,6 +217,8 @@ model Employee {
   userId Int?  @unique @map("id_user_e")
   user   User? @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
+  workShifts WorkShift[]
+
   @@map("employees_e")
 }
 
@@ -238,6 +240,40 @@ model StockMovement {
   @@unique([salesOrderId, productId])
   @@unique([productId, purchaseOrderId])
   @@map("stock_movements_sm")
+}
+
+model WorkShiftType {
+  id              Int      @id @default(autoincrement()) @map("id_work_shift_type")
+  name            String   @unique @map("name")
+  isNonWorkingDay Boolean  @default(false) @map("is_non_working_day")
+  startTime       String?  @map("start_time") @db.VarChar(5)
+  endTime         String?  @map("end_time") @db.VarChar(5)
+  color           String   @default("#2563EB") @map("color") @db.VarChar(7)
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  workShifts WorkShift[]
+
+  @@map("work_shift_types")
+}
+
+model WorkShift {
+  id              Int      @id @default(autoincrement()) @map("id_work_shift")
+  date            DateTime @map("date") @db.Date
+  employeeId      Int      @map("id_employee")
+  workShiftTypeId Int      @map("id_work_shift_type")
+  notes           String?  @map("notes")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workShiftType WorkShiftType @relation(fields: [workShiftTypeId], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, date, workShiftTypeId])
+  @@index([date])
+  @@map("work_shifts")
 }
 
 enum StockMovementType {

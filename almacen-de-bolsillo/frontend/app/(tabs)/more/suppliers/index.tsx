@@ -450,6 +450,18 @@ const visibleSuppliers = useMemo(() => {
                       new Date(supplier.createdAt).toLocaleDateString("es-AR")
                     }
                   />
+                  <Permission resource="purchases" action="read">
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        router.push({ pathname: "/more/suppliers/[id]/purchases", params: { id: String(supplier.id) } });
+                      }}
+                      className="mt-2 flex-row items-center justify-center gap-2 rounded-xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
+                      <Ionicons name="receipt-outline" size={20} color="#80938A" />
+                      <Text className="font-semibold text-white dark:text-black">Ver compras</Text>
+                    </Pressable>
+                  </Permission>
                   <Pressable
                     onPress={(event) => {
                     event.stopPropagation();

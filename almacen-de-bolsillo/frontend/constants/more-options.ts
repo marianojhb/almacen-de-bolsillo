@@ -32,4 +32,11 @@ export const MORE_OPTIONS = [
     href: "/more/employees" as Href,
     icon: "people-outline",
   },
+  {
+  id: "work-shifts",
+  title: "Turnos laborales",
+  description: "Calendario, seguimiento y jornadas",
+  href: "/more/work-shifts" as Href,
+  icon: "calendar-outline",
+},
 ] satisfies MoreOption[];

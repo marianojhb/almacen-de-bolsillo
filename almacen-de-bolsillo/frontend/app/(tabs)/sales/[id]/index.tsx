@@ -2,6 +2,7 @@ import { useSales } from "@/contexts/sales";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Text, View, ScrollView } from "react-native";
 import { DeleteButton } from "@/components/sales/DeleteButton";
+import { SellerInfo } from "@/components/sales/SellerInfo";
 
 export default function SalesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,9 +40,7 @@ export default function SalesDetailScreen() {
               <Text className="mt-2 text-sm leading-5 text-slate-300" numberOfLines={2}>
                 Fecha: {new Date(sale.createdAt).toLocaleString("es-AR")}
               </Text>
-              <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                Vendedor: {sale.seller.email}
-              </Text>
+              <SellerInfo seller={sale.seller} onDark />
             </View>
 
             <View>

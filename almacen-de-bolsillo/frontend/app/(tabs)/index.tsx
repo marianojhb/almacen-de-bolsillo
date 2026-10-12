@@ -1,11 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Redirect, router, type Href } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { usePurchases } from "@/contexts/purchases";
 import { useSales } from "@/contexts/sales";
 import { Permission } from "@/components/auth/Permission";
+import { WorkShiftsScreen } from "@/components/work-shifts/WorkShiftsScreen";
 
 type FinancialRecord = {
   createdAt: string;
@@ -475,5 +477,12 @@ function EmployeeDashboard() {
 }
 
 export default function HomeScreen() {
+  const { user } = useAuth();
+  if (user?.role === "EMPLOYEE") {
+    return <WorkShiftsScreen />;
+  }
+  if (user?.role !== "BUSINESS_OWNER") {
+    return <Redirect href={"/more/work-shifts" as Href} />;
+  }
   return <EmployeeDashboard />;
 }

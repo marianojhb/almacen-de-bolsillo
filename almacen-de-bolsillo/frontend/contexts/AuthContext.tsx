@@ -1,4 +1,4 @@
-import type { AuthUser, LoginDto } from "@almacen/shared";
+import type { AuthUser, CreateOwnerDto, LoginDto } from "@almacen/shared";
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { createOwnerRequest, loginRequest } from "@/services/authApi";
 
@@ -6,7 +6,7 @@ type AuthContextType = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   login: (credentials: LoginDto) => Promise<void>;
-  createOwner: (credentials: LoginDto) => Promise<void>;
+  createOwner: (credentials: CreateOwnerDto) => Promise<void>;
   logout: () => void;
 };
 
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (request === operation.current) setUser(response.user);
   }, []);
 
-  const createOwner = useCallback(async (credentials: LoginDto) => {
+  const createOwner = useCallback(async (credentials: CreateOwnerDto) => {
     const request = ++operation.current;
     const response = await createOwnerRequest(credentials);
     if (request === operation.current) setUser(response.user);

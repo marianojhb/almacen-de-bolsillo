@@ -1,4 +1,5 @@
 import express from "express";
+import authRouter from "./modules/auth/auth.routes.js";
 import productsRouter from "./modules/products/products.routes.js";
 import categoriesRouter from "./modules/categories/categories.routes.js";
 import suppliersRouter from "./modules/suppliers/suppliers.routes.js";
@@ -9,7 +10,8 @@ import employeesRouter from "./modules/employees/employees.routes.js";
 import balancesRouter from "./modules/balances/balances.routes.js";
 import transactionsRouter from "./modules/transactions/transactions.routes.js";
 import stockMovementsRouter from "./modules/stock-movements/stock-movements.routes.js";
-import authRouter from "./modules/auth/auth.routes.js";
+import workShiftTypesRouter from "./modules/work-shifts/work-shift-types.routes.js";
+import workShiftsRouter from "./modules/work-shifts/work-shifts.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -36,6 +38,8 @@ app.use("/employees", employeesRouter);
 app.use("/balances", balancesRouter);
 app.use("/transactions", transactionsRouter);
 app.use("/stock-movements", stockMovementsRouter);
+app.use("/work-shift-types", workShiftTypesRouter);
+app.use("/work-shifts", workShiftsRouter);
 
 // const PORT = process.env.PORT || 3000;
 function getPORT(): number {

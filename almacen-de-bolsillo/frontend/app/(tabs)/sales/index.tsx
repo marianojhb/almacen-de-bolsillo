@@ -3,6 +3,7 @@ import { FlatList, Keyboard, Pressable, RefreshControl, Text, TextInput, View } 
 import { router } from "expo-router";
 import { useSales } from "@/contexts/sales";
 import { Permission } from "@/components/auth/Permission";
+import { SellerInfo } from "@/components/sales/SellerInfo";
 
 export default function SalesScreen() {
   const { totalSales, sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
@@ -186,6 +187,7 @@ export default function SalesScreen() {
                   </View>
                 </View>
 
+                <SellerInfo seller={sale.seller} />
                 <View className="mt-4 flex-row flex-wrap gap-2">
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">

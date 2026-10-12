@@ -1,4 +1,5 @@
 import type { CreateEmployeeWithUserDto, UpdateEmployeeDto } from "@almacen/shared";
+import { formatFullName } from "@almacen/shared";
 
 import { prisma } from "../../config/prisma.js";
 import { hashPassword } from "../auth/password.js";
@@ -15,10 +16,7 @@ const employeeUserInclude = {
 } as const;
 
 const buildFullname = (firstname: string | null | undefined, lastname: string | null | undefined) => {
-  const fullname = [firstname, lastname]
-    .map((value) => value?.trim())
-    .filter(Boolean)
-    .join(" ");
+  const fullname = formatFullName(firstname, lastname);
 
   return fullname || null;
 };
@@ -62,14 +60,13 @@ const mapEmployeeFields = (employeeData: UpdateEmployeeDto) => ({
   }),
 });
 
-const getEmployeesFromDatabase = async (includeInactive: boolean) =>
-  prisma.employee.findMany({
+const getEmployeesFromDatabase = async (includeInactive: boolean) => {
+  const employees = await prisma.employee.findMany({
     include: employeeUserInclude,
-    where: includeInactive
-      ? {}
-      : {
-          isActive: true,
-        },
+    where: {
+      ...(includeInactive ? {} : { isActive: true }),
+      OR: [{ user: null }, { user: { is: { role: { not: "BUSINESS_OWNER" } } } }],
+    },
     orderBy: [
       {
         lastname: "asc",
@@ -79,6 +76,8 @@ const getEmployeesFromDatabase = async (includeInactive: boolean) =>
       },
     ],
   });
+  return employees.map((employee) => ({ ...employee, fullname: buildFullname(employee.firstname, employee.lastname) }));
+};
 
 const getEmployeeByIdFromDatabase = async (employeeId: number) =>
   prisma.employee.findUnique({

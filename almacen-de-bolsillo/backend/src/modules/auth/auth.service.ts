@@ -1,8 +1,10 @@
 import type {
   AuthUser,
+  CreateOwnerDto,
   LoginDto,
   SetupStatus,
 } from "@almacen/shared";
+import { formatFullName } from "@almacen/shared";
 
 import { Prisma } from "../../../generated/prisma/client.js";
 import { prisma } from "../../config/prisma.js";
@@ -22,6 +24,9 @@ const authUserSelect = {
   id: true,
   email: true,
   role: true,
+  employee: {
+    select: { firstname: true, lastname: true, fullname: true, dni: true, gender: true },
+  },
 } as const;
 
 async function findOwner() {
@@ -44,7 +49,7 @@ export async function getSetupStatus(): Promise<SetupStatus> {
 }
 
 export async function createOwner(
-  credentials: LoginDto,
+  credentials: CreateOwnerDto,
 ): Promise<AuthUser> {
   const owner = await findOwner();
 
@@ -66,6 +71,16 @@ export async function createOwner(
         role: "BUSINESS_OWNER",
         isActive: true,
         lastAccess: new Date(),
+        employee: {
+          create: {
+            firstname: credentials.firstname,
+            lastname: credentials.lastname,
+            fullname: formatFullName(credentials.firstname, credentials.lastname),
+            dni: credentials.dni,
+            gender: credentials.gender,
+            isActive: true,
+          },
+        },
       },
       select: authUserSelect,
     });
@@ -86,7 +101,7 @@ export async function createOwner(
 
       throw new AuthError(
         409,
-        "El email ya está utilizado por otra cuenta.",
+        "El email o el DNI ya está utilizado por otra cuenta.",
       );
     }
 
@@ -112,6 +127,7 @@ export async function login(
       isActive: true,
       employee: {
         select: {
+          ...authUserSelect.employee.select,
           isActive: true,
         },
       },

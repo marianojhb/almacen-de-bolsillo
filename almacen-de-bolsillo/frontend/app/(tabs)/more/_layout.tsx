@@ -38,6 +38,12 @@ export default function MoreLayout() {
         options={{ headerShown: false }}
       />
       </Stack.Protected>
+      <Stack.Protected guard={can("workShifts", "read")}>
+      <Stack.Screen
+        name="work-shifts"
+         options={{ headerShown: false }}
+      />
+      </Stack.Protected>
     </Stack>
   );
 }

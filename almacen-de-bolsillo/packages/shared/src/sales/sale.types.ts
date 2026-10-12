@@ -1,6 +1,11 @@
 // This file contains the types for sales orders and their related entities.
 import type { ProductWithRelations } from "../index.js";
 import type { User } from "../users/user.types.js";
+import type { Employee } from "../employees/employee.types.js";
+
+export type SaleSeller = User & {
+  employee?: Pick<Employee, "fullname" | "firstname" | "lastname"> | null;
+};
 
 export type PaymentMethod = "EFECTIVO" | "MERCADOPAGO" | "UALA";
 
@@ -34,7 +39,7 @@ export type SalesOrder = {
   subtotal: number;
   total: number;
   updatedAt: string;
-  seller: User;
+  seller: SaleSeller;
   transactionId: number;
 };
 
