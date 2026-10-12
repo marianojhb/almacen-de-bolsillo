@@ -1,9 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { usePermissions } from "@/hooks/usePermissions";
 import { router } from "expo-router";
 import { Pressable, Text, useColorScheme } from "react-native";
 
 export function NewEmployeeButton() {
     const isDark = useColorScheme() === "dark";
+
+    const { can } = usePermissions();
+    if (!can("employees", "create")) return null;
 
     return (
     <Pressable

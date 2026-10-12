@@ -1,4 +1,4 @@
-import type { Employee } from "@almacen/shared";
+import { ROLE_LABELS, type Employee } from "@almacen/shared";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -37,6 +37,7 @@ function DetailRow({ label, value }: { label: string; value: string | null; }) {
 export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: EmployeeCardProps) {
     const [isChanging, setIsChanging] = useState(false);
     const employeeName = getEmployeeName(employee);
+    const isActive = employee.isActive && employee.user?.isActive !== false;
 
     const salary = employee.salary === null
     ? null
@@ -56,7 +57,7 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
             disabled: isChanging,
         }}
         className={`rounded-2xl border p-4 active:opacity-80 ${
-            employee.isActive
+            isActive
             ? "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
             : "border-gray-400 bg-gray-100 opacity-70 dark:border-gray-600 dark:bg-gray-800"
         } ${isChanging ? "opacity-50" : ""}`}
@@ -70,19 +71,19 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
 
                     <View
                         className={`rounded-full px-2.5 py-1 ${
-                        employee.isActive
+                        isActive
                         ? "bg-green-100 dark:bg-green-950"
                         : "bg-gray-300 dark:bg-gray-700"
                     }`}
                     >
                         <Text
                             className={`text-xs font-semibold ${
-                            employee.isActive
+                            isActive
                             ? "text-green-700 dark:text-green-300"
                             : "text-gray-700 dark:text-gray-300"
                             }`}
                         >
-                            {employee.isActive ? "Activo" : "Inactivo"}
+                            {isActive ? "Activo" : "Usuario desactivado"}
                         </Text>
                     </View>
                 </View>
@@ -131,7 +132,8 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
                 />
                 <DetailRow label="Puesto" value={employee.jobTitle} />
                 <DetailRow label="Salario" value={salary} />
-                <DetailRow label="PTO" value={employee.pto} />
+                <DetailRow label="Email de acceso" value={employee.user?.email ?? null} />
+                <DetailRow label="Rol" value={employee.user ? ROLE_LABELS[employee.user.role] : null} />
                 <DetailRow
                     label="Fecha de registro"
                     value={formatEmployeeDate(employee.createdAt)}

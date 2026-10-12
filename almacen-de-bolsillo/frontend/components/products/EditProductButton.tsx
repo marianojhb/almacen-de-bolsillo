@@ -1,7 +1,11 @@
 import { router } from "expo-router";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Pressable, Text } from "react-native";
 
 export function EditProductButton({ id }: { id: string }) {
+  const { can } = usePermissions();
+  if (!can("products", "update")) return null;
+
   return (
     <Pressable
       onPress={() => router.push(`/products/${id}/edit`)}

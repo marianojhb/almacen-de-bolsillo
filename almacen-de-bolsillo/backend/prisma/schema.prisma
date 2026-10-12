@@ -142,15 +142,16 @@ model Balance {
 }
 
 model User {
-  id             Int             @id @default(autoincrement()) @map("id_user_u")
-  username       String          @unique @map("username_u")
-  email          String          @unique @map("email_u")
-  last_access    DateTime        @map("last_access_u")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  isActive       Boolean         @default(true) @map("is_active_u")
-  passwordHash   String          @map("password_hash_u")
-  role           Role            @default(EMPLOYEE) @map("role_u")
+  id           Int       @id @default(autoincrement()) @map("id_user_u")
+  email        String    @unique @map("email_u")
+  lastAccess   DateTime? @map("last_access_u")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  isActive     Boolean   @default(true) @map("is_active_u")
+  passwordHash String    @map("password_hash_u")
+  role         Role      @default(EMPLOYEE) @map("role_u")
+
+  employee       Employee?
   salesOrders    SalesOrder[]
   purchaseOrders PurchaseOrder[]
 
@@ -208,11 +209,13 @@ model Employee {
   dob       DateTime? @map("dob_e")
   salary    Decimal?  @map("salary_e") @db.Decimal(10, 2)
   jobTitle  String?   @map("job_title_e")
-  pto       String?   @map("pto_e")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   isActive  Boolean   @default(true) @map("is_active_e")
   gender    Gender    @default(M) @map("gender_e")
+
+  userId Int?  @unique @map("id_user_e")
+  user   User? @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@map("employees_e")
 }

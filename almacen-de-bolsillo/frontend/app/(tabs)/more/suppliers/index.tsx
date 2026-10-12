@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Permission } from "@/components/auth/Permission";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Alert, FlatList, Pressable, RefreshControl, Text, TextInput, View} from "react-native";
@@ -186,6 +187,7 @@ const visibleSuppliers = useMemo(() => {
           </Text>
         </View>
 
+        <Permission resource="suppliers" action="create">
         <Pressable
           onPress={() =>
             router.push("/more/suppliers/new")
@@ -198,6 +200,7 @@ const visibleSuppliers = useMemo(() => {
             Nuevo
           </Text>
         </Pressable>
+        </Permission>
       </View>
 
       <View className="mb-4 flex-row items-center rounded-xl border border-gray-200 bg-white px-3 dark:border-gray-700 dark:bg-gray-900">
@@ -345,6 +348,7 @@ const visibleSuppliers = useMemo(() => {
                 </View>
 
                 <View className="flex-row items-center gap-2">
+                  <Permission resource="suppliers" action="update">
                   <Pressable
                     disabled={isDeleting}
                     onPress={(event) => {
@@ -367,10 +371,12 @@ const visibleSuppliers = useMemo(() => {
                       color="#4b5563"
                     />
                   </Pressable>
+                  </Permission>
                   
 
 
               {supplier.isActive ? (
+                <Permission resource="suppliers" action="delete">
                 <Pressable
                   disabled={isChangingStatus}
                   onPress={(event) => {
@@ -387,7 +393,9 @@ const visibleSuppliers = useMemo(() => {
                     color="#dc2626"
                   />
                 </Pressable>
+                </Permission>
               ) : (
+                <Permission resource="suppliers" action="update">
                 <Pressable
                   disabled={isChangingStatus}
                   onPress={(event) => {
@@ -404,6 +412,7 @@ const visibleSuppliers = useMemo(() => {
                     color="#16a34a"
                   />
                 </Pressable>
+                </Permission>
               )}
                   
                   <Ionicons

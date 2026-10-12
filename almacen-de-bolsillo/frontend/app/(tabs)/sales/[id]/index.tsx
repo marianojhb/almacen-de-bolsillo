@@ -40,7 +40,7 @@ export default function SalesDetailScreen() {
                 Fecha: {new Date(sale.createdAt).toLocaleString("es-AR")}
               </Text>
               <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                Vendedor: {sale.seller.username}
+                Vendedor: {sale.seller.email}
               </Text>
             </View>
 

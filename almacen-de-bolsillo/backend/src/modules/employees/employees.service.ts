@@ -1,6 +1,18 @@
-import type { CreateEmployeeDto, UpdateEmployeeDto } from "@almacen/shared";
+import type { CreateEmployeeWithUserDto, UpdateEmployeeDto } from "@almacen/shared";
 
 import { prisma } from "../../config/prisma.js";
+import { hashPassword } from "../auth/password.js";
+
+const employeeUserInclude = {
+  user: {
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      isActive: true,
+    },
+  },
+} as const;
 
 const buildFullname = (firstname: string | null | undefined, lastname: string | null | undefined) => {
   const fullname = [firstname, lastname]
@@ -41,10 +53,6 @@ const mapEmployeeFields = (employeeData: UpdateEmployeeDto) => ({
     jobTitle: employeeData.jobTitle?.trim() || null
   }),
 
-  ...(employeeData.pto !== undefined && {
-    pto: employeeData.pto?.trim() || null
-  }),
-
   ...(employeeData.gender !== undefined && {
     gender: employeeData.gender
   }),
@@ -56,6 +64,7 @@ const mapEmployeeFields = (employeeData: UpdateEmployeeDto) => ({
 
 const getEmployeesFromDatabase = async (includeInactive: boolean) =>
   prisma.employee.findMany({
+    include: employeeUserInclude,
     where: includeInactive
       ? {}
       : {
@@ -73,6 +82,7 @@ const getEmployeesFromDatabase = async (includeInactive: boolean) =>
 
 const getEmployeeByIdFromDatabase = async (employeeId: number) =>
   prisma.employee.findUnique({
+    include: employeeUserInclude,
     where: {
       id: employeeId,
     },
@@ -93,8 +103,11 @@ const getEmployeeByDniFromDatabase = async (dni: string, excludedEmployeeId?: nu
     },
   });
 
-const postEmployeeToDatabase = async (employeeData: CreateEmployeeDto) =>
-  prisma.employee.create({
+const postEmployeeToDatabase = async (employeeData: CreateEmployeeWithUserDto) => {
+  const email = employeeData.email.trim().toLowerCase();
+  const passwordHash = await hashPassword(employeeData.password);
+
+  return prisma.employee.create({
     data: {
       ...mapEmployeeFields(employeeData),
 
@@ -102,8 +115,18 @@ const postEmployeeToDatabase = async (employeeData: CreateEmployeeDto) =>
         employeeData.firstname,
         employeeData.lastname,
       ),
+      user: {
+        create: {
+          email,
+          passwordHash,
+          role: employeeData.role,
+          isActive: true,
+        },
+      },
     },
+    include: employeeUserInclude,
   });
+};
 
 const updateEmployeeFromDatabase = async (employeeId: number, employeeData: UpdateEmployeeDto) => {
   const currentEmployee = await prisma.employee.findUniqueOrThrow({
@@ -113,12 +136,26 @@ const updateEmployeeFromDatabase = async (employeeId: number, employeeData: Upda
     select: {
       firstname: true,
       lastname: true,
+      userId: true,
     },
   });
 
   const firstname = employeeData.firstname ?? currentEmployee.firstname;
 
   const lastname = employeeData.lastname ?? currentEmployee.lastname;
+
+  const accountData = {
+    ...(employeeData.email !== undefined && {
+      email: employeeData.email.trim().toLowerCase(),
+    }),
+    ...(employeeData.role !== undefined && { role: employeeData.role }),
+    ...(employeeData.password !== undefined && {
+      passwordHash: await hashPassword(employeeData.password),
+    }),
+    ...(employeeData.isActive !== undefined && { isActive: employeeData.isActive }),
+  };
+
+  const hasAccountChanges = Object.keys(accountData).length > 0;
 
   return prisma.employee.update({
     where: {
@@ -131,26 +168,48 @@ const updateEmployeeFromDatabase = async (employeeId: number, employeeData: Upda
         firstname,
         lastname,
       ),
+      ...(hasAccountChanges && currentEmployee.userId !== null && {
+          user: {
+            update: accountData,
+          },
+        }),
     },
+    include: employeeUserInclude,
   });
 };
 
 const deactivateEmployeeFromDatabase = async (employeeId: number) =>
-  prisma.employee.update({
-    where: {
-      id: employeeId,
-    },
-    data: {
-      isActive: false,
-    },
+  prisma.$transaction(async (tx) => {
+    const employee = await tx.employee.update({
+      where: { id: employeeId },
+      data: { isActive: false },
+    });
+
+    if (employee.userId !== null) {
+      await tx.user.update({
+        where: { id: employee.userId },
+        data: { isActive: false },
+      });
+    }
+
+    return employee;
   });
 
 const permanentlyDeleteEmployeeFromDatabase = async (employeeId: number) =>
-    prisma.employee.delete({
-      where: {
-        id: employeeId,
-      },
+  prisma.$transaction(async (tx) => {
+    const employee = await tx.employee.delete({
+      where: { id: employeeId },
     });
+
+    if (employee.userId !== null) {
+      // Si existen referencias de ventas o compras, se revierte toda la operación.
+      await tx.user.delete({
+        where: { id: employee.userId },
+      });
+    }
+
+    return employee;
+  });
 
 export {
   deactivateEmployeeFromDatabase,

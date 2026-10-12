@@ -8,8 +8,18 @@ import {
 } from "react-native";
 
 import { MORE_OPTIONS } from "@/constants/more-options";
+import { ROLE_LABELS } from "@almacen/shared";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function MoreScreen() {
+  const { user, logout } = useAuth();
+  const { can, hasFullAccess } = usePermissions();
+  const options = MORE_OPTIONS.filter((option) => {
+    if (option.id === "suppliers") return can("suppliers", "read");
+    if (option.id === "employees") return can("employees", "read");
+    return hasFullAccess;
+  });
   return (
     <View className="flex-1 bg-gray-50 px-4 pt-5 dark:bg-black">
       <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
@@ -17,7 +27,18 @@ export default function MoreScreen() {
       </Text>
 
       <FlatList
-        data={MORE_OPTIONS}
+        data={options}
+        ListHeaderComponent={
+          <View className="mb-4 gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+            <Text className="text-lg font-semibold text-gray-950 dark:text-white">Mi cuenta</Text>
+            <Text className="text-base text-gray-600 dark:text-gray-300">{user?.email}</Text>
+            <Text className="text-sm text-gray-500 dark:text-gray-400">{user ? ROLE_LABELS[user.role] : ""}</Text>
+            <Pressable accessibilityRole="button" onPress={logout} className="flex-row items-center justify-center gap-2 rounded-xl bg-[#111A1A] p-3 active:opacity-70 dark:bg-white">
+              <Ionicons name="log-out-outline" size={20} color="#80938A" />
+              <Text className="font-semibold text-white dark:text-black">Cerrar sesión</Text>
+            </Pressable>
+          </View>
+        }
         keyExtractor={(item) =>
           item.id
         }

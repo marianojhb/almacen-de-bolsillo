@@ -7,8 +7,10 @@ import { SuppliersProvider } from "@/contexts/suppliers/provider";
 import { ProductsProvider } from "@/contexts/products/provider";
 import { useColorScheme } from "react-native";
 import { EmployeesProvider } from "@/contexts/employees";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function TabScreen() {
+  const { can } = usePermissions();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   return (
@@ -36,6 +38,7 @@ export default function TabScreen() {
                   fontWeight: "900",
                 },
               }}>
+              <Tabs.Protected guard={can("sales", "read") && can("purchases", "read")}>
               <Tabs.Screen
                 name="index"
                 options={{
@@ -48,6 +51,8 @@ export default function TabScreen() {
                 }}
               />
 
+              </Tabs.Protected>
+              <Tabs.Protected guard={can("sales", "read")}>
               <Tabs.Screen
                 name="sales"
                 options={{
@@ -56,6 +61,8 @@ export default function TabScreen() {
                   tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
                 }}
               />
+              </Tabs.Protected>
+              <Tabs.Protected guard={can("products", "read")}>
               <Tabs.Screen
                 name="products"
                 options={{
@@ -64,6 +71,8 @@ export default function TabScreen() {
                   tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
                 }}
               />
+              </Tabs.Protected>
+              <Tabs.Protected guard={can("purchases", "read")}>
               <Tabs.Screen
                 name="purchases"
                 options={{
@@ -72,6 +81,7 @@ export default function TabScreen() {
                   tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
                 }}
               />
+              </Tabs.Protected>
               <Tabs.Screen
                 name="more"
                 options={{

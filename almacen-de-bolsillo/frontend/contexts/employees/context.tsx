@@ -1,4 +1,4 @@
-import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
+import type { CreateEmployeeWithUserDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
 import { createContext } from "react";
 
 interface EmployeesContextType {
@@ -7,7 +7,7 @@ interface EmployeesContextType {
   employeesError: string | null;
   refreshEmployees: () => Promise<void>;
 
-  addEmployee: (employee: CreateEmployeeDto) => Promise<Employee>;
+  addEmployee: (employee: CreateEmployeeWithUserDto) => Promise<Employee>;
 
   updateEmployee: (employeeId: number, employee: UpdateEmployeeDto) => Promise<Employee>;
 

@@ -1,8 +1,11 @@
-import type {
-  CreateEmployeeDto,
-  EmployeeGender,
-  UpdateEmployeeDto,
+import {
+  EMPLOYEE_ROLES,
+  type CreateEmployeeWithUserDto,
+  type EmployeeAccountDto,
+  type EmployeeGender,
+  type UpdateEmployeeDto,
 } from "@almacen/shared";
+
 import type {
   Request,
   Response,
@@ -18,9 +21,12 @@ import {
   updateEmployeeFromDatabase,
 } from "./employees.service.js";
 
+type ValidatedEmployeePayload =
+  UpdateEmployeeDto & Partial<EmployeeAccountDto>;
+
 type ValidationResult =
   | {
-      data: UpdateEmployeeDto;
+      data: ValidatedEmployeePayload;
       error: null;
     }
   | {
@@ -77,7 +83,7 @@ const validateEmployeePayload = (
     unknown
   >;
 
-  const data: UpdateEmployeeDto = {};
+  const data: ValidatedEmployeePayload = {};
 
   if (
     !isUpdate ||
@@ -218,23 +224,6 @@ const validateEmployeePayload = (
         : null;
   }
 
-  if (source.pto !== undefined) {
-    if (
-      source.pto !== null &&
-      typeof source.pto !== "string"
-    ) {
-      return {
-        data: null,
-        error: "El PTO no es válido.",
-      };
-    }
-
-    data.pto =
-      typeof source.pto === "string"
-        ? source.pto.trim() || null
-        : null;
-  }
-
   if (!isUpdate && source.gender === undefined) {
     data.gender = "M";
   } else if (source.gender !== undefined) {
@@ -269,6 +258,58 @@ const validateEmployeePayload = (
 
     data.isActive = source.isActive;
   }
+  if (!isUpdate || source.email !== undefined) {
+    if (typeof source.email !== "string") {
+      return {
+        data: null,
+        error: "El email de acceso es obligatorio.",
+      };
+    }
+
+    const email = source.email.trim().toLowerCase();
+
+    if (
+      email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      return {
+        data: null,
+        error: "Ingresá un email válido.",
+      };
+    }
+
+    data.email = email;
+  }
+
+  if (!isUpdate || source.password !== undefined) {
+    if (
+      typeof source.password !== "string" ||
+      source.password.length < 8 ||
+      source.password.length > 128
+    ) {
+      return {
+        data: null,
+        error: "La contraseña debe tener entre 8 y 128 caracteres.",
+      };
+    }
+
+    data.password = source.password;
+  }
+
+  if (!isUpdate || source.role !== undefined) {
+    const role = EMPLOYEE_ROLES.find(
+      (value) => value === source.role,
+    );
+
+    if (!role) {
+      return {
+        data: null,
+        error: "Seleccioná un rol válido para el empleado.",
+      };
+    }
+
+    data.role = role;
+  }
 
   if (
     isUpdate &&
@@ -302,7 +343,7 @@ const sendDatabaseError = (
   if (code === "P2002") {
     res.status(409).json({
       message:
-        "Ya existe un empleado con ese DNI.",
+        "Ya existe un empleado con ese DNI o una cuenta con ese email.",
     });
     return;
   }
@@ -317,7 +358,7 @@ const sendDatabaseError = (
   if (code === "P2003") {
     res.status(409).json({
       message:
-        "No se puede eliminar físicamente el empleado porque tiene registros relacionados.",
+        "No se puede eliminar al empleado y su usuario porque tienen registros relacionados, como ventas o compras. Podés desactivarlos para conservar el historial.",
     });
     return;
   }
@@ -407,7 +448,7 @@ const postEmployee = async (
   }
 
   const employeeData =
-    validation.data as CreateEmployeeDto;
+    validation.data as CreateEmployeeWithUserDto;
 
   try {
     const existingEmployee =

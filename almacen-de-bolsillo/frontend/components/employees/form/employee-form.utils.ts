@@ -1,4 +1,10 @@
-import type { CreateEmployeeDto, EmployeeGender } from "@almacen/shared";
+import {
+    EMPLOYEE_ROLES,
+    type CreateEmployeeWithUserDto,
+    type EmployeeGender,
+    type EmployeeRole,
+    type UpdateEmployeeDto,
+} from "@almacen/shared";
 
 export type EmployeeFormState = {
     firstname: string;
@@ -8,19 +14,24 @@ export type EmployeeFormState = {
     dob: string;
     salary: string;
     jobTitle: string;
-    pto: string;
     gender: EmployeeGender;
+    email: string;
+    password: string;
+    passwordConfirmation: string;
+    role: EmployeeRole;
 };
 
 export type EmployeeFieldsProps = {
     values: EmployeeFormState;
     onChange: (changes: Partial<EmployeeFormState>) => void;
     disabled: boolean;
+    mode: "create" | "edit";
+    showAccountFields: boolean;
 };
 
-type ValidationResult = { ok: true; data: CreateEmployeeDto } | { ok: false; message: string };
+type ValidationResult<T> = { ok: true; data: T } | { ok: false; message: string };
 
-export function createEmployeeFormState(values?: Partial<CreateEmployeeDto>): EmployeeFormState {
+export function createEmployeeFormState(values?: Partial<CreateEmployeeWithUserDto>): EmployeeFormState {
     return {
         firstname: values?.firstname ?? "",
         lastname: values?.lastname ?? "",
@@ -29,8 +40,11 @@ export function createEmployeeFormState(values?: Partial<CreateEmployeeDto>): Em
         dob: values?.dob?.slice(0, 10) ?? "",
         salary: values?.salary?.toString() ?? "",
         jobTitle: values?.jobTitle ?? "",
-        pto: values?.pto ?? "",
         gender: values?.gender ?? "M",
+        email: values?.email ?? "",
+        password: "",
+        passwordConfirmation: "",
+        role: values?.role ?? "EMPLOYEE",
     };
 }
 
@@ -46,7 +60,13 @@ function isValidBirthDate(value: string): boolean {
     );
 }
 
-export function validateEmployeeForm(values: EmployeeFormState): ValidationResult {
+export function validateEmployeeForm(values: EmployeeFormState, mode: "create"): ValidationResult<CreateEmployeeWithUserDto>;
+export function validateEmployeeForm(values: EmployeeFormState, mode: "edit", showAccountFields?: boolean): ValidationResult<UpdateEmployeeDto>;
+export function validateEmployeeForm(
+    values: EmployeeFormState,
+    mode: "create" | "edit",
+    showAccountFields = true,
+): ValidationResult<CreateEmployeeWithUserDto | UpdateEmployeeDto> {
     const firstname = values.firstname.trim();
     const lastname = values.lastname.trim();
     const dni = values.dni.replace(/\D/g, "");
@@ -98,18 +118,48 @@ export function validateEmployeeForm(values: EmployeeFormState): ValidationResul
         };
     }
 
+    const data: UpdateEmployeeDto = {
+        firstname,
+        lastname,
+        dni,
+        cuil: cuil || null,
+        dob: dob || null,
+        salary,
+        jobTitle: values.jobTitle.trim() || null,
+        gender: values.gender,
+    };
+
+    if (mode === "create" || showAccountFields) {
+        const email = values.email.trim().toLowerCase();
+        const role = EMPLOYEE_ROLES.find((value) => value === values.role);
+
+        if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return { ok: false, message: "Ingresá un email de acceso válido." };
+        }
+
+        if (!role) {
+            return { ok: false, message: "Seleccioná un rol válido." };
+        }
+
+        if ((mode === "create" || values.password.length > 0) &&
+            (values.password.length < 8 || values.password.length > 128)) {
+            return { ok: false, message: "La contraseña debe tener entre 8 y 128 caracteres." };
+        }
+
+        if (values.password !== values.passwordConfirmation) {
+            return { ok: false, message: "Las contraseñas no coinciden. Volvé a confirmarlas." };
+        }
+
+        data.email = email;
+        data.role = role;
+
+        if (mode === "create" || values.password.length > 0) {
+            data.password = values.password;
+        }
+    }
+
     return {
         ok: true,
-        data: {
-            firstname,
-            lastname,
-            dni,
-            cuil: cuil || null,
-            dob: dob || null,
-            salary,
-            jobTitle: values.jobTitle.trim() || null,
-            pto: values.pto.trim() || null,
-            gender: values.gender,
-        },
+        data,
     };
 }

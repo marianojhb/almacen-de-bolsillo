@@ -1,4 +1,5 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import { Permission } from "@/components/auth/Permission";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { EditProductButton, DeleteProductButton } from "@/components/products";
@@ -78,11 +79,13 @@ export default function ProductDetailScreen() {
               </Text>
             </View>
             <View className="gap-2">
+                <Permission resource="products" action="update">
               <Pressable
                 onPress={() => router.push(`/products/${product.id}/stock-adjustment`)}
                 className="items-center rounded-2xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white">
                 <Text className="text-sm font-black text-white dark:text-[#111A1A]">Ajustar</Text>
               </Pressable>
+                </Permission>
               <Pressable
                 onPress={() => router.push(`/products/${product.id}/movements`)}
                 className="items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 active:opacity-75 dark:border-slate-800 dark:bg-slate-900">

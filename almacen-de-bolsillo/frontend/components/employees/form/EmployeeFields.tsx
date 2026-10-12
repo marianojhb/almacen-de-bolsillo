@@ -9,6 +9,7 @@ import {
 
 import type { EmployeeFieldsProps } from "./employee-form.utils";
 import { employeeGenderLabels } from "../employee.utils";
+import { EmployeeRoleSelect } from "./EmployeeRoleSelect";
 
 type FieldProps = TextInputProps & {
   label: string;
@@ -32,7 +33,7 @@ function Field({ label, ...props }: FieldProps) {
 
 const genders: EmployeeGender[] = ["M", "F", "OTHER"];
 
-export function EmployeeFields({ values, onChange, disabled }: EmployeeFieldsProps) {
+export function EmployeeFields({ values, onChange, disabled, mode, showAccountFields }: EmployeeFieldsProps) {
   return (
     <View className="gap-5">
       <Field
@@ -92,13 +93,48 @@ export function EmployeeFields({ values, onChange, disabled }: EmployeeFieldsPro
         keyboardType="decimal-pad"
         editable={!disabled}
       />
-      <Field
-        label="PTO"
-        value={values.pto}
-        onChangeText={(pto) => onChange({ pto })}
-        placeholder="Información de licencia"
-        editable={!disabled}
-      />
+      {showAccountFields && (
+        <View className="gap-5 rounded-2xl border border-gray-200 p-4 dark:border-gray-700">
+          <Text className="text-lg font-semibold text-gray-950 dark:text-white">
+            Cuenta de acceso
+          </Text>
+          <Field
+            label="Email de acceso *"
+            value={values.email}
+            onChangeText={(email) => onChange({ email })}
+            placeholder="empleado@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!disabled}
+          />
+          <Field
+            label={mode === "create" ? "Contraseña *" : "Nueva contraseña (opcional)"}
+            value={values.password}
+            onChangeText={(password) => onChange({ password })}
+            placeholder={mode === "create" ? "Al menos 8 caracteres" : "Dejar vacía para conservar la actual"}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!disabled}
+          />
+          <Field
+            label={mode === "create" ? "Confirmar contraseña *" : "Confirmar nueva contraseña"}
+            value={values.passwordConfirmation}
+            onChangeText={(passwordConfirmation) => onChange({ passwordConfirmation })}
+            placeholder="Repetí la contraseña"
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!disabled}
+          />
+          <EmployeeRoleSelect
+            value={values.role}
+            onChange={(role) => onChange({ role })}
+            disabled={disabled}
+          />
+        </View>
+      )}
       <View>
         <Text className="mb-2 font-semibold text-gray-950 dark:text-white">
           Género

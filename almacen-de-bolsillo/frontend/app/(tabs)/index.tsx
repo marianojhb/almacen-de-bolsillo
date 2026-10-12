@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } 
 import { useProducts } from "@/contexts/products";
 import { usePurchases } from "@/contexts/purchases";
 import { useSales } from "@/contexts/sales";
+import { Permission } from "@/components/auth/Permission";
 
 type FinancialRecord = {
   createdAt: string;
@@ -210,6 +211,7 @@ function EmployeeDashboard() {
             </View>
           </View>
           <View className="flex-row gap-3">
+            <Permission resource="sales" action="create">
             <Pressable
               className="flex-1 rounded-[22px] bg-emerald-700 p-4 active:opacity-80 dark:bg-emerald-600"
               onPress={() => router.push("/(tabs)/sales/new")}>
@@ -219,6 +221,8 @@ function EmployeeDashboard() {
               <Text className="mt-4 text-sm font-black text-white">Nueva venta</Text>
               <Text className="mt-1 text-xs text-emerald-100">Registrar cobro</Text>
             </Pressable>
+            </Permission>
+            <Permission resource="purchases" action="create">
             <Pressable
               className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/purchases/new")}>
@@ -228,6 +232,7 @@ function EmployeeDashboard() {
               <Text className="mt-4 text-sm font-black text-slate-950 dark:text-white">Nueva compra</Text>
               <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Reponer stock</Text>
             </Pressable>
+            </Permission>
             <Pressable
               className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/products")}>

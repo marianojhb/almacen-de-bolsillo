@@ -9,6 +9,7 @@ import employeesRouter from "./modules/employees/employees.routes.js";
 import balancesRouter from "./modules/balances/balances.routes.js";
 import transactionsRouter from "./modules/transactions/transactions.routes.js";
 import stockMovementsRouter from "./modules/stock-movements/stock-movements.routes.js";
+import authRouter from "./modules/auth/auth.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
   res.send(`Server is running at http://localhost:${getPORT()}`);
 });
 
+app.use("/auth", authRouter);
 app.use("/products", productsRouter);
 app.use("/categories", categoriesRouter);
 app.use("/suppliers", suppliersRouter);

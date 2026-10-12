@@ -1,4 +1,5 @@
 import type { Employee } from "@almacen/shared";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Ionicons } from "@expo/vector-icons";
 import { Alert, Pressable, Text } from "react-native";
 
@@ -35,7 +36,7 @@ export function DeleteEmployeeButton({ employee, disabled, onBusyChange, onDelet
     const confirmFinalDelete = () => {
         Alert.alert(
             "Confirmación final",
-            `¿Confirmás la eliminación definitiva de ${employeeName}?`,
+            `¿Confirmás la eliminación definitiva de ${employeeName} y su cuenta de usuario?`,
             [
                 {
                     text: "Cancelar",
@@ -53,7 +54,7 @@ export function DeleteEmployeeButton({ employee, disabled, onBusyChange, onDelet
     const confirmDelete = () => {
         Alert.alert(
             "Eliminar definitivamente",
-            `Esta acción eliminará a ${employeeName} y no se puede deshacer.`,
+            `Esta acción eliminará a ${employeeName} y su cuenta de usuario. No se puede deshacer.`,
             [
                 {
                     text: "Cancelar",
@@ -67,6 +68,9 @@ export function DeleteEmployeeButton({ employee, disabled, onBusyChange, onDelet
             ],
         );
     };
+
+    const { can } = usePermissions();
+    if (!can("employees", "delete")) return null;
 
     return (
     <Pressable

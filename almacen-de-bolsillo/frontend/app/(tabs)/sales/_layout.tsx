@@ -2,8 +2,10 @@
 
 import { SalesDraftProvider } from "@/contexts/sales-draft/provider";
 import { Stack } from "expo-router";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function SalesLayout() {
+  const { can } = usePermissions();
   return (
     <SalesDraftProvider>
       <Stack
@@ -16,6 +18,7 @@ export default function SalesLayout() {
         }}>
         <Stack.Screen name="index" options={{ title: "Ventas" }} />
 
+        <Stack.Protected guard={can("sales", "create")}>
         <Stack.Screen name="new/index" options={{ title: "Nueva venta" }} />
 
         <Stack.Screen
@@ -23,6 +26,7 @@ export default function SalesLayout() {
           options={{ title: "Seleccionar productos", presentation: "modal", headerShown: false }}
         />
 
+        </Stack.Protected>
         <Stack.Screen name="[id]/index" options={{ title: "Detalle de la venta" }} />
       </Stack>
     </SalesDraftProvider>

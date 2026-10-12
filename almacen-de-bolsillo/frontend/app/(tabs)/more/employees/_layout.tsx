@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function EmployeesLayout() {
+  const { can } = usePermissions();
   return (
     <Stack
       screenOptions={{
@@ -24,6 +26,7 @@ export default function EmployeesLayout() {
         }}
       />
 
+      <Stack.Protected guard={can("employees", "create")}>
       <Stack.Screen
         name="new"
         options={{
@@ -31,12 +34,15 @@ export default function EmployeesLayout() {
         }}
       />
 
+      </Stack.Protected>
+      <Stack.Protected guard={can("employees", "update")}>
       <Stack.Screen
         name="[id]/edit"
         options={{
           title: "Editar empleado",
         }}
       />
+      </Stack.Protected>
     </Stack>
   );
 }
