@@ -1,4 +1,4 @@
-import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
+import type { CreateEmployeeWithUserDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { 
@@ -39,7 +39,7 @@ export function EmployeesProvider({children}: Props) {
 
       const response = await getEmployeesRequest();
 
-      setEmployees(sortEmployees(response));
+      setEmployees(sortEmployees(response.filter((employee) => employee.user?.role !== "BUSINESS_OWNER")));
     } catch (error) {
       console.error("Error loading employees:", error);
 
@@ -50,10 +50,12 @@ export function EmployeesProvider({children}: Props) {
   }, []);
 
   useEffect(() => { 
+    // Sincroniza el listado con la API al montar el provider.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshEmployees(); 
   }, [refreshEmployees]);
 
-  const addEmployee = async (employeeData: CreateEmployeeDto) => {
+  const addEmployee = async (employeeData: CreateEmployeeWithUserDto) => {
     const employee = await createEmployeeRequest(employeeData);
 
     setEmployees((current) => sortEmployees([...current, employee]),
@@ -81,7 +83,8 @@ export function EmployeesProvider({children}: Props) {
       current.map((employee) => 
         employee.id === employeeId ? { 
           ...employee, 
-          isActive: false 
+          isActive: false,
+          user: employee.user ? { ...employee.user, isActive: false } : null,
         } : employee
       ),
     );

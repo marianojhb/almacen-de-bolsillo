@@ -1,4 +1,5 @@
 import type { Employee } from "@almacen/shared";
+import { formatFullName } from "@almacen/shared";
 
 export function formatEmployeeCode(id: number): string {
     return `EMP-${id.toString().padStart(6, "0")}`;
@@ -6,8 +7,7 @@ export function formatEmployeeCode(id: number): string {
 
 export function getEmployeeName(employee: Employee): string {
   return (
-        employee.fullname?.trim() ||
-        `${employee.firstname ?? ""} ${employee.lastname ?? ""}`.trim() ||
+        formatFullName(employee.firstname, employee.lastname) ||
         "Empleado sin nombre"
     );
 }

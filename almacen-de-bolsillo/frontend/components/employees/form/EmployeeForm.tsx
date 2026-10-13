@@ -1,4 +1,4 @@
-import type { CreateEmployeeDto } from "@almacen/shared";
+import type { CreateEmployeeWithUserDto, UpdateEmployeeDto } from "@almacen/shared";
 import { useState } from "react";
 import {
     Alert,
@@ -17,16 +17,20 @@ import {
     type EmployeeFormState,
 } from "./employee-form.utils";
 
-export type EmployeeFormValues = CreateEmployeeDto;
+export type EmployeeFormValues = CreateEmployeeWithUserDto;
 
 type EmployeeFormProps = {
     initialValues?: Partial<EmployeeFormValues>;
     submitLabel?: string;
-    onSubmit: (values: EmployeeFormValues) => Promise<void>;
     onCancel: () => void;
-};
+    showAccountFields?: boolean;
+} & (
+    { mode?: "create"; onSubmit: (values: CreateEmployeeWithUserDto) => Promise<void> }
+    | { mode: "edit"; onSubmit: (values: UpdateEmployeeDto) => Promise<void> }
+);
 
-export default function EmployeeForm({ initialValues, submitLabel = "Guardar", onSubmit, onCancel }: EmployeeFormProps) {
+export default function EmployeeForm(props: EmployeeFormProps) {
+    const { initialValues, submitLabel = "Guardar", onCancel } = props;
     const [values, setValues] = useState(() => createEmployeeFormState(initialValues));
 
     const [isSaving, setIsSaving] = useState(false);
@@ -41,16 +45,23 @@ export default function EmployeeForm({ initialValues, submitLabel = "Guardar", o
     const handleSubmit = async () => {
         if (isSaving) return;
 
-        const result = validateEmployeeForm(values);
-
-        if (!result.ok) {
-            Alert.alert("Revisá los datos", result.message);
-            return;
-        }
-
         try {
             setIsSaving(true);
-            await onSubmit(result.data);
+            if (props.mode === "edit") {
+                const result = validateEmployeeForm(values, "edit", props.showAccountFields !== false);
+                if (!result.ok) {
+                    Alert.alert("Revisá los datos", result.message);
+                    return;
+                }
+                await props.onSubmit(result.data);
+            } else {
+                const result = validateEmployeeForm(values, "create");
+                if (!result.ok) {
+                    Alert.alert("Revisá los datos", result.message);
+                    return;
+                }
+                await props.onSubmit(result.data);
+            }
         } catch (error) {
             Alert.alert(
                 "No se pudo guardar",
@@ -76,6 +87,8 @@ export default function EmployeeForm({ initialValues, submitLabel = "Guardar", o
                 values={values}
                 onChange={updateValues}
                 disabled={isSaving}
+                mode={props.mode ?? "create"}
+                showAccountFields={props.mode !== "edit" || props.showAccountFields !== false}
             />
 
             <View className="mt-4 flex-row gap-3">

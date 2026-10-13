@@ -1,4 +1,4 @@
-import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
+import type { CreateEmployeeWithUserDto, Employee, UpdateEmployeeDto } from "@almacen/shared";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -24,7 +24,7 @@ export async function getEmployeesRequest(): Promise<Employee[]> {
   return response.json();
 }
 
-export async function createEmployeeRequest(employee: CreateEmployeeDto): Promise<Employee> {
+export async function createEmployeeRequest(employee: CreateEmployeeWithUserDto): Promise<Employee> {
   const response = await fetch(`${API_URL}/employees`,
     {
       method: "POST",

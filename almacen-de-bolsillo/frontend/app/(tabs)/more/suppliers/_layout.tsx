@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function SuppliersLayout() {
+  const { can } = usePermissions();
   return (
       <Stack
         screenOptions={{
@@ -20,6 +22,7 @@ export default function SuppliersLayout() {
           }}
         />
 
+        <Stack.Protected guard={can("suppliers", "create")}>
         <Stack.Screen
           name="new"
           options={{
@@ -27,12 +30,19 @@ export default function SuppliersLayout() {
           }}
         />
 
+        </Stack.Protected>
+        <Stack.Protected guard={can("suppliers", "update")}>
         <Stack.Screen
           name="[id]/edit"
           options={{
             title: "Editar proveedor",
           }}
         />
+        <Stack.Screen name="[id]/products" options={{ title: "Productos del proveedor" }} />
+        </Stack.Protected>
+        <Stack.Protected guard={can("purchases", "read")}>
+          <Stack.Screen name="[id]/purchases" options={{ title: "Compras del proveedor" }} />
+        </Stack.Protected>
       </Stack>
   );
 }

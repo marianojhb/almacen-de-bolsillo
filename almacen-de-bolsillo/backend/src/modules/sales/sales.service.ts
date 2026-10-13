@@ -2,6 +2,19 @@ import { prisma } from "@/config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
 import type { CreateSalesOrderDto } from "@almacen/shared";
 
+const sellerSelect = {
+  id: true,
+  email: true,
+  role: true,
+  isActive: true,
+  lastAccess: true,
+  createdAt: true,
+  updatedAt: true,
+  employee: {
+    select: { fullname: true, firstname: true, lastname: true },
+  },
+} satisfies Prisma.UserSelect;
+
 const getSalesOrdersFromDatabase = async () =>
   prisma.salesOrder.findMany({
     include: {
@@ -10,7 +23,7 @@ const getSalesOrdersFromDatabase = async () =>
           product: true,
         },
       },
-      seller: true,
+      seller: { select: sellerSelect },
     },
     orderBy: {
       createdAt: "desc",
@@ -20,7 +33,10 @@ const getSalesOrdersFromDatabase = async () =>
 const getSalesOrderByIdFromDatabase = async (salesOrderId: number) =>
   prisma.salesOrder.findUnique({
     where: { id: salesOrderId },
-    include: { salesOrderItems: { include: { product: true, seller: true } } },
+    include: {
+      salesOrderItems: { include: { product: true } },
+      seller: { select: sellerSelect },
+    },
   });
 
 // This function creates a new sales order along with its items, updates the stock of the products involved, and creates stock movement records. It uses a transaction to ensure that all operations are atomic.
@@ -79,7 +95,8 @@ const postSalesOrderToDatabase = async (salesOrderData: CreateSalesOrderDto) => 
       },
       // Include related records in the response (salesOrderItems and transaction)
       include: {
-        salesOrderItems: true,
+        salesOrderItems: { include: { product: true } },
+        seller: { select: sellerSelect },
         transaction: true,
       },
     });

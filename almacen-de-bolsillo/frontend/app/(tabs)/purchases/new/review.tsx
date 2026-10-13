@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
 import { usePurchases } from "@/contexts/purchases";
 import { useSuppliers } from "@/contexts/suppliers";
+import { useAuth } from "@/contexts/AuthContext";
 
 type SupplierReviewItem = {
   productId: number;
@@ -31,6 +32,7 @@ const formatCurrency = (value: number) =>
   });
 
 export default function ReviewPurchaseScreen() {
+  const { user } = useAuth();
   const { items, purchaseQuantities, clearPurchase } = usePurchaseDraft();
   const { suppliers } = useSuppliers();
   const { addPurchase, refreshPurchases } = usePurchases();
@@ -100,13 +102,13 @@ export default function ReviewPurchaseScreen() {
   const isCreateDisabled = supplierGroups.length === 0 || isCreatingOrders;
 
   const handleCreateOrders = async () => {
-    if (isCreateDisabled) {
+    if (isCreateDisabled || !user) {
       return;
     }
 
     const orders: CreatePurchaseOrderDto[] = supplierGroups.map((group) => ({
       supplierId: group.supplierId,
-      userId: 3,
+      userId: user.id,
       total: group.total,
       items: group.items.map((item) => ({
         productId: item.productId,

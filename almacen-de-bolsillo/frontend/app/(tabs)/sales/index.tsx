@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { useSales } from "@/contexts/sales";
+import { Permission } from "@/components/auth/Permission";
+import { SellerInfo } from "@/components/sales/SellerInfo";
 
 export default function SalesScreen() {
   const { totalSales, sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
@@ -55,14 +57,16 @@ export default function SalesScreen() {
             <Text className="mt-1 text-4xl font-black text-white">Ventas</Text>
           </View>
 
-          <Pressable
-            className="min-w-[124px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
+            <Permission resource="sales" action="create">
+            <Pressable
+              className="min-w-[124px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
             onPress={() => {
               Keyboard.dismiss();
               router.push("/sales/new");
             }}>
             <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Nueva venta</Text>
           </Pressable>
+            </Permission>
         </View>
         <View>
           <Text className="mt-2 text-sm leading-5 text-slate-300">
@@ -183,6 +187,7 @@ export default function SalesScreen() {
                   </View>
                 </View>
 
+                <SellerInfo seller={sale.seller} />
                 <View className="mt-4 flex-row flex-wrap gap-2">
                   <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">

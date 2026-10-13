@@ -1,4 +1,5 @@
 import type { Employee } from "@almacen/shared";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Ionicons } from "@expo/vector-icons";
 import { Alert, Pressable } from "react-native";
 
@@ -15,7 +16,7 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
     const { deactivateEmployee, updateEmployee } = useEmployees();
 
     const employeeName = getEmployeeName(employee);
-    const isActive = employee.isActive;
+    const isActive = employee.isActive && employee.user?.isActive !== false;
 
     const changeStatus = async () => {
         try {
@@ -27,8 +28,8 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
                 await updateEmployee(employee.id, { isActive: true });
 
                 Alert.alert(
-                    "Empleado activado",
-                    `${employeeName} fue dado de alta correctamente.`,
+                    "Empleado y usuario activados",
+                    `${employeeName} y su cuenta de usuario fueron activados correctamente.`,
                 );
             }
         } catch (error) {
@@ -45,8 +46,8 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
         Alert.alert(
             isActive ? "Dar de baja empleado" : "Dar de alta empleado",
             isActive
-            ? `¿Querés dar de baja a ${employeeName}? Podrás volver a activarlo.`
-            : `¿Querés volver a activar a ${employeeName}?`,
+            ? `¿Querés desactivar a ${employeeName} y su usuario? Podrás volver a activarlos.`
+            : `¿Querés volver a activar a ${employeeName} y su usuario?`,
             [
                 {
                     text: "Cancelar",
@@ -60,6 +61,9 @@ export function EmployeeStatusButton({ employee, disabled, onBusyChange }: Emplo
             ],
         );
     };
+
+    const { can } = usePermissions();
+    if (!can("employees", "update")) return null;
 
     return (
     <Pressable

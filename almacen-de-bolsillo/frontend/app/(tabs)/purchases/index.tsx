@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { usePurchases } from "@/contexts/purchases";
+import { Permission } from "@/components/auth/Permission";
 
 const PurchasesScreen = () => {
   const { purchases, totalPurchases, isLoadingPurchases, errorPurchases } = usePurchases();
@@ -69,6 +70,7 @@ const PurchasesScreen = () => {
             </Text>
           </View>
 
+          <Permission resource="purchases" action="create">
           <Pressable
             className="min-w-[132px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
             onPress={() => {
@@ -77,6 +79,7 @@ const PurchasesScreen = () => {
             }}>
             <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Nueva compra</Text>
           </Pressable>
+          </Permission>
         </View>
       </View>
 

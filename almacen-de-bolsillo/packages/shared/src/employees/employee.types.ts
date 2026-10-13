@@ -1,3 +1,6 @@
+import type { AuthUser } from "../auth/auth.types.js";
+import type { EmployeeRole } from "../users/user.types.js";
+
 export type EmployeeGender = | "M" | "F" | "OTHER";
 
 export type Employee = {
@@ -10,11 +13,13 @@ export type Employee = {
     dob: string | null;
     salary: number | string | null;
     jobTitle: string | null;
-    pto: string | null;
     createdAt: string;
     updatedAt: string;
     isActive: boolean;
     gender: EmployeeGender;
+
+    userId: number | null;
+    user: (AuthUser & { isActive: boolean }) | null;
 };
 
 export type CreateEmployeeDto = {
@@ -25,10 +30,19 @@ export type CreateEmployeeDto = {
     dob?: string | null;
     salary?: number | null;
     jobTitle?: string | null;
-    pto?: string | null;
     gender: EmployeeGender;
 };
 
-export type UpdateEmployeeDto = Partial<CreateEmployeeDto> & {
+
+export type EmployeeAccountDto = {
+  email: string;
+  password: string;
+  role: EmployeeRole;
+};
+
+export type CreateEmployeeWithUserDto =
+  CreateEmployeeDto & EmployeeAccountDto;
+
+export type UpdateEmployeeDto = Partial<CreateEmployeeWithUserDto> & {
     isActive?: boolean;
 };

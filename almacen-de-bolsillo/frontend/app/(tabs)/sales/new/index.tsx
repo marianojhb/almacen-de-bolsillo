@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSales } from "@/contexts/sales";
 import { useSalesDraft } from "@/contexts/sales-draft";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const NewSaleScreen = () => {
+  const { user } = useAuth();
   const { items, totalAmount, removeItem, clearSales } = useSalesDraft();
   const { addSale, refreshSales } = useSales();
 
@@ -23,9 +25,10 @@ export const NewSaleScreen = () => {
   const isDisabled = items.length === 0 || isSavingSale;
 
   async function handleAddSale() {
+    if (!user || isDisabled) return;
     const payload: CreateSalesOrderDto = {
       invoice: numeroFactura,
-      sellerId: 3,
+      sellerId: user.id,
       paymentMethod: metodoDePago,
       subtotal: subtotal,
       discount: discount,

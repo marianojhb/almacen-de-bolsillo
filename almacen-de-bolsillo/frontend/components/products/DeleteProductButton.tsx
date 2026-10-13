@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Alert, Pressable, Text } from "react-native";
 import { deleteProductRequest } from "@/services/productsApi";
 import { useProducts } from "@/contexts/products";
@@ -29,6 +30,9 @@ export function DeleteProductButton({ id }: { id: string }) {
       },
     ]);
   };
+  const { can } = usePermissions();
+  if (!can("products", "delete")) return null;
+
   return (
     <Pressable onPress={handleDelete} className="items-center rounded-2xl bg-red-500 px-5 py-3 active:opacity-75">
       <Text className="text-sm font-black text-white">Eliminar</Text>

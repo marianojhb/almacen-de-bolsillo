@@ -35,6 +35,8 @@ export default function EditEmployeeScreen() {
   return (
     <EmployeeForm
       key={employee.id}
+      mode="edit"
+      showAccountFields={employee.user !== null}
       submitLabel="Guardar cambios"
       initialValues={{
         firstname: employee.firstname ?? "",
@@ -45,8 +47,11 @@ export default function EditEmployeeScreen() {
         salary:
           employee.salary === null ? null : Number(employee.salary),
         jobTitle: employee.jobTitle,
-        pto: employee.pto,
         gender: employee.gender,
+        ...(employee.user && {
+          email: employee.user.email,
+          role: employee.user.role === "BUSINESS_OWNER" ? "EMPLOYEE" : employee.user.role,
+        }),
       }}
       onCancel={() => router.back()}
       onSubmit={async (values) => {
