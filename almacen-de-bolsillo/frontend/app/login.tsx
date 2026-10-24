@@ -25,7 +25,7 @@ export default function LoginScreen() {
   }, [retry]);
 
   return (
-    <AuthShell>
+    <AuthShell animateStartupLogo>
       <View style={authStyles.card}>
         <Text style={authStyles.title}>Iniciar sesión</Text>
         <CredentialsForm mode="login" onSubmit={login} />
