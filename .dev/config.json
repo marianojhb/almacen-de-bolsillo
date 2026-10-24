@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "githubProjects": {
+    "enabled": false,
+    "projectUrl": null,
+    "backlogStatus": "Backlog",
+    "askedAtInit": true
+  }
+}
