@@ -2,11 +2,16 @@
 
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import "react-native-reanimated";
 import "../global.css";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+
+SplashScreen.setOptions({ duration: 0, fade: false });
+void SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -37,5 +42,9 @@ function AppNavigation() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
+
   return <AuthProvider><AppNavigation /></AuthProvider>;
 }
