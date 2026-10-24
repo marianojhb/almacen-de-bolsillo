@@ -50,7 +50,7 @@ export const permissions: Permissions = {
 
   EMPLOYEE: {
     sales: ["create", "read"],
-    products: ["create", "read", "update"],
+    // products: ["create", "read", "update"],
     workShifts: ["read"],
   },
 };
