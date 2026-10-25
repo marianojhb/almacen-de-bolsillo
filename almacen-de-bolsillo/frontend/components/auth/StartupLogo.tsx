@@ -39,7 +39,6 @@ type StartupLogoProps = {
 export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const targetRef = useRef<View>(null);
-  const overlayRef = useRef<View>(null);
   const animationStarted = useRef(false);
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0);
@@ -61,30 +60,24 @@ export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
       return;
     }
 
-    const target = targetRef.current;
-    const overlay = overlayRef.current;
-    if (!target || !overlay) return;
+    targetRef.current?.measureInWindow((x, y) => {
+      const scaleOffset = (initialSize - targetSize) / 2;
+      const nextDestination = {
+        translateX: x - initialLeft - scaleOffset,
+        translateY: y - initialTop - scaleOffset,
+        scale: targetSize / initialSize,
+      };
 
-    target.measureInWindow((targetX, targetY) => {
-      overlay.measureInWindow((overlayX, overlayY) => {
-        const scaleOffset = (initialSize - targetSize) / 2;
-        const nextDestination = {
-          translateX: targetX - overlayX - initialLeft - scaleOffset,
-          translateY: targetY - overlayY - initialTop - scaleOffset,
-          scale: targetSize / initialSize,
-        };
+      setDestination((current) => {
+        if (
+          current?.translateX === nextDestination.translateX &&
+          current.translateY === nextDestination.translateY &&
+          current.scale === nextDestination.scale
+        ) {
+          return current;
+        }
 
-        setDestination((current) => {
-          if (
-            current?.translateX === nextDestination.translateX &&
-            current.translateY === nextDestination.translateY &&
-            current.scale === nextDestination.scale
-          ) {
-            return current;
-          }
-
-          return nextDestination;
-        });
+        return nextDestination;
       });
     });
   }, [finish, initialLeft, initialSize, initialTop, reduceMotion, targetSize]);
@@ -112,6 +105,7 @@ export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
     const currentProgress = progress.get();
 
     return {
+      opacity: interpolate(currentProgress, [2, 3], [1, 0], Extrapolation.CLAMP),
       transform: [
         {
           translateX: interpolate(
@@ -153,21 +147,19 @@ export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
         onLayout={captureDestination}
         style={[styles.target, { width: targetSize, height: targetSize, borderRadius: targetRadius }]}
       >
-        {complete && (
-          <OptimizedImage
-            accessibilityLabel="Logo de Almacén de Bolsillo"
-            cachePolicy="memory-disk"
-            contentFit="cover"
-            priority="high"
-            source={logoImage}
-            style={styles.targetImage}
-          />
-        )}
+        <OptimizedImage
+          accessibilityLabel="Logo de Almacén de Bolsillo"
+          cachePolicy="memory-disk"
+          contentFit="cover"
+          priority="high"
+          source={logoImage}
+          style={styles.targetImage}
+        />
       </View>
 
       {!complete && (
         <Modal animationType="none" onRequestClose={finish} statusBarTranslucent transparent visible>
-          <View ref={overlayRef} collapsable={false} onLayout={captureDestination} style={styles.overlay}>
+          <View style={styles.overlay}>
             <Animated.View style={[styles.backdrop, backdropAnimatedStyle]} />
             <Animated.View
               style={[
