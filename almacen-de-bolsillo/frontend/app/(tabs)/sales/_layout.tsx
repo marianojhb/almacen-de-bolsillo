@@ -16,7 +16,7 @@ export default function SalesLayout() {
           headerTintColor: "#fff",
           headerTitleStyle: { fontWeight: "900" },
         }}>
-        <Stack.Screen name="index" options={{ title: "Ventas" }} />
+        <Stack.Screen name="index" options={{ title: "Ventas", headerShown: false }} />
 
         <Stack.Protected guard={can("sales", "create")}>
         <Stack.Screen name="new/index" options={{ title: "Nueva venta" }} />

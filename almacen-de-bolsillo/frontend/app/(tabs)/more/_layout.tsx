@@ -17,6 +17,7 @@ export default function MoreLayout() {
         name="index"
         options={{
           title: "Más",
+          headerShown: false,
         }}
       />
 

@@ -60,12 +60,12 @@ export default function ProductsScreen() {
 
         return false;
       }}>
-      <View className="mb-4 rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
+      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Inventario</Text>
-            <Text className="mt-1 text-4xl font-black text-white">Productos</Text>
-            <Text className="mt-2 text-sm leading-5 text-slate-300">
+            <Text className="text-xs font-semibold text-emerald-300">Inventario</Text>
+            <Text className="mt-0.5 text-2xl font-black text-white">Productos</Text>
+            <Text className="mt-1 text-xs leading-5 text-slate-300">
               {filteredProducts.length} de {products.length} productos visibles
             </Text>
           </View>

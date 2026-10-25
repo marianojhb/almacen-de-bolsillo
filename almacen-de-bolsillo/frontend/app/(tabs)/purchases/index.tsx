@@ -59,12 +59,12 @@ const PurchasesScreen = () => {
 
         return false;
       }}>
-      <View className="mb-4 rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
+      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Abastecimiento</Text>
-            <Text className="mt-1 text-4xl font-black text-white">Compras</Text>
-            <Text className="mt-2 text-sm leading-5 text-slate-300">
+            <Text className="text-xs font-semibold text-emerald-300">Abastecimiento</Text>
+            <Text className="mt-0.5 text-2xl font-black text-white">Compras</Text>
+            <Text className="mt-1 text-xs leading-5 text-slate-300">
               {filteredPurchases.length} de {purchases.length} compras visibles · Total{" "}
               {Number(totalPurchases).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
             </Text>
@@ -72,12 +72,12 @@ const PurchasesScreen = () => {
 
           <Permission resource="purchases" action="create">
           <Pressable
-            className="min-w-[132px] rounded-2xl bg-white/10 px-4 py-3 active:opacity-80"
+            className="min-w-[116px] rounded-2xl bg-white/10 px-3 py-2.5 active:opacity-80"
             onPress={() => {
               Keyboard.dismiss();
               router.push("/(tabs)/purchases/new");
             }}>
-            <Text className="text-center text-sm font-black uppercase tracking-[1px] text-white">Nueva compra</Text>
+            <Text className="text-center text-sm font-black text-white">Nueva compra</Text>
           </Pressable>
           </Permission>
         </View>

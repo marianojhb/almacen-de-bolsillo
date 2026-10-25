@@ -14,7 +14,7 @@ export default function ProductsLayout() {
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "900" },
       }}>
-      <Stack.Screen name="index" options={{ title: "Productos" }} />
+      <Stack.Screen name="index" options={{ title: "Productos", headerShown: false }} />
 
       <Stack.Protected guard={can("products", "create")}>
         <Stack.Screen name="new" options={{ title: "Nuevo producto" }} />

@@ -16,7 +16,7 @@ export default function PurchasesLayout() {
           headerTintColor: "#fff",
           headerTitleStyle: { fontWeight: "900" },
         }}>
-        <Stack.Screen name="index" options={{ title: "Compras" }} />
+        <Stack.Screen name="index" options={{ title: "Compras", headerShown: false }} />
 
         <Stack.Protected guard={can("purchases", "create")}>
         <Stack.Screen name="new/index" options={{ title: "Nueva compra" }} />

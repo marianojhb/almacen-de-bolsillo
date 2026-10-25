@@ -1,5 +1,5 @@
 // @/app/(tabs)/_layout.tsx
-import { Tabs } from "expo-router/tabs";
+import { Tabs, useSegments } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SalesProvider } from "@/contexts/sales/provider";
 import { PurchasesProvider } from "@/contexts/purchases/provider";
@@ -12,6 +12,8 @@ import { usePermissions } from "@/hooks/usePermissions";
 
 export default function TabScreen() {
   const { can } = usePermissions();
+  const segments = useSegments();
+  const isTabRoot = segments.length <= 2;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   return (
@@ -21,7 +23,7 @@ export default function TabScreen() {
           <PurchasesProvider>
               <SalesProvider>
                 <WorkShiftsProvider>
-                <Tabs initialRouteName="index"
+                <Tabs
                 screenOptions={{
 
                   headerStyle: {
@@ -49,7 +51,7 @@ export default function TabScreen() {
 
                   options={{
                     title: "Dashboard",
-                    tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={String(color)} size={size} />,
                     headerBackButtonDisplayMode: "minimal",
                     headerStyle: { backgroundColor: "#111A1A" },
                     headerTintColor: "#fff",
@@ -63,8 +65,11 @@ export default function TabScreen() {
                   name="sales"
                   options={{
                     title: "Ventas",
-                    headerShown: false,
-                    tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={color} size={size} />,
+                    headerShown: isTabRoot,
+                    headerStyle: { backgroundColor: "#111A1A" },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: { fontWeight: "900" },
+                    tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={String(color)} size={size} />,
                   }}
                 />
                 </Tabs.Protected>
@@ -73,8 +78,11 @@ export default function TabScreen() {
                   name="products"
                   options={{
                     title: "Productos",
-                    headerShown: false,
-                    tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={color} size={size} />,
+                    headerShown: isTabRoot,
+                    headerStyle: { backgroundColor: "#111A1A" },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: { fontWeight: "900" },
+                    tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={String(color)} size={size} />,
                   }}
                 />
                 </Tabs.Protected>
@@ -83,8 +91,11 @@ export default function TabScreen() {
                   name="purchases"
                   options={{
                     title: "Compras",
-                    headerShown: false,
-                    tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={color} size={size} />,
+                    headerShown: isTabRoot,
+                    headerStyle: { backgroundColor: "#111A1A" },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: { fontWeight: "900" },
+                    tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={String(color)} size={size} />,
                   }}
                 />
                 </Tabs.Protected>
@@ -92,8 +103,11 @@ export default function TabScreen() {
                   name="more"
                   options={{
                     title: "Más",
-                    headerShown: false,
-                    tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={color} size={size} />,
+                    headerShown: isTabRoot,
+                    headerStyle: { backgroundColor: "#111A1A" },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: { fontWeight: "900" },
+                    tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={String(color)} size={size} />,
                   }}
                 />
                 </Tabs>
