@@ -39,6 +39,7 @@ type StartupLogoProps = {
 export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const targetRef = useRef<View>(null);
+  const overlayRef = useRef<View>(null);
   const animationStarted = useRef(false);
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0);
@@ -60,24 +61,30 @@ export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
       return;
     }
 
-    targetRef.current?.measureInWindow((x, y) => {
-      const scaleOffset = (initialSize - targetSize) / 2;
-      const nextDestination = {
-        translateX: x - initialLeft - scaleOffset,
-        translateY: y - initialTop - scaleOffset,
-        scale: targetSize / initialSize,
-      };
+    const target = targetRef.current;
+    const overlay = overlayRef.current;
+    if (!target || !overlay) return;
 
-      setDestination((current) => {
-        if (
-          current?.translateX === nextDestination.translateX &&
-          current.translateY === nextDestination.translateY &&
-          current.scale === nextDestination.scale
-        ) {
-          return current;
-        }
+    target.measureInWindow((targetX, targetY) => {
+      overlay.measureInWindow((overlayX, overlayY) => {
+        const scaleOffset = (initialSize - targetSize) / 2;
+        const nextDestination = {
+          translateX: targetX - overlayX - initialLeft - scaleOffset,
+          translateY: targetY - overlayY - initialTop - scaleOffset,
+          scale: targetSize / initialSize,
+        };
 
-        return nextDestination;
+        setDestination((current) => {
+          if (
+            current?.translateX === nextDestination.translateX &&
+            current.translateY === nextDestination.translateY &&
+            current.scale === nextDestination.scale
+          ) {
+            return current;
+          }
+
+          return nextDestination;
+        });
       });
     });
   }, [finish, initialLeft, initialSize, initialTop, reduceMotion, targetSize]);
@@ -160,7 +167,7 @@ export function StartupLogo({ targetRadius, targetSize }: StartupLogoProps) {
 
       {!complete && (
         <Modal animationType="none" onRequestClose={finish} statusBarTranslucent transparent visible>
-          <View style={styles.overlay}>
+          <View ref={overlayRef} collapsable={false} onLayout={captureDestination} style={styles.overlay}>
             <Animated.View style={[styles.backdrop, backdropAnimatedStyle]} />
             <Animated.View
               style={[
