@@ -3,3 +3,5 @@ DS_Store
 .clinerules
 .vscode
 .favorites.json
+.agents/*
+skills-lock.json
