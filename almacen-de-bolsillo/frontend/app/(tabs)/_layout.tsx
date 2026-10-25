@@ -9,12 +9,9 @@ import { useColorScheme } from "react-native";
 import { EmployeesProvider } from "@/contexts/employees";
 import { WorkShiftsProvider } from "@/contexts/work-shifts";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function TabScreen() {
   const { can } = usePermissions();
-  const { user } = useAuth();
-  const isEmployee = user?.role === "EMPLOYEE";
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   return (
@@ -51,10 +48,8 @@ export default function TabScreen() {
 
 
                   options={{
-                    title: isEmployee ? "Turnos" : "Dashboard",
-
-                    ...(user?.role === "BUSINESS_OWNER" || isEmployee ? {} : { href: null }),
-                    tabBarIcon: ({ color, size }) => <Ionicons name={isEmployee ? "calendar-outline" : "storefront-outline"} color={color} size={size} />,
+                    title: "Dashboard",
+                    tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={color} size={size} />,
                     headerBackButtonDisplayMode: "minimal",
                     headerStyle: { backgroundColor: "#111A1A" },
                     headerTintColor: "#fff",

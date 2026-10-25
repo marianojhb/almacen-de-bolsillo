@@ -13,3 +13,4 @@ export * from "./users/full-name.js";
 export * from "./transactions/transaction.types.js";
 export * from "./employees/employee.types.js";
 export * from "./work-shifts/work-shift.types.js";
+export * from "./balances/balance.types.js";

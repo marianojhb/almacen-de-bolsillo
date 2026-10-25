@@ -1,13 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, router, type Href } from "expo-router";
-import { useAuth } from "@/contexts/AuthContext";
+import { router, type Href } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { usePurchases } from "@/contexts/purchases";
 import { useSales } from "@/contexts/sales";
 import { Permission } from "@/components/auth/Permission";
-import { WorkShiftsScreen } from "@/components/work-shifts/WorkShiftsScreen";
 
 type FinancialRecord = {
   createdAt: string;
@@ -57,7 +55,7 @@ const sumRecords = (records: FinancialRecord[], from: Date, to: Date) =>
     0,
   );
 
-function EmployeeDashboard() {
+function Dashboard() {
   const { products, isLoadingProducts, productsError, refreshProducts } = useProducts();
   const { sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
   const { purchases, isLoadingPurchases, errorPurchases, refreshPurchases } = usePurchases();
@@ -212,10 +210,21 @@ function EmployeeDashboard() {
               <Text className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">Tareas frecuentes del turno</Text>
             </View>
           </View>
-          <View className="flex-row gap-3">
+          <View className="flex-row flex-wrap gap-3">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Abrir Cierre de Caja"
+              className="min-w-[46%] flex-1 rounded-[22px] bg-[#111A1A] p-4 active:opacity-80 dark:border dark:border-slate-800 dark:bg-slate-950"
+              onPress={() => router.push("/more/cash-closing" as Href)}>
+              <View className="h-10 w-10 items-center justify-center rounded-2xl bg-emerald-400">
+                <Ionicons name="calculator-outline" size={21} color="#111A1A" />
+              </View>
+              <Text className="mt-4 text-sm font-black text-white">Cierre de Caja</Text>
+              <Text className="mt-1 text-xs text-slate-300">Conciliar efectivo</Text>
+            </Pressable>
             <Permission resource="sales" action="create">
             <Pressable
-              className="flex-1 rounded-[22px] bg-emerald-700 p-4 active:opacity-80 dark:bg-emerald-600"
+              className="min-w-[46%] flex-1 rounded-[22px] bg-emerald-700 p-4 active:opacity-80 dark:bg-emerald-600"
               onPress={() => router.push("/(tabs)/sales/new")}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-white/15">
                 <Ionicons name="cart-outline" size={21} color="white" />
@@ -226,7 +235,7 @@ function EmployeeDashboard() {
             </Permission>
             <Permission resource="purchases" action="create">
             <Pressable
-              className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
+              className="min-w-[46%] flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/purchases/new")}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/40">
                 <Ionicons name="basket-outline" size={21} color="#b45309" />
@@ -236,7 +245,7 @@ function EmployeeDashboard() {
             </Pressable>
             </Permission>
             <Pressable
-              className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
+              className="min-w-[46%] flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/products")}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
                 <Ionicons name="cube-outline" size={21} color="#64748b" />
@@ -477,12 +486,5 @@ function EmployeeDashboard() {
 }
 
 export default function HomeScreen() {
-  const { user } = useAuth();
-  if (user?.role === "EMPLOYEE") {
-    return <WorkShiftsScreen />;
-  }
-  if (user?.role !== "BUSINESS_OWNER") {
-    return <Redirect href={"/more/work-shifts" as Href} />;
-  }
-  return <EmployeeDashboard />;
+  return <Dashboard />;
 }

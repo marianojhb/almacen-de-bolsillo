@@ -18,6 +18,7 @@ export default function MoreScreen() {
   const profile = user?.employee;
   const fullname = formatFullName(profile?.firstname, profile?.lastname);
   const options = MORE_OPTIONS.filter((option) => {
+    if (option.id === "cash-closing") return true;
     if (option.id === "suppliers") return can("suppliers", "read");
     if (option.id === "employees") return can("employees", "read");
     if (option.id === "work-shifts") return can("workShifts", "read");
