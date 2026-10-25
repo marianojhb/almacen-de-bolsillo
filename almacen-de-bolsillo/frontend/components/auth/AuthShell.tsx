@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   content: { width: "100%", maxWidth: 560, alignSelf: "center" },
   brand: { alignItems: "center", marginBottom: 18, gap: 6 },
   compactBrand: { marginBottom: 12, gap: 4 },
-  logo: { width: 64, height: 64, borderRadius: 18, borderCurve: "continuous", backgroundColor: "#1C2B28", alignItems: "center", justifyContent: "center", marginBottom: 4, overflow: "hidden" },
+  logo: { width: 64, height: 64, borderRadius: 18, borderCurve: "continuous", alignItems: "center", justifyContent: "center", marginBottom: 4, overflow: "hidden" },
   compactLogo: { width: 48, height: 48, borderRadius: 14 },
   logoImage: { width: 64, height: 64 },
   compactLogoImage: { width: 48, height: 48 },
