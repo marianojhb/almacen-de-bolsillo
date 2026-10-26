@@ -49,6 +49,10 @@ export default function MoreLayout() {
         name="cash-closing"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="account"
+        options={{ title: "Mi cuenta" }}
+      />
     </Stack>
   );
 }
