@@ -12,6 +12,7 @@ import { formatFullName } from "@almacen/shared";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { NotebookHeading } from "@/components/ui/notebook";
+import { ThemeSelector } from "@/components/settings/ThemeSelector";
 
 export default function MoreScreen() {
   const { user } = useAuth();
@@ -31,6 +32,7 @@ export default function MoreScreen() {
 
       <FlatList
         data={options}
+        ListHeaderComponent={<ThemeSelector />}
         ListFooterComponent={
           <Link href="/more/account" asChild>
             <Pressable

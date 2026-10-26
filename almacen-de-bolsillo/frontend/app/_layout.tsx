@@ -1,7 +1,6 @@
 // @/app/_layout.tsx
 
 import { DarkTheme, DefaultTheme, ThemeProvider, Stack } from "expo-router";
-import { useColorScheme as useUtilityColorScheme } from "nativewind";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -11,6 +10,7 @@ import "react-native-reanimated";
 import "../global.css";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemePreferenceProvider } from "@/contexts/ThemePreferenceContext";
 import { NotebookPaper, NotebookScene } from "@/components/ui/notebook";
 import { notebook, notebookFonts } from "@/constants/notebook";
 
@@ -57,18 +57,16 @@ function AppNavigation() {
 }
 
 export default function RootLayout() {
-  const systemColorScheme = useColorScheme();
-  const { setColorScheme } = useUtilityColorScheme();
   const [fontsLoaded, fontError] = useFonts({
     [notebookFonts.handwriting]: require("../assets/fonts/Caveat.ttf"),
   });
   useEffect(() => {
     if (fontsLoaded || fontError) SplashScreen.hide();
   }, [fontsLoaded, fontError]);
-  useEffect(() => {
-    setColorScheme(systemColorScheme ?? "light");
-  }, [setColorScheme, systemColorScheme]);
-
   if (!fontsLoaded && !fontError) return null;
-  return <AuthProvider><AppNavigation /></AuthProvider>;
+  return (
+    <ThemePreferenceProvider>
+      <AuthProvider><AppNavigation /></AuthProvider>
+    </ThemePreferenceProvider>
+  );
 }
