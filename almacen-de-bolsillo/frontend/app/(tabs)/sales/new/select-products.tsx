@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Keyboard, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { useSalesDraft } from "@/contexts/sales-draft";
 
@@ -96,14 +96,22 @@ export default function SelectProductsModal() {
         />
       </View>
 
-      <View className="mb-4 flex-row flex-wrap gap-2">
+      <ScrollView
+        horizontal
+        className="mb-4 flex-none"
+        contentContainerClassName="gap-2 pr-4"
+        showsHorizontalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
         {categories.map((category) => {
           const isSelected = categoryId === category.id.toString();
 
           return (
             <Pressable
               key={category.id}
-              onPress={() => setCategoryId(isSelected ? null : category.id.toString())}
+              onPress={() => {
+                Keyboard.dismiss();
+                setCategoryId(isSelected ? null : category.id.toString());
+              }}
               className={`rounded-full border px-4 py-2 active:opacity-75 ${
                 isSelected
                   ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
@@ -118,7 +126,7 @@ export default function SelectProductsModal() {
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
       {products.length === 0 ? (
         <View className="flex-1 items-center justify-center pb-16">
@@ -144,7 +152,7 @@ export default function SelectProductsModal() {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerClassName="gap-3 pb-8"
+          contentContainerClassName="gap-2 pb-8"
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -153,44 +161,47 @@ export default function SelectProductsModal() {
             const canAdd = quantity > 0;
 
             return (
-              <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              <View className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
                 <View className="flex-row items-start justify-between gap-3">
-                  <View className="flex-1">
-                    <Text className="text-2xl font-black text-slate-950 dark:text-white">{product.shortname}</Text>
-                    <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
-                      #{product.id} · {product.longname}
+                  <View className="min-w-0 flex-1">
+                    <Text className="text-lg font-black text-slate-950 dark:text-white" numberOfLines={1}>
+                      {product.shortname}
                     </Text>
+                    <View className="mt-0.5 flex-row items-center gap-2">
+                      <Text className="min-w-0 flex-1 text-xs font-semibold text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                        {product.longname}
+                      </Text>
+                      <View className="rounded-full bg-indigo-50 px-2 py-0.5 dark:bg-indigo-950/60">
+                        <Text className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300" numberOfLines={1}>
+                          {product.category.name}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
 
                   <View className="items-end">
-                    <Text className="text-xs font-bold uppercase tracking-[1px] text-emerald-600 dark:text-emerald-400">
+                    <Text className="text-[9px] font-bold uppercase tracking-[1px] text-emerald-600 dark:text-emerald-400">
                       Precio
                     </Text>
-                    <Text className="text-xl font-black text-emerald-700 dark:text-emerald-300">
+                    <Text className="text-base font-black text-emerald-700 dark:text-emerald-300">
                       {Number(product.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                     </Text>
                   </View>
                 </View>
 
-                <View className="mt-4 flex-row flex-wrap gap-2">
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Stock: {product.stock}</Text>
+                <View className="mt-2 flex-row items-center gap-1.5">
+                  <View className="rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-900">
+                    <Text className="text-[10px] font-bold text-slate-700 dark:text-slate-200">Stock: {product.stock}</Text>
                   </View>
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Mín: {product.stockMin}</Text>
+                  <View className="rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-900">
+                    <Text className="text-[10px] font-bold text-slate-700 dark:text-slate-200">Mín: {product.stockMin}</Text>
                   </View>
-                  <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
-                    <Text className="text-xs font-bold text-indigo-700 dark:text-indigo-300">{product.category.name}</Text>
-                  </View>
-                </View>
 
-                <View className="mt-4 flex-row items-center gap-3">
-                  <View className="flex-1">
-                    <Text className="mb-2 text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-                      Cantidad
-                    </Text>
+                  <View className="ml-auto flex-row items-center gap-1.5">
+                    <Text className="text-[10px] font-bold text-slate-400 dark:text-slate-500">Cant.</Text>
                     <TextInput
-                      className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+                      accessibilityLabel={`Cantidad de ${product.shortname}`}
+                      className="w-12 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-center text-sm font-bold text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                       placeholder="1"
                       placeholderTextColor="#94a3b8"
                       value={quantity.toString()}
@@ -204,32 +215,32 @@ export default function SelectProductsModal() {
                       }}
                       keyboardType="numeric"
                     />
-                  </View>
 
-                  <Pressable
-                    className={`mt-6 rounded-2xl px-4 py-3 active:opacity-80 ${
-                      canAdd ? "bg-[#111A1A] dark:bg-white" : "bg-slate-300 dark:bg-slate-700"
-                    }`}
-                    disabled={!canAdd}
-                    onPress={() => {
-                      addItem({
-                        productId: product.id,
-                        quantity,
-                        shortname: product.shortname,
-                        longname: product.longname,
-                        price: product.price,
-                        discount: 0,
-                        subtotal: 0,
-                      });
-                      router.dismiss();
-                    }}>
-                    <Text
-                      className={`text-sm font-black uppercase tracking-[1px] ${
-                        canAdd ? "text-white dark:text-[#111A1A]" : "text-slate-500 dark:text-slate-300"
-                      }`}>
-                      Agregar
-                    </Text>
-                  </Pressable>
+                    <Pressable
+                      className={`rounded-xl px-3 py-2 active:opacity-80 ${
+                        canAdd ? "bg-[#111A1A] dark:bg-white" : "bg-slate-300 dark:bg-slate-700"
+                      }`}
+                      disabled={!canAdd}
+                      onPress={() => {
+                        addItem({
+                          productId: product.id,
+                          quantity,
+                          shortname: product.shortname,
+                          longname: product.longname,
+                          price: product.price,
+                          discount: 0,
+                          subtotal: 0,
+                        });
+                        router.dismiss();
+                      }}>
+                      <Text
+                        className={`text-xs font-black ${
+                          canAdd ? "text-white dark:text-[#111A1A]" : "text-slate-500 dark:text-slate-300"
+                        }`}>
+                        Agregar
+                      </Text>
+                    </Pressable>
+                  </View>
                 </View>
               </View>
             );
