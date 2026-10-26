@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -28,26 +29,32 @@ function isThemePreference(value: string | null): value is ThemePreference {
 export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
   const [themePreference, setThemePreferenceState] = useState<ThemePreference>("system");
   const { setColorScheme } = useUtilityColorScheme();
+  const setColorSchemeRef = useRef(setColorScheme);
+  const hasManualSelectionRef = useRef(false);
+
+  useEffect(() => {
+    setColorSchemeRef.current = setColorScheme;
+  }, [setColorScheme]);
 
   useEffect(() => {
     let isMounted = true;
-    setColorScheme("system");
 
     void AsyncStorage.getItem(THEME_PREFERENCE_STORAGE_KEY)
       .then((storedPreference) => {
-        if (!isMounted || !isThemePreference(storedPreference)) return;
+        if (!isMounted || hasManualSelectionRef.current || !isThemePreference(storedPreference)) return;
         setThemePreferenceState(storedPreference);
-        setColorScheme(storedPreference);
+        setColorSchemeRef.current(storedPreference);
       })
       .catch(() => undefined);
 
     return () => {
       isMounted = false;
     };
-  }, [setColorScheme]);
+  }, []);
 
   const setThemePreference = useCallback(
     (preference: ThemePreference) => {
+      hasManualSelectionRef.current = true;
       setThemePreferenceState(preference);
       setColorScheme(preference);
       void AsyncStorage.setItem(THEME_PREFERENCE_STORAGE_KEY, preference).catch(() => undefined);
