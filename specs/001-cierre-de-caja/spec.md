@@ -1,6 +1,6 @@
 # Spec 001 — Cierre de Caja
 
-**Estado:** implementada
+**Estado:** aprobada
 
 ## Contexto y objetivo
 
@@ -16,6 +16,7 @@ Administradores, propietarios, supervisores y empleados autenticados.
 - **HU-2.** Como integrante del comercio, quiero comparar el efectivo esperado con el efectivo real para detectar diferencias.
 - **HU-3.** Como integrante del comercio, quiero ver por separado las ventas de Mercado Pago y Ualá para conocer los cobros no efectivos del período.
 - **HU-4.** Como integrante del comercio, quiero guardar varios cierres consecutivos para conciliar distintos períodos de trabajo.
+- **HU-5.** Como responsable del comercio, quiero conocer qué empleado registró cada cierre para mantener su trazabilidad.
 
 ## Definiciones
 
@@ -24,6 +25,7 @@ Administradores, propietarios, supervisores y empleados autenticados.
 - **Período:** intervalo posterior al cierre anterior y hasta el momento en que se cargan los datos. Sin cierre anterior, comienza a las 00:00 del día actual.
 - **Efectivo esperado:** apertura más ventas activas en efectivo menos gastos en efectivo.
 - **Diferencia:** efectivo real menos efectivo esperado.
+- **Empleado responsable:** empleado asociado a la cuenta autenticada que confirma el cierre.
 
 ## Requisitos funcionales
 
@@ -35,9 +37,10 @@ Administradores, propietarios, supervisores y empleados autenticados.
 - **RF-6:** CUANDO se prepara un cierre, EL SISTEMA suma como gastos únicamente las transacciones de egreso en efectivo pertenecientes al período.
 - **RF-7:** MIENTRAS el usuario ingresa el efectivo real, EL SISTEMA calcula la diferencia respecto del efectivo esperado.
 - **RF-8:** SI la diferencia es distinta de cero, ENTONCES EL SISTEMA la presenta en color rojo.
-- **RF-9:** CUANDO el usuario confirma un importe real válido, EL SISTEMA registra un nuevo balance con apertura, entradas y salidas de efectivo, efectivo esperado, efectivo real y diferencia; tras completar el registro, vuelve al Dashboard reemplazando la pantalla de cierre en el historial de navegación.
+- **RF-9:** CUANDO el usuario confirma un importe real válido, EL SISTEMA registra un nuevo balance con apertura, entradas y salidas de efectivo, efectivo esperado, efectivo real, diferencia y el identificador del empleado responsable; tras completar el registro, vuelve al Dashboard reemplazando la pantalla de cierre en el historial de navegación.
 - **RF-10:** EL SISTEMA permite registrar múltiples cierres sin reemplazar cierres anteriores.
 - **RF-11:** SI falla la consulta o el guardado, ENTONCES EL SISTEMA conserva el dato ingresado e informa cómo reintentar.
+- **RF-12:** SI la cuenta que confirma el cierre no tiene un empleado asociado, ENTONCES EL SISTEMA rechaza el registro e informa que no puede identificar al responsable.
 
 ## Requisitos no funcionales
 
@@ -53,6 +56,8 @@ Administradores, propietarios, supervisores y empleados autenticados.
 - El efectivo real es cero.
 - La diferencia es positiva o negativa.
 - El registro falla y el usuario debe permanecer en la pantalla con el importe ingresado.
+- La cuenta autenticada no tiene un empleado asociado.
+- Existen balances anteriores a la incorporación del empleado responsable; estos conservan el responsable sin informar.
 
 ## Fuera de alcance
 
@@ -60,6 +65,8 @@ Administradores, propietarios, supervisores y empleados autenticados.
 - Edición o eliminación de cierres anteriores.
 - Persistencia de totales de Mercado Pago y Ualá en la tabla de balances.
 - Selección manual del período.
+- Asignación retroactiva de un empleado responsable a balances existentes.
+- Visualización del empleado responsable en la interfaz.
 
 ## Criterios de finalización
 

@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
+import type { CreateBalanceDto } from '@almacen/shared';
+import { BalanceInputError, parseCreateBalanceInput } from './balances.input.js';
 
 import {
+  BalanceResponsibleEmployeeError,
   getBalancesFromDatabase,
   getBalanceByIdFromDatabase,
   postBalanceToDatabase,
@@ -29,14 +32,30 @@ const getBalanceById = async (req: Request, res: Response) => {
   }
 };
 
-const postBalance = async (req: Request, res: Response) => {
-  try {
-    res.status(201).json(await postBalanceToDatabase(req.body));
-  } catch (error) {
-    console.error('Error creating balance:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};
+export function createPostBalanceHandler(
+  createBalance: (data: CreateBalanceDto) => Promise<unknown> = postBalanceToDatabase,
+) {
+  return async (req: Request, res: Response) => {
+    try {
+      const input = parseCreateBalanceInput(req.body);
+      const balance = await createBalance(input);
+      res.status(201).json(balance);
+    } catch (error) {
+      if (error instanceof BalanceInputError) {
+        res.status(400).json({ message: error.message });
+        return;
+      }
+      if (error instanceof BalanceResponsibleEmployeeError) {
+        res.status(422).json({ message: error.message });
+        return;
+      }
+      console.error('Error creating balance:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+}
+
+const postBalance = createPostBalanceHandler();
 
 const updateBalance = async (req: Request, res: Response) => {
   const balanceId = Number(req.params.id);

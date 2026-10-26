@@ -127,17 +127,20 @@ model Transaction {
 }
 
 model Balance {
-  id              Int      @id @default(autoincrement()) @map("id_balance_b")
-  date            DateTime @default(now()) @map("date_b")
-  cashIn          Decimal  @map("cash_in_b") @db.Decimal(10, 2)
-  cashOut         Decimal  @map("cash_out_b") @db.Decimal(10, 2)
-  expectedClosing Decimal  @map("expected_closing_b")
-  actualClosing   Decimal  @map("actual_closing_b")
-  difference      Decimal  @map("difference_b")
-  createdAt       DateTime @default(now()) @map("created_at")
-  opening         Decimal  @map("opening_b") @db.Decimal(10, 2)
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id              Int       @id @default(autoincrement()) @map("id_balance_b")
+  date            DateTime  @default(now()) @map("date_b")
+  cashIn          Decimal   @map("cash_in_b") @db.Decimal(10, 2)
+  cashOut         Decimal   @map("cash_out_b") @db.Decimal(10, 2)
+  expectedClosing Decimal   @map("expected_closing_b")
+  actualClosing   Decimal   @map("actual_closing_b")
+  difference      Decimal   @map("difference_b")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  opening         Decimal   @map("opening_b") @db.Decimal(10, 2)
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  employeeId      Int      @map("id_employee_e")
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
+  @@index([employeeId])
   @@map("balance_b")
 }
 
@@ -217,6 +220,7 @@ model Employee {
   userId Int?  @unique @map("id_user_e")
   user   User? @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
+  balances   Balance[]
   workShifts WorkShift[]
 
   @@map("employees_e")

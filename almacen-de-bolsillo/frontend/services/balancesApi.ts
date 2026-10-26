@@ -2,7 +2,8 @@ import type { BalanceDto, CreateBalanceDto } from "@almacen/shared";
 
 import { apiRequest } from "@/services/apiClient";
 
-type BalanceResponse = Omit<BalanceDto, "cashIn" | "cashOut" | "expectedClosing" | "actualClosing" | "difference" | "opening"> & {
+type BalanceResponse = Omit<BalanceDto, "employeeId" | "cashIn" | "cashOut" | "expectedClosing" | "actualClosing" | "difference" | "opening"> & {
+  employeeId?: number | string | null;
   cashIn: number | string;
   cashOut: number | string;
   expectedClosing: number | string;
@@ -13,6 +14,7 @@ type BalanceResponse = Omit<BalanceDto, "cashIn" | "cashOut" | "expectedClosing"
 
 const normalizeBalance = (balance: BalanceResponse): BalanceDto => ({
   ...balance,
+  employeeId: balance.employeeId == null ? null : Number(balance.employeeId),
   cashIn: Number(balance.cashIn),
   cashOut: Number(balance.cashOut),
   expectedClosing: Number(balance.expectedClosing),

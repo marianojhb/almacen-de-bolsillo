@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { createBalanceRequest, getBalancesRequest } from "@/services/balancesApi";
+import { useAuth } from "@/contexts/AuthContext";
 import { getSalesOrdersRequest } from "@/services/salesApi";
 import { getTransactionsRequest } from "@/services/transactionsApi";
 import { calculateCashClosing } from "@/utils/cash-closing";
@@ -50,6 +51,7 @@ function AmountRow({ label, value, emphasis = false }: { label: string; value: n
 }
 
 export default function CashClosingScreen() {
+  const { user } = useAuth();
   const [summary, setSummary] = useState<ClosingSummary | null>(null);
   const [actualClosingText, setActualClosingText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -97,12 +99,17 @@ export default function CashClosingScreen() {
 
   const handleSave = async () => {
     if (!summary || actualClosing === null || isSaving) return;
+    if (!user) {
+      setError("Iniciá sesión para registrar el cierre.");
+      return;
+    }
 
     setIsSaving(true);
     setError(null);
 
     try {
       await createBalanceRequest({
+        userId: user.id,
         date: summary.to.toISOString(),
         opening: summary.opening,
         cashIn: summary.cashSales,
