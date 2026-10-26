@@ -1,9 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
-import { FlatList, Keyboard, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { SectionList, Keyboard, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useSales } from "@/contexts/sales";
 import { Permission } from "@/components/auth/Permission";
 import { SellerInfo } from "@/components/sales/SellerInfo";
+import { NotebookHeading } from "@/components/ui/notebook";
+import { groupRecordsByDay } from "@/utils/notebook-sections";
 
 export default function SalesScreen() {
   const { totalSales, sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
@@ -28,10 +31,11 @@ export default function SalesScreen() {
         sale.paymentMethod === "EFECTIVO" ? "eft" : sale.paymentMethod === "MERCADOPAGO" ? "mp" : "ual";
 
       return [`venta ${sale.id}`, `#${sale.id}`, sale.invoice, sale.paymentMethod, formattedPaymentMethod]
-        .filter((value): value is string => value !== undefined)
+        .filter((value): value is string => typeof value === "string")
         .some((value) => value.toLowerCase().includes(normalizedSearchText));
     });
   }, [sales, searchText]);
+  const sections = useMemo(() => groupRecordsByDay(filteredSales), [filteredSales]);
 
   if (errorSaleOrders) {
     return (
@@ -48,7 +52,7 @@ export default function SalesScreen() {
 
   return (
     <View
-      className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]"
+      className="flex-1 bg-transparent px-6 pt-4"
       onStartShouldSetResponderCapture={() => {
         if (isSearchFocused) {
           Keyboard.dismiss();
@@ -56,41 +60,15 @@ export default function SalesScreen() {
 
         return false;
       }}>
-      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
-        <View className="flex-row items-start justify-between gap-4">
-          <View className="flex-1">
-            <Text className="text-xs font-semibold text-emerald-300">Comercial</Text>
-            <Text className="mt-0.5 text-2xl font-black text-white">Ventas</Text>
-          </View>
+      <NotebookHeading subtitle={`${filteredSales.length} ventas · ${Number(totalSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}`}>
+        Anotador de ventas
+      </NotebookHeading>
 
-            <Permission resource="sales" action="create">
-            <Pressable
-              className="min-w-[116px] rounded-2xl bg-white/10 px-3 py-2.5 active:opacity-80"
-            onPress={() => {
-              Keyboard.dismiss();
-              router.push("/sales/new");
-            }}>
-            <Text className="text-center text-sm font-black text-white">Nueva venta</Text>
-          </Pressable>
-            </Permission>
-        </View>
-        <View>
-          <Text className="mt-1 text-xs leading-5 text-slate-300">
-            {filteredSales.length} de {sales.length} ventas visibles · Total{" "}
-            {Number(totalSales).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-          </Text>
-        </View>
-      </View>
-
-      <View className="mb-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-        <View className="mb-2 flex-row items-center justify-between gap-3">
-          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-            Buscar
-          </Text>
-        </View>
+      <View className="mb-5 flex-row flex-wrap items-center gap-2">
         <TextInput
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-          placeholder="Filtrar por número, factura o medio de pago"
+          accessibilityLabel="Buscar venta por número, factura o medio de pago"
+          className="min-h-12 min-w-[160px] flex-1 rounded-xl border border-slate-300 bg-white/60 px-3 py-3 text-base text-ink dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          placeholder="Buscar venta"
           placeholderTextColor="#94a3b8"
           keyboardType="default"
           returnKeyType="search"
@@ -100,12 +78,27 @@ export default function SalesScreen() {
           onBlur={() => setIsSearchFocused(false)}
           onSubmitEditing={Keyboard.dismiss}
         />
+        <Permission resource="sales" action="create">
+          <Pressable
+            accessibilityRole="button"
+            className="min-h-12 flex-row items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 active:opacity-80"
+            onPress={() => { Keyboard.dismiss(); router.push("/sales/new"); }}>
+            <Ionicons name="add" size={20} color="#FFFCF3" />
+            <Text className="text-sm font-bold text-white">Nueva venta</Text>
+          </Pressable>
+        </Permission>
       </View>
 
-      <FlatList
-        data={filteredSales}
+      <SectionList
+        sections={sections}
+        stickySectionHeadersEnabled={false}
         keyExtractor={(sale) => sale.id.toString()}
-        contentContainerClassName="gap-3 pb-8"
+        contentContainerClassName="pb-8"
+        renderSectionHeader={({ section }) => (
+          <View className="mb-1 mt-4 self-start border-b-2 border-pencil pb-1">
+            <Text className="font-handwriting text-[28px] leading-9 text-ink dark:text-white">{section.title}</Text>
+          </View>
+        )}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -150,20 +143,6 @@ export default function SalesScreen() {
                 ? "Mercado Pago"
                 : "Ualá";
 
-          const paymentMethodBadgeClass =
-            sale.paymentMethod === "EFECTIVO"
-              ? "bg-emerald-50 dark:bg-emerald-950/60"
-              : sale.paymentMethod === "MERCADOPAGO"
-                ? "bg-amber-50 dark:bg-amber-950/60"
-                : "bg-blue-50 dark:bg-blue-950/60";
-
-          const paymentMethodTextClass =
-            sale.paymentMethod === "EFECTIVO"
-              ? "text-emerald-700 dark:text-emerald-300"
-              : sale.paymentMethod === "MERCADOPAGO"
-                ? "text-amber-700 dark:text-amber-300"
-                : "text-blue-700 dark:text-blue-300";
-
           return (
             <Pressable
               onPress={() => {
@@ -173,55 +152,29 @@ export default function SalesScreen() {
                   params: { id: String(sale.id) },
                 });
               }}
-              className="rounded-3xl active:scale-[0.98] active:opacity-80">
-              <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              accessibilityRole="button"
+              accessibilityLabel={`Abrir venta ${sale.id}`}
+              className="border-b border-slate-200 py-4 active:opacity-60 dark:border-slate-700">
+              <View>
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
-                    <Text className="text-2xl font-black text-slate-950 dark:text-white">Venta Nº{sale.id}</Text>
+                    <Text className="text-lg font-bold text-ink dark:text-white">Venta Nº{sale.id}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
-                      {sale.invoice ? `Factura ${sale.invoice}` : "Sin comprobante"}
+                      {new Date(sale.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })} · {paymentMethodLabel}
+                      {sale.invoice ? ` · Factura ${sale.invoice}` : ""}
                     </Text>
                   </View>
 
-                  <View className="items-end">
-                    <Text className="text-xs font-bold uppercase tracking-[1px] text-emerald-600 dark:text-emerald-400">
-                      Total
-                    </Text>
-                    <Text className="text-xl font-black text-emerald-700 dark:text-emerald-300">
+                  <View className="max-w-[50%] flex-row items-center gap-2">
+                    <Text selectable className="shrink text-lg font-bold text-ink dark:text-white">
                       {Number(sale.total).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                     </Text>
+                    <Ionicons name="chevron-forward" size={18} color="#637369" />
                   </View>
                 </View>
 
                 <SellerInfo seller={sale.seller} />
-                <View className="mt-4 flex-row flex-wrap gap-2">
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {new Date(sale.createdAt).toLocaleDateString("es-AR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
-                    </Text>
-                  </View>
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                      {new Date(sale.createdAt).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
-                    </Text>
-                  </View>
-                  <View className={`rounded-full px-3 py-1.5 ${paymentMethodBadgeClass}`}>
-                    <Text className={`text-xs font-bold ${paymentMethodTextClass}`}>{paymentMethodLabel}</Text>
-                  </View>
-                  <View
-                    className={`rounded-full px-3 py-1.5 ${sale.isActive ? "bg-emerald-50 dark:bg-emerald-950/60" : "bg-slate-100 dark:bg-slate-900"}`}>
-                    <Text
-                      className={`text-xs font-bold ${
-                        sale.isActive ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"
-                      }`}>
-                      {sale.isActive ? "Activa" : "Inactiva"}
-                    </Text>
-                  </View>
-                </View>
+                {!sale.isActive ? <Text className="mt-2 text-xs font-bold text-red-700 dark:text-red-300">Inactiva</Text> : null}
               </View>
             </Pressable>
           );

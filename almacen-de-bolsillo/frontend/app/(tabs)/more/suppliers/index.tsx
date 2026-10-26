@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Alert, FlatList, Pressable, RefreshControl, Text, TextInput, View} from "react-native";
 
 import { useSuppliers } from "@/contexts/suppliers";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 
 type SupplierFilter = | "all" | "active" | "inactive";
@@ -175,21 +176,17 @@ const visibleSuppliers = useMemo(() => {
   };
 
   return (
-    <View className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]">
-      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
+    <View className="flex-1 bg-transparent px-6 pt-4">
+      <View className="mb-3">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-xs font-semibold text-emerald-300">Abastecimiento</Text>
-            <Text className="mt-0.5 text-2xl font-black text-white">Proveedores</Text>
-            <Text className="mt-1 text-xs leading-5 text-slate-300">
-              {visibleSuppliers.length} de {suppliers.length} proveedores visibles
-            </Text>
+            <NotebookHeading subtitle={`${visibleSuppliers.length} de ${suppliers.length} proveedores visibles`}>Proveedores</NotebookHeading>
           </View>
 
           <Permission resource="suppliers" action="create">
             <Pressable
               onPress={() => router.push("/more/suppliers/new")}
-              className="flex-row items-center gap-2 rounded-2xl bg-white/10 px-3 py-2.5 active:opacity-75">
+              className="min-h-12 flex-row items-center gap-2 rounded-xl bg-ink px-3 py-2.5 active:opacity-75">
               <Ionicons name="add" size={20} color="#ffffff" />
               <Text className="text-sm font-black text-white">Nuevo</Text>
             </Pressable>

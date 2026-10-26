@@ -30,10 +30,10 @@ export default function AccountScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-slate-50 dark:bg-[#071111]"
+      className="flex-1 bg-transparent"
       contentContainerClassName="gap-4 px-4 pb-8 pt-4"
       showsVerticalScrollIndicator={false}>
-      <View className="items-center rounded-3xl bg-[#111A1A] px-5 py-7 dark:bg-slate-950">
+      <View className="items-center rounded-2xl bg-ink px-5 py-7 dark:bg-slate-950">
         <View className="h-20 w-20 items-center justify-center rounded-full bg-emerald-400/15">
           <Ionicons name="person-outline" size={38} color="#6ee7b7" />
         </View>

@@ -9,6 +9,9 @@ import { useColorScheme } from "react-native";
 import { EmployeesProvider } from "@/contexts/employees";
 import { WorkShiftsProvider } from "@/contexts/work-shifts";
 import { usePermissions } from "@/hooks/usePermissions";
+import { NotebookBrand, NotebookScene } from "@/components/ui/notebook";
+import { notebook } from "@/constants/notebook";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabScreen() {
   const { can } = usePermissions();
@@ -16,6 +19,8 @@ export default function TabScreen() {
   const isTabRoot = segments.length <= 2;
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const palette = isDark ? notebook.dark : notebook;
+  const insets = useSafeAreaInsets();
   return (
     <ProductsProvider>
       <SuppliersProvider>
@@ -24,20 +29,32 @@ export default function TabScreen() {
               <SalesProvider>
                 <WorkShiftsProvider>
                 <Tabs
+                screenLayout={({ children }) => <NotebookScene>{children}</NotebookScene>}
                 screenOptions={{
 
                   headerStyle: {
-                    backgroundColor: isDark ? "#111A1A" : "#ffffff",
+                    backgroundColor: palette.paper,
                   },
-                  headerTintColor: isDark ? "#ffffff" : "#111111",
+                  headerTintColor: palette.ink,
+                  headerTitle: () => <NotebookBrand />,
+                  headerTitleAlign: "left",
+                  headerShadowVisible: false,
+                  sceneStyle: { backgroundColor: palette.paper },
 
                   tabBarStyle: {
-                    backgroundColor: isDark ? "#111A1A" : "#ffffff",
-                    borderTopColor: isDark ? "#263333" : "#dddddd",
+                    backgroundColor: palette.paper,
+                    borderTopColor: palette.border,
+                    elevation: 0,
+                    height: 64 + Math.max(insets.bottom, 8),
+                    paddingTop: 4,
+                    paddingBottom: Math.max(insets.bottom, 8),
                   },
 
-                  tabBarActiveTintColor: isDark ? "#ffffff" : "#111111",
-                  tabBarInactiveTintColor: isDark ? "#8A9999" : "#777777",
+                  tabBarActiveTintColor: palette.ink,
+                  tabBarInactiveTintColor: palette.muted,
+                  tabBarActiveBackgroundColor: palette.selected,
+                  tabBarItemStyle: { borderRadius: 14, marginHorizontal: 3 },
+                  tabBarLabelStyle: { fontSize: 11, fontWeight: "600", marginBottom: 4 },
 
                   headerTitleStyle: {
                     fontWeight: "900",
@@ -51,10 +68,11 @@ export default function TabScreen() {
 
                   options={{
                     title: "Dashboard",
+                    tabBarLabel: "Inicio",
                     tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" color={String(color)} size={size} />,
                     headerBackButtonDisplayMode: "minimal",
-                    headerStyle: { backgroundColor: "#111A1A" },
-                    headerTintColor: "#fff",
+                    headerStyle: { backgroundColor: palette.paper },
+                    headerTintColor: palette.ink,
                     headerTitleStyle: { fontWeight: "900" },
                   }}
                 />
@@ -66,8 +84,8 @@ export default function TabScreen() {
                   options={{
                     title: "Ventas",
                     headerShown: isTabRoot,
-                    headerStyle: { backgroundColor: "#111A1A" },
-                    headerTintColor: "#fff",
+                    headerStyle: { backgroundColor: palette.paper },
+                    headerTintColor: palette.ink,
                     headerTitleStyle: { fontWeight: "900" },
                     tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" color={String(color)} size={size} />,
                   }}
@@ -79,8 +97,8 @@ export default function TabScreen() {
                   options={{
                     title: "Productos",
                     headerShown: isTabRoot,
-                    headerStyle: { backgroundColor: "#111A1A" },
-                    headerTintColor: "#fff",
+                    headerStyle: { backgroundColor: palette.paper },
+                    headerTintColor: palette.ink,
                     headerTitleStyle: { fontWeight: "900" },
                     tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" color={String(color)} size={size} />,
                   }}
@@ -92,8 +110,8 @@ export default function TabScreen() {
                   options={{
                     title: "Compras",
                     headerShown: isTabRoot,
-                    headerStyle: { backgroundColor: "#111A1A" },
-                    headerTintColor: "#fff",
+                    headerStyle: { backgroundColor: palette.paper },
+                    headerTintColor: palette.ink,
                     headerTitleStyle: { fontWeight: "900" },
                     tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" color={String(color)} size={size} />,
                   }}
@@ -104,8 +122,8 @@ export default function TabScreen() {
                   options={{
                     title: "Más",
                     headerShown: isTabRoot,
-                    headerStyle: { backgroundColor: "#111A1A" },
-                    headerTintColor: "#fff",
+                    headerStyle: { backgroundColor: palette.paper },
+                    headerTintColor: palette.ink,
                     headerTitleStyle: { fontWeight: "900" },
                     tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal" color={String(color)} size={size} />,
                   }}

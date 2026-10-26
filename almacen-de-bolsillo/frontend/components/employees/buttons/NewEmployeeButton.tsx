@@ -12,7 +12,7 @@ export function NewEmployeeButton() {
         onPress={() => router.push("/more/employees/new")}
         accessibilityRole="button"
         accessibilityLabel="Registrar empleado"
-        className="flex-row items-center gap-2 rounded-2xl bg-white/10 px-3 py-2.5 active:opacity-75"
+        className="min-h-12 flex-row items-center gap-2 rounded-xl bg-ink px-3 py-2.5 active:opacity-75"
     >
         <Ionicons
             name="add"

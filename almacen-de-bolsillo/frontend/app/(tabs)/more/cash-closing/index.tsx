@@ -160,13 +160,13 @@ export default function CashClosingScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-slate-50 dark:bg-[#071111]"
+      className="flex-1 bg-transparent"
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={isLoading} onRefresh={handleRefresh} tintColor="#059669" />}
       contentContainerClassName="gap-4 px-4 pb-10 pt-4">
-      <View className="overflow-hidden rounded-[30px] bg-[#111A1A] p-5 dark:bg-slate-950">
+      <View className="overflow-hidden rounded-2xl bg-ink p-5 dark:bg-slate-950">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
             <Text className="text-sm font-semibold text-emerald-300">Efectivo esperado</Text>

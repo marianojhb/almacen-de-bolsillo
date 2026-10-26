@@ -10,6 +10,7 @@ import {
 } from "@/components/employees";
 import { formatEmployeeCode } from "@/components/employees/employee.utils";
 import { useEmployees } from "@/contexts/employees";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 export default function EmployeesScreen() {
   const { employees, isLoadingEmployees, employeesError, refreshEmployees } = useEmployees();
@@ -59,15 +60,11 @@ export default function EmployeesScreen() {
   };
 
   return (
-    <View className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]">
-      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
+    <View className="flex-1 bg-transparent px-6 pt-4">
+      <View className="mb-3">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-xs font-semibold text-emerald-300">Equipo</Text>
-            <Text className="mt-0.5 text-2xl font-black text-white">Empleados</Text>
-            <Text className="mt-1 text-xs leading-5 text-slate-300">
-              {visibleEmployees.length} de {employees.length} empleados visibles
-            </Text>
+            <NotebookHeading subtitle={`${visibleEmployees.length} de ${employees.length} empleados visibles`}>El equipo</NotebookHeading>
           </View>
           <NewEmployeeButton />
         </View>

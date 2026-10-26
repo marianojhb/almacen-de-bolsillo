@@ -39,6 +39,7 @@ test("Caja muestra el enlace y protege el historial solo para BUSINESS_OWNER", a
     const layout = await loadModule("../app/(tabs)/more/cash-closing/_layout.tsx", {
       ...baseDependencies,
       "expo-router": { Stack, router: { push: (path) => navigation.push(path) } },
+      "@/components/ui/notebook": { useNotebookHeader: () => ({ headerTintColor: "#173F30" }) },
       "@/contexts/AuthContext": { useAuth: () => ({ user: role ? { role } : null }) },
     });
     const children = layout.default().props.children;

@@ -91,7 +91,7 @@ export default function CashClosingHistoryScreen() {
 
   return (
     <FlatList
-      className="flex-1 bg-slate-50 dark:bg-[#071111]"
+      className="flex-1 bg-transparent"
       contentContainerClassName="gap-3 px-4 pb-8 pt-4"
       data={balances}
       keyExtractor={(balance) => String(balance.id)}

@@ -11,6 +11,7 @@ import { MORE_OPTIONS } from "@/constants/more-options";
 import { formatFullName } from "@almacen/shared";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 export default function MoreScreen() {
   const { user } = useAuth();
@@ -25,10 +26,8 @@ export default function MoreScreen() {
     return hasFullAccess;
   });
   return (
-    <View className="flex-1 bg-gray-50 px-4 pt-5 dark:bg-black">
-      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
-        Gestión del negocio
-      </Text>
+    <View className="flex-1 bg-transparent px-6 pt-5">
+      <NotebookHeading subtitle="Todo para llevar tu negocio al día">Mi almacén</NotebookHeading>
 
       <FlatList
         data={options}
@@ -37,7 +36,7 @@ export default function MoreScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Abrir mi cuenta"
-              className="mb-8 mt-3 flex-row items-center rounded-2xl border border-gray-200 bg-white p-4 active:opacity-60 dark:border-gray-700 dark:bg-gray-900">
+               className="mb-8 mt-3 flex-row items-center border-b border-gray-200 py-4 active:opacity-60 dark:border-gray-700">
               <View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
                 <Ionicons name="person-circle-outline" size={27} color="#687076" />
               </View>
@@ -60,7 +59,7 @@ export default function MoreScreen() {
             href={item.href}
             asChild
           >
-            <Pressable className="flex-row items-center rounded-2xl border border-gray-200 bg-white p-4 active:opacity-60 dark:border-gray-700 dark:bg-gray-900">
+            <Pressable className="flex-row items-center border-b border-gray-200 py-4 active:opacity-60 dark:border-gray-700">
               <View className="mr-4 h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
                 <Ionicons
                   name={item.icon}

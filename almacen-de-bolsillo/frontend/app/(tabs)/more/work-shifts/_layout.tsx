@@ -1,20 +1,17 @@
 import { router, Stack, type Href } from "expo-router";
 import { Pressable, Text } from "react-native";
 import { usePermissions } from "@/hooks/usePermissions";
+import { NotebookScene, useNotebookHeader } from "@/components/ui/notebook";
 
 export default function WorkShiftsLayout() {
+  const header = useNotebookHeader();
   const { can } = usePermissions();
   return (
     <Stack
+      screenLayout={({ children }) => <NotebookScene>{children}</NotebookScene>}
       screenOptions={{
         headerBackButtonDisplayMode: "minimal",
-        headerStyle: {
-          backgroundColor: "#111A1A",
-        },
-        headerTintColor: "#ffffff",
-        headerTitleStyle: {
-          fontWeight: "900",
-        },
+        ...header,
       }}
     >
       <Stack.Screen
@@ -23,7 +20,7 @@ export default function WorkShiftsLayout() {
           title: "Turnos laborales",
           headerLeft: () => (
             <Pressable accessibilityRole="button" onPress={() => router.replace("/more" as Href)}>
-              <Text style={{ color: "white", marginRight: 12 }}>‹ Más</Text>
+              <Text style={{ color: header.headerTintColor, marginRight: 12 }}>‹ Más</Text>
             </Pressable>
           ),
         }}

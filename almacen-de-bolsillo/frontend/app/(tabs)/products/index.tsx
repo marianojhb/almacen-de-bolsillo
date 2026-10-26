@@ -5,6 +5,7 @@ import { useProducts } from "@/contexts/products";
 import { useCallback, useState, useMemo } from "react";
 import { ProductCategoryFilters } from "@/components/products/ProductCategoryFilters";
 import { matchesProductFilters } from "@/utils/product-filters";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 export default function ProductsScreen() {
   const {
@@ -53,7 +54,7 @@ export default function ProductsScreen() {
 
   return (
     <View
-      className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]"
+      className="flex-1 bg-transparent px-6 pt-4"
       onStartShouldSetResponderCapture={() => {
         if (isSearchFocused) {
           Keyboard.dismiss();
@@ -61,29 +62,12 @@ export default function ProductsScreen() {
 
         return false;
       }}>
-      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
-        <View className="flex-row items-start justify-between gap-4">
-          <View className="flex-1">
-            <Text className="text-xs font-semibold text-emerald-300">Inventario</Text>
-            <Text className="mt-0.5 text-2xl font-black text-white">Productos</Text>
-            <Text className="mt-1 text-xs leading-5 text-slate-300">
-              {filteredProducts.length} de {products.length} productos visibles
-            </Text>
-          </View>
-
-          <NewProductButton />
-        </View>
-      </View>
-
-      <View className="mb-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-        <View className="mb-2 flex-row items-center justify-between gap-3">
-          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-            Buscar
-          </Text>
-        </View>
+      <NotebookHeading subtitle={`${filteredProducts.length} de ${products.length} productos visibles`}>La estantería</NotebookHeading>
+      <View className="mb-4 flex-row items-center gap-2">
         <TextInput
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-          placeholder="Filtrar por nombre"
+          accessibilityLabel="Buscar productos por nombre"
+          className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white/60 px-3 py-3 text-base text-ink dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          placeholder="Buscar producto"
           placeholderTextColor="#94a3b8"
           keyboardType="default"
           returnKeyType="search"
@@ -93,6 +77,7 @@ export default function ProductsScreen() {
           onBlur={() => setIsSearchFocused(false)}
           onSubmitEditing={Keyboard.dismiss}
         />
+        <NewProductButton />
       </View>
 
       <ProductCategoryFilters
@@ -155,11 +140,11 @@ export default function ProductsScreen() {
                 Keyboard.dismiss();
                 router.push(`/products/${product.id}`);
               }}
-              className="rounded-2xl active:scale-[0.98] active:opacity-80">
-              <View className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
+              className="border-b border-slate-200 active:opacity-70 dark:border-slate-700">
+              <View className="py-4">
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
-                    <Text className="text-2xl font-black text-slate-950 dark:text-white">{product.shortname}</Text>
+                    <Text className="text-xl font-bold text-ink dark:text-white">{product.shortname}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
                       {product.longname}
                     </Text>

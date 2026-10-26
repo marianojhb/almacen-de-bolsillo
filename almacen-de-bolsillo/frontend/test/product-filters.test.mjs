@@ -100,6 +100,7 @@ async function renderScreen(path) {
     "@expo/vector-icons": { Ionicons: "Ionicons" },
     "react-native-safe-area-context": { useSafeAreaInsets: () => ({ bottom: 0 }) },
     "@/components/products": { NewProductButton: "NewProductButton" },
+    "@/components/ui/notebook": { NotebookHeading: "NotebookHeading" },
     "@/components/products/ProductCategoryFilters": components,
     "@/utils/product-filters": filters,
     "@/contexts/products": { useProducts: () => ({ products, categories }) },

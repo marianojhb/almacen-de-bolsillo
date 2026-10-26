@@ -16,6 +16,7 @@ import {
 
 import { useWorkShifts } from "@/contexts/work-shifts";
 import { usePermissions } from "@/hooks/usePermissions";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 import {
   formatCalendarDate,
@@ -198,7 +199,7 @@ export function WorkShiftsScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-gray-50 dark:bg-black"
+      className="flex-1 bg-transparent"
       contentContainerClassName="gap-4 p-4 pb-8"
       keyboardShouldPersistTaps="handled"
       refreshControl={
@@ -210,15 +211,7 @@ export function WorkShiftsScreen() {
         />
       }
     >
-      <View className="rounded-2xl bg-[#111A1A] p-5">
-        <Text className="text-2xl font-bold text-white">
-          Turnos laborales
-        </Text>
-
-        <Text className="mt-2 text-sm text-gray-300">
-          Calendario y jornadas asignadas
-        </Text>
-      </View>
+      <NotebookHeading subtitle="Calendario y jornadas asignadas">Turnos laborales</NotebookHeading>
 
       <View className="flex-row gap-2">
         {sections.map((item) => {

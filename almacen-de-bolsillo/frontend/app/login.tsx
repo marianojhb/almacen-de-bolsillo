@@ -6,6 +6,7 @@ import { AuthShell, authStyles } from "@/components/auth/AuthShell";
 import { CredentialsForm } from "@/components/auth/CredentialsForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSetupStatusRequest } from "@/services/authApi";
+import { notebook } from "@/constants/notebook";
 
 export default function LoginScreen() {
   const compact = useWindowDimensions().height < 740;
@@ -66,8 +67,8 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  setupCard: { backgroundColor: "#F8FCFA", flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
+  setupCard: { backgroundColor: notebook.surface, flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
   illustration: { width: 56, height: 80, alignItems: "center", justifyContent: "center" },
-  blob: { position: "absolute", width: "100%", height: "100%", borderRadius: 24, backgroundColor: "#E5F5ED", transform: [{ rotate: "-12deg" }] },
-  setupTitle: { fontSize: 16, fontWeight: "800", color: "#090E18", lineHeight: 20 },
+  blob: { position: "absolute", width: "100%", height: "100%", borderRadius: 10, backgroundColor: notebook.selected, transform: [{ rotate: "-8deg" }] },
+  setupTitle: { fontSize: 16, fontWeight: "800", color: notebook.ink, lineHeight: 20 },
 });

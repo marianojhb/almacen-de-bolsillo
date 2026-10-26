@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { usePurchases } from "@/contexts/purchases";
 import { Permission } from "@/components/auth/Permission";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 const PurchasesScreen = () => {
   const { purchases, totalPurchases, isLoadingPurchases, errorPurchases, refreshPurchases } = usePurchases();
@@ -57,7 +58,7 @@ const PurchasesScreen = () => {
 
   return (
     <View
-      className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]"
+      className="flex-1 bg-transparent px-6 pt-4"
       onStartShouldSetResponderCapture={() => {
         if (isSearchFocused) {
           Keyboard.dismiss();
@@ -65,39 +66,12 @@ const PurchasesScreen = () => {
 
         return false;
       }}>
-      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
-        <View className="flex-row items-start justify-between gap-4">
-          <View className="flex-1">
-            <Text className="text-xs font-semibold text-emerald-300">Abastecimiento</Text>
-            <Text className="mt-0.5 text-2xl font-black text-white">Compras</Text>
-            <Text className="mt-1 text-xs leading-5 text-slate-300">
-              {filteredPurchases.length} de {purchases.length} compras visibles · Total{" "}
-              {Number(totalPurchases).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
-            </Text>
-          </View>
-
-          <Permission resource="purchases" action="create">
-          <Pressable
-            className="min-w-[116px] rounded-2xl bg-white/10 px-3 py-2.5 active:opacity-80"
-            onPress={() => {
-              Keyboard.dismiss();
-              router.push("/(tabs)/purchases/new");
-            }}>
-            <Text className="text-center text-sm font-black text-white">Nueva compra</Text>
-          </Pressable>
-          </Permission>
-        </View>
-      </View>
-
-      <View className="mb-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-        <View className="mb-2 flex-row items-center justify-between gap-3">
-          <Text className="text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
-            Buscar
-          </Text>
-        </View>
+      <NotebookHeading subtitle={`${filteredPurchases.length} compras · ${Number(totalPurchases).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}`}>Cuaderno de compras</NotebookHeading>
+      <View className="mb-4 flex-row items-center gap-2">
         <TextInput
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
-          placeholder="Filtrar por número de compra"
+          accessibilityLabel="Buscar compras por número"
+          className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white/60 px-3 py-3 text-base text-ink dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          placeholder="Buscar compra"
           placeholderTextColor="#94a3b8"
           keyboardType="default"
           returnKeyType="search"
@@ -107,6 +81,15 @@ const PurchasesScreen = () => {
           onBlur={() => setIsSearchFocused(false)}
           onSubmitEditing={Keyboard.dismiss}
         />
+        <Permission resource="purchases" action="create">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Nueva compra"
+            className="min-h-12 shrink-0 justify-center rounded-xl bg-ink px-4 py-3 active:opacity-80"
+            onPress={() => { Keyboard.dismiss(); router.push("/(tabs)/purchases/new"); }}>
+            <Text className="text-center text-sm font-bold text-white">Nueva</Text>
+          </Pressable>
+        </Permission>
       </View>
 
       {purchases.length === 0 ? (
@@ -146,11 +129,11 @@ const PurchasesScreen = () => {
                   params: { id: String(purchase.id) },
                 });
               }}
-              className="rounded-3xl active:scale-[0.98] active:opacity-80">
-              <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              className="border-b border-slate-200 active:opacity-70 dark:border-slate-700">
+              <View className="py-4">
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
-                    <Text className="text-2xl font-black text-slate-950 dark:text-white">Compra Nº{purchase.id}</Text>
+                    <Text className="text-xl font-bold text-ink dark:text-white">Compra Nº{purchase.id}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
                       Orden registrada el{" "}
                       {new Date(purchase.createdAt).toLocaleDateString("es-AR", {

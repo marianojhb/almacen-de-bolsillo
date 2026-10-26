@@ -1,16 +1,16 @@
 import { Stack } from "expo-router";
 import { TransactionsProvider } from "@/contexts/transactions";
+import { NotebookScene, useNotebookHeader } from "@/components/ui/notebook";
 
 export default function SuppliersLayout() {
+  const header = useNotebookHeader();
   return (
     <TransactionsProvider>
       <Stack
+        screenLayout={({ children }) => <NotebookScene>{children}</NotebookScene>}
         screenOptions={{
           headerBackButtonDisplayMode: "minimal",
-          statusBarBackgroundColor: "#111A1A",
-          headerStyle: { backgroundColor: "#111A1A" },
-          headerTintColor: "#fff",
-          headerTitleStyle: { fontWeight: "900" },
+          ...header,
         }}>
         <Stack.Screen
           name="index"

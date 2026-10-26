@@ -2,21 +2,21 @@
 
 import { usePermissions } from "@/hooks/usePermissions";
 import { Stack } from "expo-router";
+import { NotebookScene, useNotebookHeader } from "@/components/ui/notebook";
 
 export const unstable_settings = {
   anchor: "index",
 };
 
 export default function ProductsLayout() {
+  const header = useNotebookHeader();
   const { can } = usePermissions();
   return (
     <Stack
+      screenLayout={({ children }) => <NotebookScene>{children}</NotebookScene>}
       screenOptions={{
         headerBackButtonDisplayMode: "minimal",
-        statusBarBackgroundColor: "#111A1A",
-        headerStyle: { backgroundColor: "#111A1A" },
-        headerTintColor: "#fff",
-        headerTitleStyle: { fontWeight: "900" },
+        ...header,
       }}>
       <Stack.Screen name="index" options={{ title: "Productos", headerShown: false }} />
 

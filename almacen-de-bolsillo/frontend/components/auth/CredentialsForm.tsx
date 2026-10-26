@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { authStyles } from "./AuthShell";
+import { notebook } from "@/constants/notebook";
 
 type Props = ({
   mode: "login";
@@ -177,8 +178,8 @@ export function CredentialsForm({ mode, onSubmit, disabled = false }: Props) {
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: 15, fontWeight: "700", color: "#090E18", marginBottom: 7 },
-  inputRow: { minHeight: 46, borderRadius: 10, borderWidth: 1, borderColor: "#D7DAE5", flexDirection: "row", alignItems: "center", paddingHorizontal: 12, gap: 10, backgroundColor: "#FDFDFE" },
-  input: { flex: 1, minWidth: 0, fontSize: 15, color: "#090E18", paddingVertical: 11 },
-  hint: { color: "#81889D", fontSize: 12, lineHeight: 17, marginTop: 6, marginBottom: 14 },
+  label: { fontSize: 15, fontWeight: "700", color: notebook.ink, marginBottom: 7 },
+  inputRow: { minHeight: 46, borderRadius: 10, borderWidth: 1, borderColor: notebook.border, flexDirection: "row", alignItems: "center", paddingHorizontal: 12, gap: 10, backgroundColor: notebook.paper },
+  input: { flex: 1, minWidth: 0, fontSize: 15, color: notebook.ink, paddingVertical: 11 },
+  hint: { color: notebook.muted, fontSize: 12, lineHeight: 17, marginTop: 6, marginBottom: 14 },
 });

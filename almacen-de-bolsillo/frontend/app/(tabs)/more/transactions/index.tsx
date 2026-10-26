@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { FlatList, Keyboard, RefreshControl, Text, TextInput, View } from "react-native";
 import { useTransactions } from "@/contexts/transactions";
+import { NotebookHeading } from "@/components/ui/notebook";
 
 export default function TransactionsScreen() {
   const { transactions, isLoadingTransactions, transactionsError, refreshTransactions } = useTransactions();
@@ -55,7 +56,7 @@ export default function TransactionsScreen() {
 
   return (
     <View
-      className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]"
+      className="flex-1 bg-transparent px-6 pt-4"
       onStartShouldSetResponderCapture={() => {
         if (isSearchFocused) {
           Keyboard.dismiss();
@@ -63,15 +64,11 @@ export default function TransactionsScreen() {
 
         return false;
       }}>
-      <View className="mb-4 rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
+      <NotebookHeading subtitle={`${visibleTransactions.length} de ${transactions.length} movimientos visibles`}>Movimientos</NotebookHeading>
+      <View className="mb-4 rounded-xl border border-slate-200 bg-white/60 p-4 dark:border-slate-700 dark:bg-slate-950">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Finanzas</Text>
-            <Text className="mt-1 text-4xl font-black text-white">Movimientos</Text>
-            <Text className="mt-2 text-sm leading-5 text-slate-300">
-              {visibleTransactions.length} de {transactions.length} movimientos visibles
-            </Text>
-            <Text className="mt-2 text-sm leading-5 text-slate-300">
+            <Text className="text-base font-semibold text-ink dark:text-white">
               Total:{" "}
               {Number(transactions.reduce((acc, transaction) => acc + Number(transaction.amount), 0)).toLocaleString(
                 "es-AR",

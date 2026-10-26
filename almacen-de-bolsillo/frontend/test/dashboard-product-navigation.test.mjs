@@ -26,6 +26,7 @@ test("Productos declara su lista como ancla del stack y mantiene las proteccione
   const module = await loadModule("../app/(tabs)/products/_layout.tsx", {
     "react/jsx-runtime": jsxRuntime,
     "expo-router": { Stack },
+    "@/components/ui/notebook": { useNotebookHeader: () => ({}) },
     "@/hooks/usePermissions": { usePermissions: () => ({ can: () => false }) },
   });
   assert.equal(module.unstable_settings?.anchor, "index");
@@ -58,10 +59,14 @@ test("abrir la alerta desde Dashboard pide cargar el ancla bajo el detalle corre
     "@expo/vector-icons": { Ionicons: "Ionicons" },
     "expo-router": { router: { push: (...args) => navigation.push(args) }, useFocusEffect: () => {} },
     react: { useState: (value) => [value, () => {}], useMemo: (calculate) => calculate(), useCallback: (callback) => callback },
-    "react-native": Object.fromEntries(["ActivityIndicator", "Pressable", "RefreshControl", "ScrollView", "Text", "View"].map((name) => [name, name])),
+    "react-native": {
+      ...Object.fromEntries(["Pressable", "RefreshControl", "ScrollView", "Text", "View"].map((name) => [name, name])),
+      useColorScheme: () => "light",
+    },
     "@/contexts/AuthContext": { useAuth: () => ({ user: { role: "BUSINESS_OWNER" } }) },
     "@/hooks/usePermissions": { usePermissions: () => ({ can: () => true }) },
     "@/components/auth/Permission": { Permission: "Permission" },
+    "@/components/ui/notebook": { NotebookHeading: "NotebookHeading" },
     "@/contexts/products": { useProducts: () => ({ products: [{ id: 42, shortname: "Producto de prueba", stock: 1, stockMin: 5, isActive: true }] }) },
     "@/contexts/purchases": { usePurchases: () => ({ purchases: [] }) },
     "@/contexts/sales": { useSales: () => ({ sales: [] }) },
