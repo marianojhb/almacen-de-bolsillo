@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, RefreshControl, Text, TextInput, View } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useSales } from "@/contexts/sales";
 import { Permission } from "@/components/auth/Permission";
 import { SellerInfo } from "@/components/sales/SellerInfo";
@@ -9,6 +9,12 @@ export default function SalesScreen() {
   const { totalSales, sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshSales();
+    }, [refreshSales]),
+  );
 
   const filteredSales = useMemo(() => {
     const normalizedSearchText = searchText.trim().toLowerCase();

@@ -1,8 +1,8 @@
 import { FlatList, Keyboard, Text, View, Pressable, TextInput, RefreshControl, ScrollView } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { NewProductButton } from "@/components/products";
 import { useProducts } from "@/contexts/products";
-import { useState, useMemo } from "react";
+import { useCallback, useState, useMemo } from "react";
 
 export default function ProductsScreen() {
   const {
@@ -33,6 +33,12 @@ export default function ProductsScreen() {
       return matchesCategory && matchesSearchText && activeProducts;
     });
   }, [categoryId, products, searchText, isSelected]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([refreshProducts(), refreshCategories()]);
+    }, [refreshCategories, refreshProducts]),
+  );
 
   if (productsError) {
     return (

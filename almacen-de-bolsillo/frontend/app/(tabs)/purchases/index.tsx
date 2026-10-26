@@ -1,13 +1,19 @@
-import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { usePurchases } from "@/contexts/purchases";
 import { Permission } from "@/components/auth/Permission";
 
 const PurchasesScreen = () => {
-  const { purchases, totalPurchases, isLoadingPurchases, errorPurchases } = usePurchases();
+  const { purchases, totalPurchases, isLoadingPurchases, errorPurchases, refreshPurchases } = usePurchases();
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshPurchases();
+    }, [refreshPurchases]),
+  );
 
   const filteredPurchases = useMemo(() => {
     const normalizedSearchText = searchText.trim().toLowerCase();
@@ -23,7 +29,7 @@ const PurchasesScreen = () => {
     });
   }, [purchases, searchText]);
 
-  if (isLoadingPurchases) {
+  if (isLoadingPurchases && purchases.length === 0) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50 px-6 dark:bg-[#071111]">
         <View className="w-full rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">

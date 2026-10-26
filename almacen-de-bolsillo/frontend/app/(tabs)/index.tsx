@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, type Href } from "expo-router";
-import { useMemo, useState } from "react";
+import { router, type Href, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { usePurchases } from "@/contexts/purchases";
@@ -61,6 +61,12 @@ function Dashboard() {
   const { purchases, isLoadingPurchases, errorPurchases, refreshPurchases } = usePurchases();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([refreshProducts(), refreshSales(), refreshPurchases()]);
+    }, [refreshProducts, refreshPurchases, refreshSales]),
+  );
+
   const now = new Date();
   const today = startOfDay(now);
   const tomorrow = addDays(today, 1);
@@ -88,6 +94,7 @@ function Dashboard() {
         }),
     [products],
   );
+  const productsBelowMinimumCount = lowStockProducts.filter((product) => product.stock < product.stockMin).length;
 
   const firstChartDay = addDays(today, -6);
   const weeklyEvolution = Array.from({ length: 7 }, (_, index) => {
@@ -247,11 +254,33 @@ function Dashboard() {
             <Pressable
               className="min-w-[46%] flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/(tabs)/products")}>
-              <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
-                <Ionicons name="cube-outline" size={21} color="#64748b" />
+              <View className="flex-row items-start justify-between gap-2">
+                <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
+                  <Ionicons name="cube-outline" size={21} color="#64748b" />
+                </View>
+                {productsBelowMinimumCount > 0 && (
+                  <View
+                    accessible
+                    accessibilityLabel={`${productsBelowMinimumCount} productos por debajo del stock mínimo`}
+                    className="flex-row items-center gap-1 rounded-full bg-red-100 px-2 py-1 dark:bg-red-950/60">
+                    <Ionicons name="warning-outline" size={13} color="#dc2626" />
+                    <Text className="text-[10px] font-black text-red-700 dark:text-red-300">
+                      {productsBelowMinimumCount}
+                    </Text>
+                  </View>
+                )}
               </View>
               <Text className="mt-4 text-sm font-black text-slate-950 dark:text-white">Productos</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Ver inventario</Text>
+              <Text
+                className={`mt-1 text-xs ${
+                  productsBelowMinimumCount > 0
+                    ? "font-bold text-red-600 dark:text-red-300"
+                    : "text-slate-500 dark:text-slate-400"
+                }`}>
+                {productsBelowMinimumCount > 0
+                  ? `${productsBelowMinimumCount} bajo el mínimo`
+                  : "Ver inventario"}
+              </Text>
             </Pressable>
           </View>
         </View>
