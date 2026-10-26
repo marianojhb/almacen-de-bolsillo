@@ -202,7 +202,7 @@ export default function NewPurchaseScreen() {
           className="mt-1 flex-1"
           data={filteredProducts}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerClassName="gap-3 px-4 pb-4 pt-2"
+          contentContainerClassName="gap-2 px-4 pb-4 pt-2"
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           refreshControl={
@@ -223,12 +223,12 @@ export default function NewPurchaseScreen() {
                 accessibilityState={{ checked: selected }}
                 accessibilityLabel={`${product.shortname}, stock ${product.stock}`}
                 onPress={() => toggleProductSelected(product)}
-                className={`overflow-hidden rounded-[24px] border bg-white p-4 active:opacity-80 dark:bg-slate-950 ${
+                className={`overflow-hidden rounded-2xl border bg-white p-3 active:opacity-80 dark:bg-slate-950 ${
                   selected ? "border-emerald-500 dark:border-emerald-600" : "border-slate-200 dark:border-slate-800"
                 }`}>
-                <View className="flex-row items-start gap-3">
+                <View className="flex-row items-center gap-3">
                   <View
-                    className={`mt-0.5 h-11 w-11 items-center justify-center rounded-2xl ${
+                    className={`h-10 w-10 items-center justify-center rounded-xl ${
                       selected ? "bg-emerald-600" : "bg-slate-100 dark:bg-slate-900"
                     }`}>
                     <Ionicons
@@ -239,62 +239,50 @@ export default function NewPurchaseScreen() {
                   </View>
 
                   <View className="min-w-0 flex-1">
-                    <View className="flex-row items-start justify-between gap-2">
+                    <View className="flex-row items-center gap-2">
                       <Text className="flex-1 text-base font-black text-slate-950 dark:text-white" numberOfLines={1}>
                         {product.shortname}
                       </Text>
                       {!product.isActive && (
-                        <View className="rounded-full bg-amber-100 px-2.5 py-1 dark:bg-amber-950/50">
-                          <Text className="text-[10px] font-black uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                        <View className="rounded-full bg-amber-100 px-2 py-0.5 dark:bg-amber-950/50">
+                          <Text className="text-[9px] font-black uppercase tracking-wide text-amber-700 dark:text-amber-300">
                             Inactivo
                           </Text>
                         </View>
                       )}
                     </View>
                     {product.longname ? (
-                      <Text className="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                      <Text className="mt-0.5 text-xs leading-4 text-slate-500 dark:text-slate-400" numberOfLines={1}>
                         {product.longname}
                       </Text>
                     ) : null}
                   </View>
-                </View>
 
-                <View className="mt-4 flex-row gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-                  <View
-                    className={`flex-1 rounded-2xl px-3 py-2.5 ${
-                      isBelowMinimum ? "bg-red-50 dark:bg-red-950/30" : "bg-emerald-50 dark:bg-emerald-950/30"
-                    }`}>
-                    <Text
-                      className={`text-[10px] font-black uppercase tracking-wide ${
-                        isBelowMinimum ? "text-red-500 dark:text-red-300" : "text-emerald-600 dark:text-emerald-300"
-                      }`}>
-                      Stock actual
-                    </Text>
-                    <Text
-                      className={`mt-0.5 text-lg font-black ${
-                        isBelowMinimum ? "text-red-700 dark:text-red-200" : "text-emerald-700 dark:text-emerald-200"
-                      }`}>
-                      {product.stock}
-                    </Text>
-                  </View>
-                  <View className="flex-1 rounded-2xl bg-slate-50 px-3 py-2.5 dark:bg-slate-900">
-                    <Text className="text-[10px] font-black uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                      Stock mínimo
-                    </Text>
-                    <Text className="mt-0.5 text-lg font-black text-slate-700 dark:text-slate-200">
-                      {product.stockMin}
-                    </Text>
+                  <View className="w-[104px] gap-0.5 border-l border-slate-100 pl-3 dark:border-slate-800">
+                    <View className="flex-row items-center justify-between gap-2">
+                      <Text className="text-[9px] font-black uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                        Actual
+                      </Text>
+                      <Text
+                        className={`text-sm font-black ${
+                          isBelowMinimum ? "text-red-700 dark:text-red-200" : "text-emerald-700 dark:text-emerald-200"
+                        }`}>
+                        {product.stock}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center justify-between gap-2">
+                      <Text className="text-[9px] font-black uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                        Mínimo
+                      </Text>
+                      <Text className="text-sm font-black text-slate-700 dark:text-slate-200">{product.stockMin}</Text>
+                    </View>
+                    {isBelowMinimum && (
+                      <Text className="text-right text-[9px] font-bold text-red-600 dark:text-red-300">
+                        Faltan {missingUnits}
+                      </Text>
+                    )}
                   </View>
                 </View>
-
-                {isBelowMinimum && (
-                  <View className="mt-3 flex-row items-center gap-2">
-                    <Ionicons name="trending-down-outline" size={15} color="#dc2626" />
-                    <Text className="text-xs font-bold text-red-600 dark:text-red-300">
-                      Faltan {missingUnits} {missingUnits === 1 ? "unidad" : "unidades"} para alcanzar el mínimo
-                    </Text>
-                  </View>
-                )}
               </Pressable>
             );
           }}

@@ -298,12 +298,24 @@ export function ProductForm({
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         onScrollBeginDrag={Keyboard.dismiss}>
-        <View className="rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950">
-          <Text className="text-sm font-semibold uppercase tracking-[2px] text-emerald-300">Inventario</Text>
-          <Text className="mt-1 text-3xl font-black text-white">
+        <View
+          className={
+            initialValues
+              ? "rounded-[28px] bg-[#111A1A] p-5 dark:bg-slate-950"
+              : "rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950"
+          }>
+          <Text
+            className={
+              initialValues
+                ? "text-sm font-semibold uppercase tracking-[2px] text-emerald-300"
+                : "text-xs font-semibold text-emerald-300"
+            }>
+            Inventario
+          </Text>
+          <Text className={initialValues ? "mt-1 text-3xl font-black text-white" : "mt-0.5 text-2xl font-black text-white"}>
             {initialValues ? "Editar producto" : "Nuevo producto"}
           </Text>
-          <Text className="mt-2 text-sm leading-5 text-slate-300">
+          <Text className={initialValues ? "mt-2 text-sm leading-5 text-slate-300" : "mt-1 text-xs leading-5 text-slate-300"}>
             Completá los datos principales, stock, categoría y proveedores asociados.
           </Text>
         </View>
