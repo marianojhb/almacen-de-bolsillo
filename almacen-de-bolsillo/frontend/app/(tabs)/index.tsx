@@ -6,6 +6,8 @@ import { useProducts } from "@/contexts/products";
 import { usePurchases } from "@/contexts/purchases";
 import { useSales } from "@/contexts/sales";
 import { Permission } from "@/components/auth/Permission";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type FinancialRecord = {
   createdAt: string;
@@ -56,15 +58,28 @@ const sumRecords = (records: FinancialRecord[], from: Date, to: Date) =>
   );
 
 function Dashboard() {
+  const { user } = useAuth();
+  const { can } = usePermissions();
   const { products, isLoadingProducts, productsError, refreshProducts } = useProducts();
   const { sales, isLoadingSales, errorSaleOrders, refreshSales } = useSales();
   const { purchases, isLoadingPurchases, errorPurchases, refreshPurchases } = usePurchases();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isOwner = user?.role === "BUSINESS_OWNER";
+  const canReadProducts = can("products", "read");
+
+  const refreshDashboard = useCallback(async () => {
+    const requests = [refreshSales()];
+
+    if (canReadProducts) requests.push(refreshProducts());
+    if (isOwner) requests.push(refreshPurchases());
+
+    await Promise.all(requests);
+  }, [canReadProducts, isOwner, refreshProducts, refreshPurchases, refreshSales]);
 
   useFocusEffect(
     useCallback(() => {
-      void Promise.all([refreshProducts(), refreshSales(), refreshPurchases()]);
-    }, [refreshProducts, refreshPurchases, refreshSales]),
+      void refreshDashboard();
+    }, [refreshDashboard]),
   );
 
   const now = new Date();
@@ -138,12 +153,12 @@ function Dashboard() {
     1,
     ...weeklyEvolution.flatMap((day) => [day.income, day.outcome]),
   );
-  const loading = isLoadingProducts || isLoadingSales || isLoadingPurchases;
-  const dashboardError = productsError || errorSaleOrders || errorPurchases;
+  const loading = isLoadingSales || (canReadProducts && isLoadingProducts) || (isOwner && isLoadingPurchases);
+  const dashboardError = errorSaleOrders || (canReadProducts ? productsError : null) || (isOwner ? errorPurchases : null);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refreshProducts(), refreshSales(), refreshPurchases()]);
+    await refreshDashboard();
     setIsRefreshing(false);
   };
 
@@ -154,6 +169,7 @@ function Dashboard() {
         contentContainerClassName="gap-4 px-4 pb-8 pt-4"
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#047857" />}>
+        {isOwner && (
         <View className="overflow-hidden rounded-[30px] bg-[#111A1A] p-5 dark:bg-slate-950">
           <View className="flex-row items-start justify-between gap-4">
             <View className="flex-1">
@@ -199,6 +215,7 @@ function Dashboard() {
             </View>
           </View>
         </View>
+        )}
 
         {dashboardError && (
           <View className="flex-row items-center gap-3 rounded-3xl border border-red-100 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30">
@@ -251,40 +268,43 @@ function Dashboard() {
               <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Reponer stock</Text>
             </Pressable>
             </Permission>
-            <Pressable
-              className="min-w-[46%] flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
-              onPress={() => router.push("/(tabs)/products")}>
-              <View className="flex-row items-start justify-between gap-2">
-                <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
-                  <Ionicons name="cube-outline" size={21} color="#64748b" />
-                </View>
-                {productsBelowMinimumCount > 0 && (
-                  <View
-                    accessible
-                    accessibilityLabel={`${productsBelowMinimumCount} productos por debajo del stock mínimo`}
-                    className="flex-row items-center gap-1 rounded-full bg-red-100 px-2 py-1 dark:bg-red-950/60">
-                    <Ionicons name="warning-outline" size={13} color="#dc2626" />
-                    <Text className="text-[10px] font-black text-red-700 dark:text-red-300">
-                      {productsBelowMinimumCount}
-                    </Text>
+            {isOwner && (
+              <Pressable
+                className="min-w-[46%] flex-1 rounded-[22px] border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950"
+                onPress={() => router.push("/(tabs)/products")}>
+                <View className="flex-row items-start justify-between gap-2">
+                  <View className="h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-900">
+                    <Ionicons name="cube-outline" size={21} color="#64748b" />
                   </View>
-                )}
-              </View>
-              <Text className="mt-4 text-sm font-black text-slate-950 dark:text-white">Productos</Text>
-              <Text
-                className={`mt-1 text-xs ${
-                  productsBelowMinimumCount > 0
-                    ? "font-bold text-red-600 dark:text-red-300"
-                    : "text-slate-500 dark:text-slate-400"
-                }`}>
-                {productsBelowMinimumCount > 0
-                  ? `${productsBelowMinimumCount} bajo el mínimo`
-                  : "Ver inventario"}
-              </Text>
-            </Pressable>
+                  {productsBelowMinimumCount > 0 && (
+                    <View
+                      accessible
+                      accessibilityLabel={`${productsBelowMinimumCount} productos por debajo del stock mínimo`}
+                      className="flex-row items-center gap-1 rounded-full bg-red-100 px-2 py-1 dark:bg-red-950/60">
+                      <Ionicons name="warning-outline" size={13} color="#dc2626" />
+                      <Text className="text-[10px] font-black text-red-700 dark:text-red-300">
+                        {productsBelowMinimumCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text className="mt-4 text-sm font-black text-slate-950 dark:text-white">Productos</Text>
+                <Text
+                  className={`mt-1 text-xs ${
+                    productsBelowMinimumCount > 0
+                      ? "font-bold text-red-600 dark:text-red-300"
+                      : "text-slate-500 dark:text-slate-400"
+                  }`}>
+                  {productsBelowMinimumCount > 0
+                    ? `${productsBelowMinimumCount} bajo el mínimo`
+                    : "Ver inventario"}
+                </Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
+        {isOwner && (
         <View className="rounded-[26px] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
           <View className="flex-row items-start justify-between gap-3">
             <View className="flex-1">
@@ -325,7 +345,9 @@ function Dashboard() {
             })}
           </View>
         </View>
+        )}
 
+        {isOwner && (
         <View>
           <View className="mb-3">
             <Text className="text-lg font-black text-slate-950 dark:text-white">Ingresos y egresos</Text>
@@ -374,7 +396,9 @@ function Dashboard() {
             })}
           </View>
         </View>
+        )}
 
+        {canReadProducts && (
         <View className="rounded-[26px] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-1">
@@ -462,6 +486,7 @@ function Dashboard() {
             </View>
           )}
         </View>
+        )}
 
         <View className="rounded-[26px] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
           <View className="flex-row items-center justify-between gap-3">
