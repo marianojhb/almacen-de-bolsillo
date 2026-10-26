@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, type Href, useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View, useColorScheme } from "react-native";
 import { useProducts } from "@/contexts/products";
@@ -167,7 +167,14 @@ function Dashboard() {
           El día en el almacén
         </NotebookHeading>
         {isOwner && (
-          <View className="py-1">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ver ventas del día"
+            className="py-1 active:opacity-70"
+            onPress={() => router.push(
+              { pathname: "/(tabs)/sales" },
+              { withAnchor: true },
+            )}>
             <Text className="text-lg font-black uppercase tracking-[1.4px] text-ink dark:text-white">
               Ventas del día
             </Text>
@@ -195,7 +202,7 @@ function Dashboard() {
                 </View>
               </View>
             </View>
-          </View>
+          </Pressable>
         )}
 
         {dashboardError && (
@@ -216,7 +223,10 @@ function Dashboard() {
                 accessibilityRole="button"
                 accessibilityLabel="Nueva venta"
                 className="min-h-14 min-w-[46%] flex-1 flex-row items-center gap-3 rounded-xl border border-slate-300  px-3 py-4 bg-white/60 active:opacity-70 dark:border-slate-700 dark:bg-slate-950"
-                onPress={() => router.push("/(tabs)/sales/new")}>
+                onPress={() => router.push(
+                  { pathname: "/(tabs)/sales/new" },
+                  { withAnchor: true },
+                )}>
                 <View className="h-9 w-9 items-center justify-center rounded-full bg-emerald-100">
                   <Ionicons name="cart-outline" size={20} color="#173F30" />
                 </View>
@@ -229,7 +239,10 @@ function Dashboard() {
               accessibilityRole="button"
               accessibilityLabel="Abrir Caja"
               className="min-h-14 min-w-[46%] flex-1 flex-row items-center gap-3 rounded-xl border border-slate-300  px-3 py-2 active:opacity-70 dark:border-slate-700 dark:bg-slate-950"
-              onPress={() => router.push("/more/cash-closing" as Href)}>
+              onPress={() => router.push(
+                { pathname: "/(tabs)/more/cash-closing" },
+                { withAnchor: true },
+              )}>
               <View className="h-9 w-9 items-center justify-center rounded-full bg-emerald-100">
                 <Ionicons name="calculator-outline" size={20} color="#173F30" />
               </View>

@@ -32,20 +32,24 @@ function text(node) {
   return text(node.props?.children);
 }
 
-test("Caja muestra el enlace y protege el historial solo para BUSINESS_OWNER", async () => {
+test("Más ancla Caja en su stack, muestra el enlace y protege el historial solo para BUSINESS_OWNER", async () => {
   for (const role of ["BUSINESS_OWNER", "ADMIN", "SUPERVISOR", "EMPLOYEE", null]) {
     const navigation = [];
     const Stack = Object.assign(() => {}, { Screen: "Stack.Screen", Protected: "Stack.Protected" });
-    const layout = await loadModule("../app/(tabs)/more/cash-closing/_layout.tsx", {
+    const layout = await loadModule("../app/(tabs)/more/_layout.tsx", {
       ...baseDependencies,
       "expo-router": { Stack, router: { push: (path) => navigation.push(path) } },
       "@/components/ui/notebook": { useNotebookHeader: () => ({ headerTintColor: "#173F30" }) },
       "@/contexts/AuthContext": { useAuth: () => ({ user: role ? { role } : null }) },
+      "@/hooks/usePermissions": { usePermissions: () => ({ can: () => true, hasFullAccess: true }) },
     });
+    assert.equal(layout.unstable_settings?.anchor, "index");
     const children = layout.default().props.children;
-    assert.equal(children[0].props.options.title, "Caja");
-    assert.equal(children[1].props.guard, role === "BUSINESS_OWNER");
-    const button = children[0].props.options.headerRight();
+    const cashScreen = children.find((child) => child?.props?.name === "cash-closing/index");
+    const historyProtection = children.find((child) => child?.props?.guard === (role === "BUSINESS_OWNER"));
+    assert.equal(cashScreen.props.options.title, "Caja");
+    assert.ok(historyProtection);
+    const button = cashScreen.props.options.headerRight();
     if (role === "BUSINESS_OWNER") {
       assert.equal(button.props.accessibilityLabel, "Ver historial de cierres");
       button.props.onPress();

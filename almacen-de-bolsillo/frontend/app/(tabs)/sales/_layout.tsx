@@ -5,6 +5,10 @@ import { Stack } from "expo-router";
 import { usePermissions } from "@/hooks/usePermissions";
 import { NotebookScene, useNotebookHeader } from "@/components/ui/notebook";
 
+export const unstable_settings = {
+  anchor: "index",
+};
+
 export default function SalesLayout() {
   const header = useNotebookHeader();
   const { can } = usePermissions();
