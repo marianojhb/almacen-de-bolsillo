@@ -3,6 +3,10 @@
 import { usePermissions } from "@/hooks/usePermissions";
 import { Stack } from "expo-router";
 
+export const unstable_settings = {
+  anchor: "index",
+};
+
 export default function ProductsLayout() {
   const { can } = usePermissions();
   return (
