@@ -64,11 +64,13 @@ export default function TransactionsScreen() {
 
         return false;
       }}>
-      <NotebookHeading subtitle={`${visibleTransactions.length} de ${transactions.length} movimientos visibles`}>Movimientos</NotebookHeading>
-      <View className="mb-4 rounded-xl border border-slate-200 bg-white/60 p-4 dark:border-slate-700 dark:bg-slate-950">
+      <NotebookHeading subtitle={`${visibleTransactions.length} de ${transactions.length} movimientos visibles`}>
+        Movimientos
+      </NotebookHeading>
+      <View className="mb-4  border-b border-slate-200  p-4 dark:border-slate-700 dark:bg-slate-950">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-base font-semibold text-ink dark:text-white">
+            <Text className="text-x font-semibold text-ink dark:text-white">
               Total:{" "}
               {Number(transactions.reduce((acc, transaction) => acc + Number(transaction.amount), 0)).toLocaleString(
                 "es-AR",
@@ -152,25 +154,15 @@ export default function TransactionsScreen() {
                   : "Ualá";
 
             return (
-              <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              <View className=" border-b border-slate-200  p-1 dark:border-slate-800 dark:bg-slate-950">
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
-                    <Text className="text-2xl font-black text-slate-950 dark:text-white">
+                    <Text className="text-xl font-bold text-ink dark:text-white">
                       Transacción #{transaction.id}
-                    </Text>
-                    <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
-                      {new Date(transaction.date).toLocaleDateString("es-AR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
                     </Text>
                   </View>
 
                   <View className="items-end">
-                    <Text className={`text-xs font-bold uppercase tracking-[1px] ${directionTextClass}`}>
-                      {isIncome ? "Ingreso" : "Egreso"}
-                    </Text>
                     <Text className={`text-xl font-black ${directionTextClass}`}>
                       {Number(transaction.amount).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
                     </Text>
@@ -178,17 +170,20 @@ export default function TransactionsScreen() {
                 </View>
 
                 <View className="mt-4 flex-row flex-wrap gap-2">
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
-                    <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">{transaction.type}</Text>
-                  </View>
                   <View className={`rounded-full px-3 py-1.5 ${directionBadgeClass}`}>
                     <Text className={`text-xs font-bold ${directionTextClass}`}>{isIncome ? "INGRESO" : "EGRESO"}</Text>
                   </View>
                   <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
                     <Text className="text-xs font-bold text-indigo-700 dark:text-indigo-300">{paymentMethodLabel}</Text>
                   </View>
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
+
+                  <View className="rounded-full  px-3 py-1.5 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                            {new Date(transaction.date).toLocaleDateString("es-AR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}{"  "}
                       {new Date(transaction.createdAt).toLocaleTimeString("es-AR", {
                         hour: "2-digit",
                         minute: "2-digit",

@@ -54,16 +54,16 @@ export function EmployeeCard({ employee, isExpanded, onToggle }: EmployeeCardPro
             expanded: isExpanded,
             disabled: isChanging,
         }}
-        className={`rounded-3xl border p-4 active:opacity-80 ${
+        className={` border-b p-4 active:opacity-80 ${
             isActive
-            ? "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+            ? "border-slate-200  dark:border-slate-800 dark:bg-slate-950"
             : "border-slate-300 bg-slate-100 opacity-70 dark:border-slate-700 dark:bg-slate-900"
         } ${isChanging ? "opacity-50" : ""}`}
         >
         <View className="flex-row items-center">
             <View className="mr-3 flex-1">
                 <View className="flex-row items-center gap-2">
-                    <Text className="flex-shrink text-lg font-black text-slate-950 dark:text-white">
+                    <Text className="flex-shrink text-xl font-bold text-ink dark:text-white ">
                         {employeeName}
                     </Text>
 

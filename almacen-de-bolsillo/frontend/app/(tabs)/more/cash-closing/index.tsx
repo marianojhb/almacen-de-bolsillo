@@ -195,7 +195,7 @@ export default function CashClosingScreen() {
         </View>
       ) : null}
 
-      <View className="rounded-[26px] border border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-950">
+      <View className="rounded-[26px]  border-slate-200  px-4 py-2 dark:border-slate-800 dark:bg-slate-950">
         <AmountRow label="Fondo inicial" value={summary.opening} />
         <View className="h-px bg-slate-100 dark:bg-slate-800" />
         <AmountRow label="Ventas en efectivo" value={summary.cashSales} />
@@ -205,17 +205,17 @@ export default function CashClosingScreen() {
         <AmountRow label="Total esperado" value={summary.expectedClosing} emphasis />
       </View>
 
-      <View className="rounded-[26px] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+      <View className="rounded-[26px]  border-slate-200  p-4 dark:border-slate-800 dark:bg-slate-950">
         <Text className="text-lg font-black text-slate-950 dark:text-white">Cobros digitales</Text>
         <Text className="mt-1 text-sm text-slate-500 dark:text-slate-400">Se informan por separado y no modifican la caja.</Text>
         <View className="mt-4 flex-row gap-3">
-          <View className="flex-1 rounded-2xl bg-sky-50 p-3 dark:bg-sky-950/30">
+          <View className="flex-1 rounded-2xl  p-3 dark:bg-sky-950/30">
             <Text className="text-xs font-bold text-sky-700 dark:text-sky-300">Mercado Pago</Text>
             <Text selectable className="mt-2 text-base font-black text-sky-950 dark:text-sky-100">
               {formatCurrency(summary.mercadoPagoSales)}
             </Text>
           </View>
-          <View className="flex-1 rounded-2xl bg-violet-50 p-3 dark:bg-violet-950/30">
+          <View className="flex-1 rounded-2xl  p-3 dark:bg-violet-950/30">
             <Text className="text-xs font-bold text-violet-700 dark:text-violet-300">Ualá</Text>
             <Text selectable className="mt-2 text-base font-black text-violet-950 dark:text-violet-100">
               {formatCurrency(summary.ualaSales)}
