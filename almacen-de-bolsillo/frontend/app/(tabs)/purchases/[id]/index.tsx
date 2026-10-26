@@ -1,5 +1,5 @@
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, Stack, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import type { PurchaseOrderWithRelationsDto } from "@almacen/shared";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { getPurchaseByIdRequest } from "@/services/purchasesApi";
@@ -10,23 +10,40 @@ export default function PurchaseDetailScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorPurchase, setErrorPurchase] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchPurchase() {
-      try {
-        setIsLoading(true);
-        setErrorPurchase(null);
-        setPurchase(await getPurchaseByIdRequest(Number(id)));
-      } catch (error) {
-        console.error("Error fetching purchase details:", error);
-        setPurchase(null);
-        setErrorPurchase("No pudimos cargar la compra solicitada.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
 
-    void fetchPurchase();
-  }, [id]);
+      async function fetchPurchase() {
+        try {
+          setIsLoading(true);
+          setErrorPurchase(null);
+          const refreshedPurchase = await getPurchaseByIdRequest(Number(id));
+
+          if (isActive) {
+            setPurchase(refreshedPurchase);
+          }
+        } catch (error) {
+          console.error("Error fetching purchase details:", error);
+
+          if (isActive) {
+            setPurchase(null);
+            setErrorPurchase("No pudimos cargar la compra solicitada.");
+          }
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+
+      void fetchPurchase();
+
+      return () => {
+        isActive = false;
+      };
+    }, [id]),
+  );
 
   if (isLoading) {
     return (

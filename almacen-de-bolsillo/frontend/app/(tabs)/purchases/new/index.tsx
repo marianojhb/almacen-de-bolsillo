@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Switch, Text, TextInput, View } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import type { ProductWithRelations, PurchaseDraftItem } from "@almacen/shared";
 import { useProducts } from "@/contexts/products";
@@ -26,6 +26,12 @@ export default function NewPurchaseScreen() {
   } = useProducts();
 
   const { items, toggleProduct, clearPurchase } = usePurchaseDraft();
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([refreshProducts(), refreshCategories()]);
+    }, [refreshCategories, refreshProducts]),
+  );
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {

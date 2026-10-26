@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
@@ -14,8 +15,14 @@ const formatCurrency = (value: number) =>
 
 export default function SelectSuppliersScreen() {
   const { items, purchaseQuantities, updatePurchaseQuantity } = usePurchaseDraft();
-  const { products, isLoadingProducts, productsError } = useProducts();
-  const { suppliers, isLoadingSuppliers, suppliersError } = useSuppliers();
+  const { products, isLoadingProducts, productsError, refreshProducts } = useProducts();
+  const { suppliers, isLoadingSuppliers, suppliersError, refreshSuppliers } = useSuppliers();
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([refreshProducts(), refreshSuppliers()]);
+    }, [refreshProducts, refreshSuppliers]),
+  );
 
   const isLoading = isLoadingProducts || isLoadingSuppliers;
   const loadingError = productsError || suppliersError;
@@ -103,7 +110,9 @@ export default function SelectSuppliersScreen() {
                 </View>
 
                 <View className="flex-1">
-                  <Text className="text-base font-black text-slate-950 dark:text-white">{item.shortname}</Text>
+                  <Text className="text-base font-black text-slate-950 dark:text-white">
+                    {product?.shortname ?? item.shortname}
+                  </Text>
                   <View className="mt-1 flex-row items-center gap-1.5">
                     <Ionicons
                       name={stockNeeded > 0 ? "alert-circle-outline" : "checkmark-circle-outline"}

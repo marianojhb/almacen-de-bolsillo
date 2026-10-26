@@ -1,12 +1,13 @@
 import type { CreatePurchaseOrderDto } from "@almacen/shared";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
 import { usePurchases } from "@/contexts/purchases";
 import { useSuppliers } from "@/contexts/suppliers";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProducts } from "@/contexts/products";
 
 type SupplierReviewItem = {
   productId: number;
@@ -34,10 +35,17 @@ const formatCurrency = (value: number) =>
 export default function ReviewPurchaseScreen() {
   const { user } = useAuth();
   const { items, purchaseQuantities, clearPurchase } = usePurchaseDraft();
-  const { suppliers } = useSuppliers();
+  const { products, refreshProducts } = useProducts();
+  const { suppliers, refreshSuppliers } = useSuppliers();
   const { addPurchase, refreshPurchases } = usePurchases();
   const [isCreatingOrders, setIsCreatingOrders] = useState(false);
   const [creationError, setCreationError] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      void Promise.all([refreshProducts(), refreshSuppliers()]);
+    }, [refreshProducts, refreshSuppliers]),
+  );
 
   const supplierGroups = useMemo<SupplierReviewGroup[]>(() => {
     const groups = new Map<number, SupplierReviewGroup>();
@@ -59,9 +67,10 @@ export default function ReviewPurchaseScreen() {
         const price = Number(supplierProduct.price ?? 0);
         const discount = Number(draftItem.discount ?? 0);
         const subtotal = price * quantity;
+        const product = products.find((currentProduct) => currentProduct.id === draftItem.productId);
         const reviewItem: SupplierReviewItem = {
           productId: draftItem.productId,
-          shortname: draftItem.shortname ?? "Producto sin nombre",
+          shortname: product?.shortname ?? draftItem.shortname ?? "Producto sin nombre",
           quantity,
           price,
           discount,
@@ -92,7 +101,7 @@ export default function ReviewPurchaseScreen() {
         ),
       }))
       .sort((firstGroup, secondGroup) => firstGroup.supplierName.localeCompare(secondGroup.supplierName, "es"));
-  }, [items, purchaseQuantities, suppliers]);
+  }, [items, products, purchaseQuantities, suppliers]);
 
   const grandTotal = supplierGroups.reduce((total, group) => total + group.total, 0);
   const totalUnits = supplierGroups.reduce(
