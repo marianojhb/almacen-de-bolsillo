@@ -237,13 +237,13 @@ function Dashboard() {
           <View className="flex-row flex-wrap gap-3">
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Abrir Cierre de Caja"
+              accessibilityLabel="Abrir Caja"
               className="min-w-[46%] flex-1 rounded-[22px] bg-[#111A1A] p-4 active:opacity-80 dark:border dark:border-slate-800 dark:bg-slate-950"
               onPress={() => router.push("/more/cash-closing" as Href)}>
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-emerald-400">
                 <Ionicons name="calculator-outline" size={21} color="#111A1A" />
               </View>
-              <Text className="mt-4 text-sm font-black text-white">Cierre de Caja</Text>
+              <Text className="mt-4 text-sm font-black text-white">Caja</Text>
               <Text className="mt-1 text-xs text-slate-300">Conciliar efectivo</Text>
             </Pressable>
             <Permission resource="sales" action="create">

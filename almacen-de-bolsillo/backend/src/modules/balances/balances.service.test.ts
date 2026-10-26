@@ -34,7 +34,9 @@ function createRepository(employeeId: number | null = 42) {
       async create({ data }) {
         creates.push(data);
         const id = records.length + 1;
-        const responsibleId = data.employee?.connect?.id ?? null;
+        const responsibleId = data.employee?.connect?.id;
+        assert.equal(typeof responsibleId, 'number');
+        assert.ok(responsibleId !== undefined);
         records.push({ id, employeeId: responsibleId });
         return {
           id,

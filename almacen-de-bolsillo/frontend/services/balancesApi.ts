@@ -1,4 +1,4 @@
-import type { BalanceDto, CreateBalanceDto } from "@almacen/shared";
+import type { BalanceDto, BalanceHistoryDto, CreateBalanceDto } from "@almacen/shared";
 
 import { apiRequest } from "@/services/apiClient";
 
@@ -26,6 +26,14 @@ const normalizeBalance = (balance: BalanceResponse): BalanceDto => ({
 export async function getBalancesRequest(): Promise<BalanceDto[]> {
   const balances = await apiRequest<BalanceResponse[]>("/balances");
   return balances.map(normalizeBalance);
+}
+
+export async function getBalanceHistoryRequest(): Promise<BalanceHistoryDto[]> {
+  const balances = await apiRequest<(BalanceResponse & { employee?: BalanceHistoryDto["employee"] })[]>("/balances");
+  return balances.map((balance) => ({
+    ...normalizeBalance(balance),
+    employee: balance.employee ?? null,
+  }));
 }
 
 export async function createBalanceRequest(balance: CreateBalanceDto): Promise<BalanceDto> {

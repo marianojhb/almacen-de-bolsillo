@@ -33,7 +33,28 @@ export async function resolveResponsibleEmployee(
   return employee.id;
 }
 
-const getBalancesFromDatabase = async () => prisma.balance.findMany();
+const balanceHistoryQuery = {
+  orderBy: [{ date: 'desc' }, { id: 'desc' }],
+  include: {
+    employee: {
+      select: {
+        firstname: true,
+        lastname: true,
+        fullname: true,
+        user: { select: { email: true } },
+      },
+    },
+  },
+} satisfies Prisma.BalanceFindManyArgs;
+
+type BalanceHistoryRepository = {
+  findMany(args: typeof balanceHistoryQuery): Promise<Prisma.BalanceGetPayload<{
+    include: typeof balanceHistoryQuery.include;
+  }>[]>;
+};
+
+const getBalancesFromDatabase = async (repository: BalanceHistoryRepository = prisma.balance) =>
+  repository.findMany(balanceHistoryQuery);
 
 const getBalanceByIdFromDatabase = async (balanceId: number) => prisma.balance.findUnique({ where: { id: balanceId } });
 

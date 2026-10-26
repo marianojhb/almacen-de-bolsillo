@@ -13,7 +13,7 @@ export type MoreOption = {
 export const MORE_OPTIONS = [
   {
     id: "cash-closing",
-    title: "Cierre de Caja",
+    title: "Caja",
     description: "Conciliar el efectivo y registrar el cierre",
     href: "/more/cash-closing" as Href,
     icon: "calculator-outline",
