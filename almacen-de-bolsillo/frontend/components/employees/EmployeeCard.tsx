@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { DeleteEmployeeButton } from "./buttons/DeleteEmployeeButton";
 import { EditEmployeeButton } from "./buttons/EditEmployeeButton";
 import { EmployeeStatusButton } from "./buttons/EmployeeStatusButton";
 import {
@@ -17,7 +16,6 @@ type EmployeeCardProps = {
     employee: Employee;
     isExpanded: boolean;
     onToggle: () => void;
-    onDeleted: () => void;
 };
 
 function DetailRow({ label, value }: { label: string; value: string | null; }) {
@@ -34,7 +32,7 @@ function DetailRow({ label, value }: { label: string; value: string | null; }) {
     );
 }
 
-export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: EmployeeCardProps) {
+export function EmployeeCard({ employee, isExpanded, onToggle }: EmployeeCardProps) {
     const [isChanging, setIsChanging] = useState(false);
     const employeeName = getEmployeeName(employee);
     const isActive = employee.isActive && employee.user?.isActive !== false;
@@ -137,12 +135,6 @@ export function EmployeeCard({ employee, isExpanded, onToggle, onDeleted }: Empl
                 <DetailRow
                     label="Fecha de registro"
                     value={formatEmployeeDate(employee.createdAt)}
-                />
-                <DeleteEmployeeButton
-                    employee={employee}
-                    disabled={isChanging}
-                    onBusyChange={setIsChanging}
-                    onDeleted={onDeleted}
                 />
             </View>
         )}

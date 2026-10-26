@@ -58,14 +58,6 @@ export default function EmployeesScreen() {
     });
   };
 
-  const removeExpandedEmployee = (employeeId: number) => {
-    setExpandedEmployeeIds((current) => {
-      const next = new Set(current);
-      next.delete(employeeId);
-      return next;
-    });
-  };
-
   return (
     <View className="flex-1 bg-gray-50 px-4 pt-4 dark:bg-black">
       <View className="mb-4 flex-row items-center justify-between">
@@ -127,7 +119,6 @@ export default function EmployeesScreen() {
             employee={item}
             isExpanded={expandedEmployeeIds.has(item.id)}
             onToggle={() => toggleEmployee(item.id)}
-            onDeleted={() => removeExpandedEmployee(item.id)}
           />
         )}
       />
