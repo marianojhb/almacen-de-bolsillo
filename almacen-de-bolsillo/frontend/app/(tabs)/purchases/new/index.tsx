@@ -1,16 +1,19 @@
 import { useMemo, useState } from "react";
-import { FlatList, Keyboard, Pressable, RefreshControl, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, Switch, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import type { ProductWithRelations, PurchaseDraftItem } from "@almacen/shared";
 import { useProducts } from "@/contexts/products";
 import { usePurchaseDraft } from "@/contexts/purchase-draft";
+import { ProductCategoryFilters } from "@/components/products/ProductCategoryFilters";
+import { matchesProductFilters } from "@/utils/product-filters";
 
 export default function NewPurchaseScreen() {
   const [isOnlyMissingProducts, setIsOnlyMissingProducts] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [isSelected, setIsSelected] = useState(false);
+  const [lowStockOnly, setLowStockOnly] = useState(false);
   // const [selectedProducts, setSelectedProducts] = useState<ProductWithRelations[]>([]);
   const {
     products,
@@ -25,18 +28,13 @@ export default function NewPurchaseScreen() {
   const { items, toggleProduct, clearPurchase } = usePurchaseDraft();
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearchText = searchText.trim().toLowerCase();
-
     return products.filter((product) => {
       const matchesOnlyMissingProducts = !isOnlyMissingProducts || product.stock < product.stockMin;
-      const matchesCategory = !categoryId || product.categoryId === Number(categoryId);
-      const matchesSearchText =
-        normalizedSearchText.length === 0 || product.shortname.toLowerCase().includes(normalizedSearchText);
-      const matchesInactiveFilter = !isSelected || product.isActive === false;
-
-      return matchesSearchText && matchesCategory && matchesInactiveFilter && matchesOnlyMissingProducts;
+      return matchesOnlyMissingProducts && matchesProductFilters(product, {
+        categoryId, searchText, lowStockOnly, inactiveOnly: isSelected,
+      });
     });
-  }, [categoryId, products, searchText, isSelected, isOnlyMissingProducts]);
+  }, [categoryId, products, searchText, isSelected, isOnlyMissingProducts, lowStockOnly]);
 
   const handleRefresh = async () => {
     await Promise.all([refreshProducts(), refreshCategories()]);
@@ -147,55 +145,16 @@ export default function NewPurchaseScreen() {
             </Text>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
+          <ProductCategoryFilters
             contentContainerClassName="gap-2 px-4 pb-2"
-            keyboardShouldPersistTaps="handled">
-            <Pressable
-              onPress={() => {
-                Keyboard.dismiss();
-                setIsSelected((current) => !current);
-              }}
-              className={`flex-row items-center gap-2 rounded-full border px-4 py-2.5 active:opacity-75 ${
-                isSelected
-                  ? "border-amber-500 bg-amber-500 dark:border-amber-400 dark:bg-amber-400"
-                  : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
-              }`}>
-              <Ionicons name="archive-outline" size={16} color={isSelected ? "#ffffff" : "#64748b"} />
-              <Text
-                className={`text-sm font-black ${
-                  isSelected ? "text-white dark:text-slate-950" : "text-slate-700 dark:text-slate-200"
-                }`}>
-                Inactivos
-              </Text>
-            </Pressable>
-
-            {categories.map((category) => {
-              const isCategorySelected = categoryId === category.id.toString();
-
-              return (
-                <Pressable
-                  key={category.id}
-                  onPress={() => {
-                    Keyboard.dismiss();
-                    setCategoryId(isCategorySelected ? null : category.id.toString());
-                  }}
-                  className={`rounded-full border px-4 py-2.5 active:opacity-75 ${
-                    isCategorySelected
-                      ? "border-slate-950 bg-slate-950 dark:border-white dark:bg-white"
-                      : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
-                  }`}>
-                  <Text
-                    className={`text-sm font-black ${
-                      isCategorySelected ? "text-white dark:text-slate-950" : "text-slate-700 dark:text-slate-200"
-                    }`}>
-                    {category.name}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+            categories={categories}
+            categoryId={categoryId}
+            onCategoryChange={setCategoryId}
+            lowStockOnly={lowStockOnly}
+            onLowStockChange={setLowStockOnly}
+            inactiveOnly={isSelected}
+            onInactiveChange={setIsSelected}
+          />
         </View>
 
         <FlatList

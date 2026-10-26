@@ -1,9 +1,11 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, Keyboard, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { FlatList, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useProducts } from "@/contexts/products";
 import { useSalesDraft } from "@/contexts/sales-draft";
+import { ProductCategoryFilters } from "@/components/products/ProductCategoryFilters";
+import { matchesProductFilters } from "@/utils/product-filters";
 
 export default function SelectProductsModal() {
   const insets = useSafeAreaInsets();
@@ -13,18 +15,14 @@ export default function SelectProductsModal() {
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [inactiveOnly, setInactiveOnly] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearchText = searchText.trim().toLowerCase();
-
-    return products.filter((product) => {
-      const matchesCategory = !categoryId || product.categoryId === Number(categoryId);
-      const matchesSearchText =
-        normalizedSearchText.length === 0 || product.shortname.toLowerCase().includes(normalizedSearchText);
-
-      return matchesCategory && matchesSearchText;
-    });
-  }, [categoryId, products, searchText]);
+    return products.filter((product) => matchesProductFilters(product, {
+      categoryId, searchText, lowStockOnly, inactiveOnly,
+    }));
+  }, [categoryId, products, searchText, lowStockOnly, inactiveOnly]);
 
   const selectedProducts = products.filter((product) => (quantities[product.id] ?? 0) > 0);
   const selectedUnits = selectedProducts.reduce((total, product) => total + (quantities[product.id] ?? 0), 0);
@@ -101,37 +99,16 @@ export default function SelectProductsModal() {
         />
       </View>
 
-      <ScrollView
-        horizontal
+      <ProductCategoryFilters
         className="mb-4 flex-none"
-        contentContainerClassName="gap-2 pr-4"
-        showsHorizontalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
-        {categories.map((category) => {
-          const isSelected = categoryId === category.id.toString();
-
-          return (
-            <Pressable
-              key={category.id}
-              onPress={() => {
-                Keyboard.dismiss();
-                setCategoryId(isSelected ? null : category.id.toString());
-              }}
-              className={`rounded-full border px-4 py-2 active:opacity-75 ${
-                isSelected
-                  ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
-                  : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
-              }`}>
-              <Text
-                className={`text-sm font-bold ${
-                  isSelected ? "text-white dark:text-[#111A1A]" : "text-slate-700 dark:text-slate-200"
-                }`}>
-                {category.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+        categories={categories}
+        categoryId={categoryId}
+        onCategoryChange={setCategoryId}
+        lowStockOnly={lowStockOnly}
+        onLowStockChange={setLowStockOnly}
+        inactiveOnly={inactiveOnly}
+        onInactiveChange={setInactiveOnly}
+      />
 
       {products.length === 0 ? (
         <View className="flex-1 items-center justify-center pb-16">

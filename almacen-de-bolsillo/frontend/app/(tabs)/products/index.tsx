@@ -1,8 +1,10 @@
-import { FlatList, Keyboard, Text, View, Pressable, TextInput, RefreshControl, ScrollView } from "react-native";
+import { FlatList, Keyboard, Text, View, Pressable, TextInput, RefreshControl } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { NewProductButton } from "@/components/products";
 import { useProducts } from "@/contexts/products";
 import { useCallback, useState, useMemo } from "react";
+import { ProductCategoryFilters } from "@/components/products/ProductCategoryFilters";
+import { matchesProductFilters } from "@/utils/product-filters";
 
 export default function ProductsScreen() {
   const {
@@ -19,20 +21,13 @@ export default function ProductsScreen() {
   const [searchText, setSearchText] = useState<string>("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
+  const [lowStockOnly, setLowStockOnly] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearchText = searchText.trim().toLowerCase();
-
-    return products.filter((product) => {
-      const matchesCategory = !categoryId || product.categoryId === Number(categoryId);
-
-      const matchesSearchText =
-        normalizedSearchText.length === 0 || product.shortname.toLowerCase().includes(normalizedSearchText);
-
-      const activeProducts = !isSelected || product.isActive === false; // Si isSelected es true, solo mostrar productos inactivos
-      return matchesCategory && matchesSearchText && activeProducts;
-    });
-  }, [categoryId, products, searchText, isSelected]);
+    return products.filter((product) => matchesProductFilters(product, {
+      categoryId, searchText, lowStockOnly, inactiveOnly: isSelected,
+    }));
+  }, [categoryId, products, searchText, isSelected, lowStockOnly]);
 
   useFocusEffect(
     useCallback(() => {
@@ -100,54 +95,16 @@ export default function ProductsScreen() {
         />
       </View>
 
-      <ScrollView
-        horizontal
+      <ProductCategoryFilters
         className="mb-4 flex-none"
-        contentContainerClassName="gap-2 pr-4"
-        showsHorizontalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
-        <Pressable
-          key="inactive"
-          onPress={() => {
-            Keyboard.dismiss();
-            setIsSelected(!isSelected);
-          }}
-          className={`rounded-full border px-4 py-2 active:opacity-75 ${
-            isSelected
-              ? "border-amber-500 bg-amber-500 dark:border-amber-400 dark:bg-amber-400"
-              : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
-          }`}>
-          <Text
-            className={`text-sm font-bold ${isSelected ? "text-white dark:text-slate-950" : "text-slate-700 dark:text-slate-200"}`}>
-            Inactivos
-          </Text>
-        </Pressable>
-
-        {categories.map((category) => {
-          const isCategorySelected = categoryId === category.id.toString();
-
-          return (
-            <Pressable
-              key={category.id}
-              onPress={() => {
-                Keyboard.dismiss();
-                setCategoryId(isCategorySelected ? null : category.id.toString());
-              }}
-              className={`rounded-full border px-4 py-2 active:opacity-75 ${
-                isCategorySelected
-                  ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
-                  : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
-              }`}>
-              <Text
-                className={`text-sm font-bold ${
-                  isCategorySelected ? "text-white dark:text-[#111A1A]" : "text-slate-700 dark:text-slate-200"
-                }`}>
-                {category.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+        categories={categories}
+        categoryId={categoryId}
+        onCategoryChange={setCategoryId}
+        lowStockOnly={lowStockOnly}
+        onLowStockChange={setLowStockOnly}
+        inactiveOnly={isSelected}
+        onInactiveChange={setIsSelected}
+      />
 
       <FlatList
         data={filteredProducts}
