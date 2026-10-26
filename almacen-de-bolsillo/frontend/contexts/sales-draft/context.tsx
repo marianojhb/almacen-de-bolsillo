@@ -5,6 +5,7 @@ interface SalesDraftContextType {
   items: CreateSalesOrderItemDto[];
   totalAmount: number;
   addItem: (item: CreateSalesOrderItemDto) => void;
+  addItems: (items: CreateSalesOrderItemDto[]) => void;
   removeItem: (productId: number) => void;
   clearSales: () => void;
 }

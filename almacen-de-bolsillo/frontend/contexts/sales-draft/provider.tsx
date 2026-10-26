@@ -11,18 +11,30 @@ export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
 
   const totalAmount = items.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  function addItem(item: CreateSalesOrderItemDto) {
+  function addItems(newItems: CreateSalesOrderItemDto[]) {
     setItems((currentItems) => {
-      const itemAlreadyExists = items.some((currentProduct) => currentProduct.productId === item.productId);
-      if (itemAlreadyExists) {
-        return currentItems.map((updateItem) =>
-          updateItem.productId === item.productId
-            ? { ...updateItem, quantity: updateItem.quantity + item.quantity }
-            : updateItem,
-        );
+      const nextItems = [...currentItems];
+
+      for (const item of newItems) {
+        const existingItemIndex = nextItems.findIndex((currentItem) => currentItem.productId === item.productId);
+
+        if (existingItemIndex >= 0) {
+          const existingItem = nextItems[existingItemIndex];
+          nextItems[existingItemIndex] = {
+            ...existingItem,
+            quantity: existingItem.quantity + item.quantity,
+          };
+        } else {
+          nextItems.push(item);
+        }
       }
-      return [...currentItems, item];
+
+      return nextItems;
     });
+  }
+
+  function addItem(item: CreateSalesOrderItemDto) {
+    addItems([item]);
   }
 
   function removeItem(productId: number) {
@@ -39,6 +51,7 @@ export function SalesDraftProvider({ children }: SalesDraftProviderProps) {
         items,
         totalAmount,
         addItem,
+        addItems,
         removeItem,
         clearSales,
       }}>

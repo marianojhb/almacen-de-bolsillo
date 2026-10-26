@@ -112,28 +112,44 @@ export const NewSaleScreen = () => {
                 items.map((item) => (
                   <View
                     key={item.productId}
-                    className="flex-row items-center gap-3 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-slate-900">
-                    <View className="min-w-0 flex-1">
-                      <Text className="text-sm font-black text-slate-950 dark:text-white" numberOfLines={1}>
+                    className="rounded-2xl bg-slate-50 px-3 py-2.5 dark:bg-slate-900">
+                    <View className="flex-row items-center gap-3">
+                      <View className="h-9 min-w-9 items-center justify-center rounded-xl bg-[#111A1A] px-2 dark:bg-white">
+                        <Text className="text-base font-black text-white dark:text-[#111A1A]">{item.quantity}</Text>
+                      </View>
+                      <Text className="flex-1 text-sm font-black text-slate-950 dark:text-white" numberOfLines={1}>
                         {item.shortname}
                       </Text>
-                      <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
-                        {item.quantity} × {Number(item.price).toLocaleString("es-AR", {
-                          style: "currency",
-                          currency: "ARS",
-                        })} · {Number(item.quantity * item.price).toLocaleString("es-AR", {
-                          style: "currency",
-                          currency: "ARS",
-                        })}
-                      </Text>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Quitar ${item.shortname}`}
+                        className="ml-auto rounded-full bg-red-50 px-2.5 py-1.5 active:opacity-70 dark:bg-red-950/30"
+                        onPress={() => removeItem(item.productId)}>
+                        <Text className="text-xs font-black text-red-600 dark:text-red-300">Quitar</Text>
+                      </Pressable>
                     </View>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={`Quitar ${item.shortname}`}
-                      className="rounded-full bg-red-50 px-2.5 py-1.5 active:opacity-70 dark:bg-red-950/30"
-                      onPress={() => removeItem(item.productId)}>
-                      <Text className="text-xs font-black text-red-600 dark:text-red-300">Quitar</Text>
-                    </Pressable>
+
+                    <View className="ml-12 mt-1.5 flex-row items-center gap-3">
+                      <View className="flex-1 justify-center">
+                        <Text className="text-[9px] font-bold uppercase tracking-[1px] text-slate-400 dark:text-slate-500">
+                          Unitario
+                        </Text>
+                        <Text className="mt-0.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+                          {Number(item.price).toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                        </Text>
+                      </View>
+                      <View className="flex-1 items-end justify-center">
+                        <Text className="text-[9px] font-bold uppercase tracking-[1px] text-emerald-600 dark:text-emerald-400">
+                          Subtotal
+                        </Text>
+                        <Text className="mt-0.5 text-sm font-black text-emerald-700 dark:text-emerald-300">
+                          {Number(item.quantity * item.price).toLocaleString("es-AR", {
+                            style: "currency",
+                            currency: "ARS",
+                          })}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 ))
               )}
