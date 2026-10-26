@@ -1,4 +1,4 @@
-import type { PaymentMethod } from "@almacen/shared";
+import type { CreateBalanceDto, PaymentMethod } from "@almacen/shared";
 
 type BalanceForClosing = {
   id: number;
@@ -29,6 +29,51 @@ type CalculateCashClosingInput = {
 
 const toCents = (value: number) => Math.round(Number(value) * 100);
 const fromCents = (value: number) => value / 100;
+
+export type CashMovementType = "cashIn" | "cashOut";
+
+type CreateCashMovementBalanceInput = {
+  userId: number;
+  now: Date;
+  currentCash: number;
+  amount: number;
+  type: CashMovementType;
+};
+
+export function createCashMovementBalance({
+  userId,
+  now,
+  currentCash,
+  amount,
+  type,
+}: CreateCashMovementBalanceInput): CreateBalanceDto {
+  const amountCents = toCents(amount);
+  const currentCashCents = toCents(currentCash);
+
+  if (!Number.isFinite(amount) || amountCents <= 0) {
+    throw new Error("El importe debe ser mayor que cero.");
+  }
+
+  if (type === "cashOut" && amountCents > currentCashCents) {
+    throw new Error("El retiro no puede superar el efectivo esperado en caja.");
+  }
+
+  const resultingCashCents = type === "cashIn"
+    ? currentCashCents + amountCents
+    : currentCashCents - amountCents;
+  const resultingCash = fromCents(resultingCashCents);
+
+  return {
+    userId,
+    date: now.toISOString(),
+    opening: fromCents(currentCashCents),
+    cashIn: type === "cashIn" ? fromCents(amountCents) : 0,
+    cashOut: type === "cashOut" ? fromCents(amountCents) : 0,
+    expectedClosing: resultingCash,
+    actualClosing: resultingCash,
+    difference: 0,
+  };
+}
 
 const getLatestBalance = (balances: BalanceForClosing[]) =>
   balances.reduce<BalanceForClosing | null>((latest, balance) => {

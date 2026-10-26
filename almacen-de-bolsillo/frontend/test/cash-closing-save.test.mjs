@@ -45,8 +45,18 @@ function findElement(node, type) {
   }
 }
 
+function findElementByLabel(node, accessibilityLabel) {
+  if (!node || typeof node !== "object") return undefined;
+  if (node.props?.accessibilityLabel === accessibilityLabel) return node;
+  const children = [node.props?.children].flat(Infinity);
+  for (const child of children) {
+    const result = findElementByLabel(child, accessibilityLabel);
+    if (result) return result;
+  }
+}
+
 async function renderScreen(createBalanceRequest, user = { id: 7 }) {
-  const states = [summary, "120,50", false, false, null];
+  const states = [summary, "120,50", false, false, null, false, "cashIn", "", false, null];
   const updates = [];
   const navigation = [];
   let nextState = 0;
@@ -62,7 +72,7 @@ async function renderScreen(createBalanceRequest, user = { id: 7 }) {
       useCallback: (callback) => callback,
       useEffect: () => {},
     },
-    "react-native": Object.fromEntries(["ActivityIndicator", "Pressable", "RefreshControl", "ScrollView", "Text", "TextInput", "View"].map((name) => [name, name])),
+    "react-native": Object.fromEntries(["ActivityIndicator", "KeyboardAvoidingView", "Modal", "Pressable", "RefreshControl", "ScrollView", "Text", "TextInput", "View"].map((name) => [name, name])),
     "@expo/vector-icons": { Ionicons: "Ionicons" },
     "expo-router": { router: { replace: (path) => navigation.push(path) } },
     "@/contexts/AuthContext": { useAuth: () => ({ user }) },
@@ -108,6 +118,15 @@ test("sin cuenta activa no envía un cierre sin usuario y conserva el importe", 
   assert.equal(screen.states[1], "120,50");
   assert.match(screen.states[4], /sesión/i);
   assert.deepEqual(screen.navigation, []);
+});
+
+test("el botón de aportes y retiros solo se muestra al BUSINESS_OWNER", async () => {
+  const label = "Registrar aporte o retiro de efectivo";
+
+  for (const role of ["BUSINESS_OWNER", "ADMIN", "SUPERVISOR", "EMPLOYEE"]) {
+    const screen = await renderScreen(async () => {}, { id: 7, role });
+    assert.equal(Boolean(findElementByLabel(screen.tree, label)), role === "BUSINESS_OWNER");
+  }
 });
 
 test("la API normaliza employeeId como número o null en balances nuevos e históricos", async () => {
