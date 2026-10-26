@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 export type EmployeeFilter = "all" | "active" | "inactive";
@@ -19,15 +18,16 @@ const filters: { value: EmployeeFilter; label: string }[] = [
 export function EmployeeFilters({ search, onSearchChange, filter, onFilterChange }: EmployeeFiltersProps) {
     return (
     <>
-        <View className="mb-4 flex-row items-center rounded-xl border border-gray-200 bg-white px-3 dark:border-gray-700 dark:bg-gray-900">
-            <Ionicons name="search-outline" size={20} color="#9ca3af" />
-
+        <View className="mb-4 rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+            <Text className="mb-2 text-xs font-bold uppercase tracking-[1.5px] text-slate-400 dark:text-slate-500">
+                Buscar
+            </Text>
             <TextInput
                 value={search}
                 onChangeText={onSearchChange}
                 placeholder="Buscar por nombre, código o DNI"
-                placeholderTextColor="#9ca3af"
-                className="h-12 flex-1 px-3 text-base text-black dark:text-white"
+                placeholderTextColor="#94a3b8"
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
             />
         </View>
 
@@ -41,17 +41,17 @@ export function EmployeeFilters({ search, onSearchChange, filter, onFilterChange
                 onPress={() => onFilterChange(option.value)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
-                className={`flex-1 items-center rounded-xl border px-3 py-2.5 active:opacity-70 ${
+                className={`flex-1 items-center rounded-full border px-3 py-2 active:opacity-70 ${
                     isSelected
                     ? "border-[#111A1A] bg-[#111A1A] dark:border-white dark:bg-white"
-                    : "border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+                    : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
                 }`}
             >
                 <Text
                     className={`font-semibold ${
                         isSelected
                         ? "text-white dark:text-black"
-                        : "text-gray-700 dark:text-gray-200"
+                        : "text-slate-700 dark:text-slate-200"
                     }`}
                 >
                     {option.label}

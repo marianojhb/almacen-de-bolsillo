@@ -1,11 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { usePermissions } from "@/hooks/usePermissions";
 import { router } from "expo-router";
-import { Pressable, Text, useColorScheme } from "react-native";
+import { Pressable, Text } from "react-native";
 
 export function NewEmployeeButton() {
-    const isDark = useColorScheme() === "dark";
-
     const { can } = usePermissions();
     if (!can("employees", "create")) return null;
 
@@ -14,15 +12,15 @@ export function NewEmployeeButton() {
         onPress={() => router.push("/more/employees/new")}
         accessibilityRole="button"
         accessibilityLabel="Registrar empleado"
-        className="flex-row items-center gap-2 rounded-xl bg-[#111A1A] px-4 py-3 active:opacity-75 dark:bg-white"
+        className="flex-row items-center gap-2 rounded-2xl bg-white/10 px-3 py-2.5 active:opacity-75"
     >
         <Ionicons
             name="add"
             size={20}
-            color={isDark ? "#111111" : "#ffffff"}
+            color="#ffffff"
         />
 
-        <Text className="font-semibold text-white dark:text-black">
+        <Text className="text-sm font-black text-white">
             Nuevo
         </Text>
     </Pressable>

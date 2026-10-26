@@ -185,7 +185,7 @@ export default function TransactionsScreen() {
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">{transaction.type}</Text>
                   </View>
                   <View className={`rounded-full px-3 py-1.5 ${directionBadgeClass}`}>
-                    <Text className={`text-xs font-bold ${directionTextClass}`}>{isIncome ? "INCOME" : "EXPENSE"}</Text>
+                    <Text className={`text-xs font-bold ${directionTextClass}`}>{isIncome ? "INGRESO" : "EGRESO"}</Text>
                   </View>
                   <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
                     <Text className="text-xs font-bold text-indigo-700 dark:text-indigo-300">{paymentMethodLabel}</Text>

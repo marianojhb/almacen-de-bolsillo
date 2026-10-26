@@ -21,11 +21,11 @@ type EmployeeCardProps = {
 function DetailRow({ label, value }: { label: string; value: string | null; }) {
     return (
     <View className="mb-3">
-        <Text className="text-xs font-semibold uppercase text-gray-400">
+        <Text className="text-xs font-semibold uppercase text-slate-400">
             {label}
         </Text>
 
-        <Text className="mt-1 text-base text-gray-800 dark:text-gray-100">
+        <Text className="mt-1 text-base text-slate-800 dark:text-slate-100">
             {value || "No informado"}
         </Text>
     </View>
@@ -54,31 +54,31 @@ export function EmployeeCard({ employee, isExpanded, onToggle }: EmployeeCardPro
             expanded: isExpanded,
             disabled: isChanging,
         }}
-        className={`rounded-2xl border p-4 active:opacity-80 ${
+        className={`rounded-3xl border p-4 active:opacity-80 ${
             isActive
-            ? "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
-            : "border-gray-400 bg-gray-100 opacity-70 dark:border-gray-600 dark:bg-gray-800"
+            ? "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+            : "border-slate-300 bg-slate-100 opacity-70 dark:border-slate-700 dark:bg-slate-900"
         } ${isChanging ? "opacity-50" : ""}`}
         >
         <View className="flex-row items-center">
             <View className="mr-3 flex-1">
                 <View className="flex-row items-center gap-2">
-                    <Text className="flex-shrink text-lg font-semibold text-gray-950 dark:text-white">
+                    <Text className="flex-shrink text-lg font-black text-slate-950 dark:text-white">
                         {employeeName}
                     </Text>
 
                     <View
                         className={`rounded-full px-2.5 py-1 ${
                         isActive
-                        ? "bg-green-100 dark:bg-green-950"
-                        : "bg-gray-300 dark:bg-gray-700"
+                        ? "bg-emerald-50 dark:bg-emerald-950/60"
+                        : "bg-slate-200 dark:bg-slate-800"
                     }`}
                     >
                         <Text
                             className={`text-xs font-semibold ${
                             isActive
-                            ? "text-green-700 dark:text-green-300"
-                            : "text-gray-700 dark:text-gray-300"
+                            ? "text-emerald-700 dark:text-emerald-300"
+                            : "text-slate-600 dark:text-slate-300"
                             }`}
                         >
                             {isActive ? "Activo" : "Usuario desactivado"}
@@ -86,7 +86,7 @@ export function EmployeeCard({ employee, isExpanded, onToggle }: EmployeeCardPro
                     </View>
                 </View>
 
-                <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <Text className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     {formatEmployeeCode(employee.id)} · DNI:{" "}
                     {employee.dni ?? "No informado"}
                 </Text>
@@ -113,7 +113,7 @@ export function EmployeeCard({ employee, isExpanded, onToggle }: EmployeeCardPro
             </View>
         </View>
         {isExpanded && (
-            <View className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+            <View className="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800">
                 <DetailRow
                     label="Código"
                     value={formatEmployeeCode(employee.id)}

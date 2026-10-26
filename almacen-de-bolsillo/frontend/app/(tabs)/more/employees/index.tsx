@@ -59,18 +59,18 @@ export default function EmployeesScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 px-4 pt-4 dark:bg-black">
-      <View className="mb-4 flex-row items-center justify-between">
-        <View>
-          <Text className="text-3xl font-bold text-gray-950 dark:text-white">
-            Empleados
-          </Text>
-
-          <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {visibleEmployees.length} visibles
-          </Text>
+    <View className="flex-1 bg-slate-50 px-4 pt-4 dark:bg-[#071111]">
+      <View className="mb-3 rounded-3xl bg-[#111A1A] p-4 dark:bg-slate-950">
+        <View className="flex-row items-start justify-between gap-4">
+          <View className="flex-1">
+            <Text className="text-xs font-semibold text-emerald-300">Equipo</Text>
+            <Text className="mt-0.5 text-2xl font-black text-white">Empleados</Text>
+            <Text className="mt-1 text-xs leading-5 text-slate-300">
+              {visibleEmployees.length} de {employees.length} empleados visibles
+            </Text>
+          </View>
+          <NewEmployeeButton />
         </View>
-        <NewEmployeeButton/>
       </View>
       <EmployeeFilters
         search={search}
@@ -89,7 +89,7 @@ export default function EmployeesScreen() {
         data={visibleEmployees}
         extraData={expandedEmployeeIds}
         keyExtractor={(employee) => employee.id.toString()}
-        contentContainerClassName="gap-3 pb-8"
+        contentContainerClassName="gap-2 pb-8"
         refreshControl={
           <RefreshControl
             refreshing={isLoadingEmployees}
