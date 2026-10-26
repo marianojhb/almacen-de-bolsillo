@@ -1,4 +1,4 @@
-import { FlatList, Keyboard, Text, View, Pressable, TextInput, RefreshControl } from "react-native";
+import { FlatList, Keyboard, Text, View, Pressable, TextInput, RefreshControl, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { NewProductButton } from "@/components/products";
 import { useProducts } from "@/contexts/products";
@@ -94,7 +94,12 @@ export default function ProductsScreen() {
         />
       </View>
 
-      <View className="mb-4 flex-row flex-wrap gap-2">
+      <ScrollView
+        horizontal
+        className="mb-4 flex-none"
+        contentContainerClassName="gap-2 pr-4"
+        showsHorizontalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
         <Pressable
           key="inactive"
           onPress={() => {
@@ -136,12 +141,12 @@ export default function ProductsScreen() {
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
       <FlatList
         data={filteredProducts}
         keyExtractor={(product) => product.id.toString()}
-        contentContainerClassName="gap-3 pb-8"
+        contentContainerClassName="gap-2 pb-8"
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -187,13 +192,13 @@ export default function ProductsScreen() {
                 Keyboard.dismiss();
                 router.push(`/products/${product.id}`);
               }}
-              className="rounded-3xl active:scale-[0.98] active:opacity-80">
-              <View className="rounded-3xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+              className="rounded-2xl active:scale-[0.98] active:opacity-80">
+              <View className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
                 <View className="flex-row items-start justify-between gap-3">
                   <View className="flex-1">
                     <Text className="text-2xl font-black text-slate-950 dark:text-white">{product.shortname}</Text>
                     <Text className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400" numberOfLines={2}>
-                      #{product.id} · {product.longname}
+                      {product.longname}
                     </Text>
                   </View>
 
@@ -207,22 +212,22 @@ export default function ProductsScreen() {
                   </View>
                 </View>
 
-                <View className="mt-4 flex-row flex-wrap gap-2">
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
+                <View className="mt-3 flex-row flex-wrap gap-1.5">
+                  <View className="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">Stock: {product.stock}</Text>
                   </View>
-                  <View className="rounded-full bg-slate-100 px-3 py-1.5 dark:bg-slate-900">
+                  <View className="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-900">
                     <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
                       Mín: {product.stockMin}
                     </Text>
                   </View>
-                  <View className="rounded-full bg-indigo-50 px-3 py-1.5 dark:bg-indigo-950/60">
+                  <View className="rounded-full bg-indigo-50 px-2.5 py-1 dark:bg-indigo-950/60">
                     <Text className="text-xs font-bold text-indigo-700 dark:text-indigo-300">
                       {product.category.name}
                     </Text>
                   </View>
                   <View
-                    className={`rounded-full px-3 py-1.5 ${
+                    className={`rounded-full px-2.5 py-1 ${
                       product.isActive ? "bg-emerald-50 dark:bg-emerald-950/60" : "bg-slate-100 dark:bg-slate-900"
                     }`}>
                     <Text
@@ -235,7 +240,7 @@ export default function ProductsScreen() {
                     </Text>
                   </View>
                   {hasLowStock && (
-                    <View className="rounded-full bg-red-50 px-3 py-1.5 dark:bg-red-950/60">
+                    <View className="rounded-full bg-red-50 px-2.5 py-1 dark:bg-red-950/60">
                       <Text className="text-xs font-black text-red-600 dark:text-red-300">Stock bajo</Text>
                     </View>
                   )}
