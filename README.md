@@ -1,11 +1,12 @@
 <div align="center">
   <img src="./assets/logo-almacen-de-bolsillo.png" alt="Logo de Almacén de Bolsillo" width="320" />
 
-  # Almacén de Bolsillo
+# Almacén de Bolsillo
 
-  **Una aplicación para organizar y gestionar pequeños comercios desde el celular.**
+**Una aplicación para organizar y gestionar pequeños comercios desde el celular.**
 
-  **Status: V.1.00 ready**
+**Status: V.1.00 ready**
+
 </div>
 
 ## Acerca del proyecto
@@ -16,7 +17,7 @@ El repositorio está organizado como un workspace con una aplicación móvil des
 
 ## Vista previa
 
-[Reproducir animación de inicio de Almacén de Bolsillo](./docs/screenshots/almacendb-splash.mp4)
+<img src="./docs/screenshots/almacendb-splash.gif" alt="Animación de inicio de Almacén de Bolsillo" width="300">
 
 ## Estructura
 
