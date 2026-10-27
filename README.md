@@ -64,6 +64,7 @@ Consultá el [detalle completo del stack](./docs/Stack.md).
 
 ## Documentación
 
+- [Guía de pantallas y funcionalidades](./docs/GuiaDePantallas.md)
 - [Requisitos funcionales](./docs/almacen_bolsillo_rfs_extendido_mvp.md)
 - [Requisitos funcionales innovadores](./docs/almacen_de_bolsillo_rfs_innovadores.md)
 - [Matriz de roles y permisos](./docs/matriz_permisos_uml_almacen_bolsillo_md_2026.md)
