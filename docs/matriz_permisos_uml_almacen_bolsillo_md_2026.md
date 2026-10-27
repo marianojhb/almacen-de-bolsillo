@@ -1,93 +1,71 @@
-# Matriz de permisos por Requerimiento Funcional — Almacén en el Bolsillo
+# Matriz de roles y permisos — Almacén de Bolsillo
 
-## Convención de permisos
-- **C** = Crear / Registrar
-- **M** = Modificar
-- **K** = Consultar
-- **E** = Eliminar / Desactivar / Cancelar
-- **–** = Sin acceso
+> **Versión documentada:** 1.0.0
+>
+> **Fuente de implementación:** `packages/shared/src/auth/permissions.ts`
+>
+> **Última actualización:** octubre de 2026
 
-> Nota: en algunos RF, la eliminación puede interpretarse como baja lógica o cancelación.
+La aplicación utiliza control de acceso basado en roles (RBAC) para habilitar rutas y acciones en la interfaz.
 
----
+## Roles
 
-# Matriz de permisos por Requerimiento Funcional
+| Identificador | Nombre visible | Responsabilidad |
+| --- | --- | --- |
+| `ADMIN` | Administrador | Acceso completo a los recursos configurados. |
+| `BUSINESS_OWNER` | Dueño del comercio | Acceso completo a la operación de su comercio. |
+| `SUPERVISOR` | Supervisor | Gestión operativa sin eliminación de ventas, productos, proveedores ni compras. |
+| `EMPLOYEE` | Empleado | Registro y consulta de ventas, consulta de productos y de sus turnos. |
 
-| RF | Admin | Business-Owner | Supervisors | Employees |
-|---|---|---|---|---|
-| **RF-01 Gestionar Ventas** | C / M / K / E | K | C / M / K | C / K |
-| **RF-02 Gestionar el Stock** | C / M / K / E | K | C / M / K | C / M / K |
-| **RF-03 Gestionar Proveedores** | C / M / K / E | C / M / K | C / M / K | – |
-| **RF-04 Gestionar Compras** | C / M / K / E | C / M / K | C / M / K | – |
-| **RF-05 Gestionar Empleados** | C / M / K / E | C / M / K | K | – |
-| **RF-06 Gestionar Turnos Laborales** | C / M / K / E | C / M / K | C / M / K / E | K |
-| **RF-07 Monitorear la Performance del Negocio** | K | K | K | – |
-| **RF-08 Gestionar Configuración General** | C / M / K / E | K | – | – |
+## Acciones
 
----
+- **C:** crear o registrar.
+- **K:** consultar.
+- **M:** modificar.
+- **E:** eliminar, cancelar o desactivar, según el recurso.
+- **—:** sin acceso configurado.
 
-# Justificación breve por RF
+## Matriz vigente
 
-## RF-01 Gestionar Ventas
-Los empleados participan en la registración y consulta de sus operaciones. Los supervisores controlan y corrigen desvíos operativos. El owner consulta resultados. El admin conserva control total.
+| Recurso | Admin | Dueño | Supervisor | Empleado |
+| --- | --- | --- | --- | --- |
+| Ventas | C / K / M / E | C / K / M / E | C / K / M | C / K |
+| Productos y stock | C / K / M / E | C / K / M / E | C / K / M | K |
+| Proveedores | C / K / M / E | C / K / M / E | C / K / M | — |
+| Compras | C / K / M / E | C / K / M / E | C / K / M | — |
+| Empleados | C / K / M / E | C / K / M / E | K | — |
+| Turnos laborales | C / K / M / E | C / K / M / E | C / K / M / E | K |
+| Tipos de turno | C / K / M / E | C / K / M / E | C / K / M / E | — |
 
-## RF-02 Gestionar el Stock
-Los empleados pueden registrar movimientos operativos, mientras que supervisores y admin gestionan cambios más amplios. El owner consulta el estado general para tomar decisiones.
+## Reglas por rol
 
-## RF-03 Gestionar Proveedores
-Por su impacto administrativo y comercial, queda restringido a niveles de supervisión y superiores.
+### Administrador
 
-## RF-04 Gestionar Compras
-Se limita a roles con responsabilidad sobre abastecimiento y egresos del negocio.
+Puede crear, consultar, modificar y eliminar todos los recursos incluidos en la matriz.
 
-## RF-05 Gestionar Empleados
-Por tratarse de información sensible, su administración queda reservada a owner y admin. Supervisors solo consultan cuando sea necesario.
+### Dueño del comercio
 
-## RF-06 Gestionar Turnos Laborales
-Supervisors operan activamente los turnos del equipo. Employees solamente consultan sus asignaciones.
+Posee acceso operativo completo. Además, la interfaz le presenta información financiera y acciones específicas del negocio, como indicadores de compras, ventas y cierres de caja.
 
-## RF-07 Monitorear la Performance del Negocio
-Es un módulo esencialmente analítico, orientado a perfiles de control y toma de decisiones.
+### Supervisor
 
-## RF-08 Gestionar Configuración General
-Por seguridad, la operación queda centralizada en admin. El owner puede consultar configuraciones generales según política del sistema.
+Puede gestionar la operación diaria, pero no eliminar ventas, productos, proveedores ni compras. Puede consultar empleados y administrar turnos y tipos de turno.
 
----
+### Empleado
 
-# Mini-diagrama textual estilo UML
+Puede registrar y consultar ventas, consultar productos y ver sus turnos. No administra compras, proveedores, empleados ni tipos de turno.
+
+## Diagrama textual
 
 ```text
-[Admin]
-  -> RF-01 Ventas
-  -> RF-02 Stock
-  -> RF-03 Proveedores
-  -> RF-04 Compras
-  -> RF-05 Empleados
-  -> RF-06 Turnos
-  -> RF-07 Dashboard
-  -> RF-08 Configuración
-
-[Business-Owner]
-  -> RF-01 Consultar Ventas
-  -> RF-02 Consultar Stock
-  -> RF-03 Proveedores
-  -> RF-04 Compras
-  -> RF-05 Empleados
-  -> RF-06 Turnos
-  -> RF-07 Dashboard
-  -> RF-08 Consultar Configuración
-
-[Supervisors]
-  -> RF-01 Ventas
-  -> RF-02 Stock
-  -> RF-03 Proveedores
-  -> RF-04 Compras
-  -> RF-05 Consultar Empleados
-  -> RF-06 Turnos
-  -> RF-07 Dashboard
-
-[Employees]
-  -> RF-01 Ventas
-  -> RF-02 Stock
-  -> RF-06 Consultar Turnos
+ADMIN ───────────────► acceso completo
+BUSINESS_OWNER ──────► acceso completo + información financiera
+SUPERVISOR ──────────► operación y turnos, con eliminación restringida
+EMPLOYEE ────────────► ventas + consulta de productos y turnos
 ```
+
+## Consideraciones de seguridad
+
+- La matriz actual se comparte entre frontend y backend como contrato de dominio, pero los controles visibles se aplican principalmente en la navegación y en los componentes del frontend.
+- Toda operación sensible debería validar los permisos también en la API antes de considerarse protegida frente a solicitudes externas.
+- Los cierres de caja, transacciones y dashboard poseen reglas adicionales en la interfaz que todavía no están modeladas como recursos dentro de la matriz compartida.

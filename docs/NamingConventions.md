@@ -1,69 +1,79 @@
-# Naming Conventions
+# Convenciones de nombres
 
-Since this project is part of our goal to learn and apply software development best practices, it is important to document the conventions used throughout the codebase.
+> **Versión:** 1.0.0
+>
+> **Última actualización:** octubre de 2026
 
-Naming conventions are part of a broader set of **coding standards**. They help keep the project consistent, readable, and easier to maintain.
+Estas reglas mantienen consistentes el código TypeScript, los componentes React Native, los contratos compartidos, Prisma y PostgreSQL.
 
-This project follows common conventions used in the JavaScript, TypeScript, React, Expo, PostgreSQL, and Prisma ecosystem.
+## TypeScript y JavaScript
 
-## TypeScript / JavaScript / Express
+### Variables, funciones y propiedades
 
-- Variables and functions use **camelCase**.
+Usar **camelCase** y nombres descriptivos.
 
 ```ts
-const userName = 'johnconnor';
+const userName = "johnconnor";
 
 function getUserName() {
   return userName;
 }
 ```
 
-- Classes use **PascalCase**.
+### Tipos, interfaces, clases y enums
+
+Usar **PascalCase**.
 
 ```ts
-class Invoice {
-  // class implementation
-}
+type ProductSummary = {
+  productId: number;
+};
+
+class InvoiceService {}
 ```
 
-- Constants that represent fixed configuration values may use **SCREAMING_SNAKE_CASE**.
+### Constantes globales y variables de entorno
+
+Usar **SCREAMING_SNAKE_CASE** para valores fijos compartidos y nombres de variables de entorno.
 
 ```ts
 const MAX_USERS = 100;
 const DATABASE_URL = process.env.DATABASE_URL;
 ```
 
-## React / Expo
+## React Native y Expo
 
-- Components use **PascalCase**.
+- Componentes: **PascalCase** (`ProductCard`, `EmployeeForm`).
+- Hooks: **camelCase** con el prefijo `use` (`useProducts`, `usePermissions`).
+- Contextos y providers: nombre del dominio seguido por `Context` o `Provider`.
+- Props: nombre del componente seguido por `Props`.
+- Rutas de Expo Router: minúsculas y **kebab-case** cuando contienen más de una palabra.
 
-```tsx
-<Dashboard />
-<UserProfile />
-<ProductCard />
+```text
+components/products/ProductCard.tsx
+contexts/products/provider.tsx
+app/(tabs)/more/work-shifts/index.tsx
 ```
 
-- Component files may also use **PascalCase**.
+## Archivos y directorios
 
-```txt
-Dashboard.tsx
-UserProfile.tsx
-ProductCard.tsx
-```
+- Componentes React: **PascalCase**.
+- Módulos, utilidades, servicios y rutas: **kebab-case** o el patrón ya establecido en el módulo.
+- Pruebas: mismo nombre de la unidad con sufijo `.test.ts` o `.test.mjs`.
+- Directorios de dominio: nombres en plural y **kebab-case**.
+
+No se deben introducir dos estilos diferentes dentro de un mismo módulo.
+
+## API y contratos compartidos
+
+- Los recursos de la API usan rutas en minúsculas y **kebab-case**: `/sales-orders`, `/stock-movements`.
+- Los datos que cruzan la frontera entre frontend y backend deben declararse o reutilizarse desde `@almacen/shared`.
+- Los DTO usan un nombre en **PascalCase** y el sufijo `Dto`: `CreateSalesOrderDto`.
+- Los identificadores usan el nombre de la entidad seguido por `Id`: `productId`, `employeeId`.
 
 ## PostgreSQL
 
-PostgreSQL database objects use **snake_case**.
-
-- Table names use **snake_case**.
-
-```sql
-users
-products
-user_profiles
-```
-
-- Field names use **snake_case**.
+Los identificadores físicos usan **snake_case**.
 
 ```sql
 user_name
@@ -71,66 +81,42 @@ created_at
 product_id
 ```
 
-### Project-specific table suffix convention
+### Sufijo de tablas del proyecto
 
-In this project, table names must end with an underscore followed by an identifying initial.
+Las tablas de dominio deben terminar con un guion bajo y una abreviatura identificadora.
 
-```txt
-users      ❌
-users_u    ✔️
-
-products   ❌
-products_p ✔️
+```text
+users_u
+products_p
+sales_orders_so
+stock_movements_sm
 ```
 
-This is a project-specific rule and not a general PostgreSQL standard.
+Esta es una regla específica del proyecto, no una convención general de PostgreSQL. Las tablas existentes que no la cumplan deberán normalizarse únicamente mediante una migración planificada; no se deben renombrar directamente en producción.
 
 ## Prisma
 
-Prisma uses conventions that match the JavaScript/TypeScript ecosystem.
-
-- Models use **PascalCase**.
-
-```prisma
-model User {
-}
-```
-
-- Fields use **camelCase**.
-
-```prisma
-firstName
-createdAt
-productId
-```
-
-- Prisma models and fields are mapped to PostgreSQL tables and columns using `@@map` and `@map`.
-
-Example:
+- Modelos y enums: **PascalCase**.
+- Campos y relaciones: **camelCase**.
+- Valores de enums: **SCREAMING_SNAKE_CASE**.
+- Usar `@map` y `@@map` para conservar nombres idiomáticos en TypeScript sin trasladar los nombres físicos de PostgreSQL a la API.
 
 ```prisma
 model User {
-  id        Int      @id @default(autoincrement())
-  firstName String   @map("first_name")
-  createdAt DateTime @map("created_at")
+  id        Int      @id @default(autoincrement()) @map("id_user_u")
+  firstName String   @map("first_name_u")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("users_u")
 }
 ```
 
-In this example:
+## Resumen
 
-- `User` is the Prisma model name.
-- `firstName` and `createdAt` are Prisma field names.
-- `first_name` and `created_at` are PostgreSQL column names.
-- `users_u` is the PostgreSQL table name.
-
-## Summary of Common Naming Conventions
-
-| Convention | Example | Common use |
+| Convención | Ejemplo | Uso |
 | --- | --- | --- |
-| **camelCase** | `userName`, `createdAt` | JavaScript/TypeScript variables, functions, object properties, Prisma fields |
-| **PascalCase** | `User`, `ProductController`, `Dashboard` | Classes, React components, TypeScript types, Prisma models |
-| **snake_case** | `user_name`, `created_at`, `product_id` | PostgreSQL tables and columns |
-| **kebab-case** | `user-profile`, `created-at` | URLs, CSS classes, file names in some projects |
-| **SCREAMING_SNAKE_CASE** | `DATABASE_URL`, `MAX_USERS` | Constants and environment variables |
+| `camelCase` | `createdAt`, `getProducts` | Variables, funciones, propiedades y campos Prisma |
+| `PascalCase` | `User`, `ProductCard` | Tipos, clases, componentes y modelos Prisma |
+| `snake_case` | `created_at`, `users_u` | Identificadores PostgreSQL |
+| `kebab-case` | `stock-movements` | Rutas, módulos y directorios con varias palabras |
+| `SCREAMING_SNAKE_CASE` | `DATABASE_URL`, `BUSINESS_OWNER` | Entorno, constantes globales y valores de enums |

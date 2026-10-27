@@ -1,101 +1,115 @@
-# Almacén en el Bolsillo  
-## Índice extendido de Requerimientos Funcionales
+# Requerimientos funcionales — Almacén de Bolsillo
 
-## RF-01: GESTIONAR VENTAS
-- RF-01.1 Registrar venta
-- RF-01.2 Consultar historial de ventas
-- RF-01.3 Validar stock disponible antes de vender
-- RF-01.4 Calcular subtotal y total de venta
-- RF-01.5 Registrar forma de pago
-- RF-01.6 Asociar venta a usuario y punto de venta
-- RF-01.7 Registrar ingreso contable
-- **RF-01.8 Venta ultrarrápida tipo kiosco (NUEVO)**
-- **RF-01.9 Escaneo de código de barras para venta (NUEVO)**
+> **Versión documentada:** 1.0.0
+>
+> **Estado:** ready
+>
+> **Última actualización:** octubre de 2026
 
-## RF-02: GESTIONAR EL STOCK
-- RF-02.1 Registrar nuevos artículos
-- RF-02.2 Modificar artículos existentes
-- RF-02.3 Validar unicidad de SKU
-- RF-02.4 Registrar movimientos de stock
-- RF-02.5 Controlar stock mínimo
-- RF-02.6 Generar alertas de bajo stock
-- RF-02.7 Consultar historial de movimientos
-- **RF-02.8 Reposición inteligente automática (NUEVO)**
-- **RF-02.9 Detector de productos dormidos (NUEVO)**
-- **RF-02.10 Alertas inteligentes diarias de stock crítico (NUEVO)**
+Este documento reúne el alcance funcional de la aplicación y distingue las funciones disponibles en la versión 1.0.0 de las propuestas para versiones futuras.
 
-## RF-03: GESTIONAR PROVEEDORES
-- RF-03.1 Registrar proveedor
-- RF-03.2 Modificar proveedor
-- RF-03.3 Consultar proveedores
-- RF-03.4 Eliminar proveedor (lógica/física)
-- RF-03.5 Validar CUIT único
-- RF-03.6 Consultar historial de compras por proveedor
+## Convenciones
 
-## RF-04: GESTIONAR COMPRAS
-- RF-04.1 Registrar compra
-- RF-04.2 Asociar compra a proveedor
-- RF-04.3 Registrar detalle de productos comprados
-- RF-04.4 Actualizar stock automáticamente
-- RF-04.5 Registrar egreso contable
-- RF-04.6 Actualizar dashboard
-- **RF-04.7 Lista automática de compra sugerida a proveedor (NUEVO)**
+- **Disponible:** incluido en el alcance de la versión 1.0.0.
+- **Parcial:** existe una implementación básica que puede ampliarse.
+- **Hoja de ruta:** propuesta fuera del alcance actual.
 
-## RF-05: GESTIONAR EMPLEADOS
-- RF-05.1 Registrar empleado
-- RF-05.2 Modificar empleado
-- RF-05.3 Consultar empleados
-- RF-05.4 Baja lógica/física
-- RF-05.5 Validar DNI único
-- RF-05.6 Generar código único de empleado
-- RF-05.7 Asociar ventas al empleado
+## RF-01: Gestionar ventas — Disponible
 
-## RF-06: GESTIONAR TURNOS LABORALES
-- RF-06.1 Asignar turnos
-- RF-06.2 Modificar turnos
-- RF-06.3 Cancelar turnos
-- RF-06.4 Consultar calendario de turnos
-- RF-06.5 Registrar historial de cambios
+- **RF-01.1** Registrar una venta con uno o más productos.
+- **RF-01.2** Consultar el historial y el detalle de ventas.
+- **RF-01.3** Validar el stock disponible antes de confirmar la operación.
+- **RF-01.4** Calcular subtotales, descuentos, impuestos y total.
+- **RF-01.5** Registrar la forma de pago.
+- **RF-01.6** Asociar la venta al usuario vendedor.
+- **RF-01.7** Generar el ingreso correspondiente en el registro de transacciones.
+- **RF-01.8** Venta rápida desde las acciones del inicio — **Parcial**.
+- **RF-01.9** Escaneo de códigos de barras — **Hoja de ruta**.
 
-## RF-07: MONITOREAR LA PERFORMANCE DEL NEGOCIO
-- RF-07.1 Visualizar dashboard general
-- RF-07.2 Filtrar por fechas
-- RF-07.3 Filtrar por tipo de operación
-- RF-07.4 Calcular KPIs
-- RF-07.5 Ranking de productos vendidos
-- RF-07.6 Detectar baja rotación
-- RF-07.7 Visualizar gráficos comparativos
-- **RF-07.8 Cierre automático diario del negocio (NUEVO)**
-- **RF-07.9 Indicador de ganancia real por producto (NUEVO)**
-- **RF-07.10 Precio sugerido por margen (NUEVO)**
+## RF-02: Gestionar stock — Disponible
 
-## RF-08: GESTIONAR CONFIGURACIÓN GENERAL
-- RF-08.1 Gestionar puntos de venta
-- RF-08.2 Gestionar usuarios
-- RF-08.3 Gestionar perfiles
-- RF-08.4 Validar credenciales
-- RF-08.5 Controlar permisos
-- RF-08.6 Registrar logs de actividad
-- RF-08.7 Consultar auditoría
-- **RF-08.8 Modo sin internet con sincronización posterior (NUEVO)**
+- **RF-02.1** Registrar productos y categorías.
+- **RF-02.2** Modificar o desactivar productos existentes.
+- **RF-02.3** Validar la unicidad del SKU cuando se informa.
+- **RF-02.4** Registrar movimientos por compra, venta, entrada, salida o ajuste manual.
+- **RF-02.5** Definir y controlar el stock mínimo de cada producto.
+- **RF-02.6** Mostrar alertas de productos con stock mínimo o crítico.
+- **RF-02.7** Consultar el historial de movimientos de un producto.
+- **RF-02.8** Reposición predictiva automática — **Hoja de ruta**.
+- **RF-02.9** Detección de productos sin rotación — **Hoja de ruta**.
+- **RF-02.10** Notificaciones diarias de stock crítico — **Hoja de ruta**.
 
----
+## RF-03: Gestionar proveedores — Disponible
 
-## MVP recomendado
-### Núcleo mínimo viable sugerido
-- RF-01.1 Registrar venta
-- RF-01.3 Validar stock disponible antes de vender
-- RF-01.4 Calcular subtotal y total de venta
-- RF-02.1 Registrar nuevos artículos
-- RF-02.4 Registrar movimientos de stock
-- RF-02.6 Generar alertas de bajo stock
-- RF-03.1 Registrar proveedor
-- RF-04.1 Registrar compra
-- RF-04.4 Actualizar stock automáticamente
-- RF-07.1 Visualizar dashboard general
-- RF-08.2 Gestionar usuarios
+- **RF-03.1** Registrar proveedores.
+- **RF-03.2** Modificar sus datos y estado.
+- **RF-03.3** Consultar y filtrar proveedores.
+- **RF-03.4** Realizar una baja lógica mediante su estado.
+- **RF-03.5** Validar la unicidad del CUIT cuando se informa.
+- **RF-03.6** Consultar compras y productos asociados a un proveedor.
 
-### Innovadores recomendados dentro del MVP
-- **RF-01.8 Venta ultrarrápida tipo kiosco**
-- **RF-02.8 Reposición inteligente automática**
-- **RF-07.8 Cierre automático diario del negocio**
+## RF-04: Gestionar compras — Disponible
+
+- **RF-04.1** Registrar una orden de compra.
+- **RF-04.2** Asociar la compra a un proveedor y a un usuario comprador.
+- **RF-04.3** Registrar productos, cantidades, precios y descuentos.
+- **RF-04.4** Actualizar el stock y generar sus movimientos de forma atómica.
+- **RF-04.5** Generar el egreso correspondiente en el registro de transacciones.
+- **RF-04.6** Reflejar las compras en el resumen financiero del dashboard.
+- **RF-04.7** Generar una lista de compra sugerida por proveedor — **Hoja de ruta**.
+
+## RF-05: Gestionar empleados — Disponible
+
+- **RF-05.1** Registrar empleados y sus credenciales de acceso.
+- **RF-05.2** Modificar datos personales, laborales y de acceso.
+- **RF-05.3** Consultar y filtrar empleados.
+- **RF-05.4** Activar, desactivar o eliminar registros según los permisos del rol.
+- **RF-05.5** Validar la unicidad del DNI cuando se informa.
+- **RF-05.6** Asignar un identificador único a cada empleado.
+- **RF-05.7** Asociar las ventas al usuario responsable.
+
+## RF-06: Gestionar turnos laborales — Disponible
+
+- **RF-06.1** Crear tipos de turno y asignarlos a empleados.
+- **RF-06.2** Modificar asignaciones y tipos de turno.
+- **RF-06.3** Eliminar o cancelar asignaciones.
+- **RF-06.4** Consultar el calendario de turnos.
+- **RF-06.5** Conservar fechas de creación y actualización de las asignaciones — **Parcial**.
+
+## RF-07: Monitorear el negocio — Disponible
+
+- **RF-07.1** Visualizar un dashboard general.
+- **RF-07.2** Consultar indicadores diarios, semanales y mensuales.
+- **RF-07.3** Diferenciar ingresos por ventas y egresos por compras.
+- **RF-07.4** Calcular totales y balance operativo por período.
+- **RF-07.5** Consultar ventas recientes.
+- **RF-07.6** Visualizar alertas de stock mínimo o crítico.
+- **RF-07.7** Visualizar la evolución comparativa de ingresos y egresos.
+- **RF-07.8** Registrar cierres de caja y consultar su historial.
+- **RF-07.9** Calcular la ganancia real por producto — **Hoja de ruta**.
+- **RF-07.10** Sugerir precios según un margen objetivo — **Hoja de ruta**.
+
+## RF-08: Gestionar acceso y configuración — Parcial
+
+- **RF-08.1** Crear la cuenta inicial del dueño del comercio.
+- **RF-08.2** Gestionar usuarios vinculados con empleados.
+- **RF-08.3** Asignar los roles `ADMIN`, `BUSINESS_OWNER`, `SUPERVISOR` y `EMPLOYEE`.
+- **RF-08.4** Validar credenciales y estado del usuario durante el inicio de sesión.
+- **RF-08.5** Controlar en la interfaz las acciones permitidas para cada rol.
+- **RF-08.6** Registrar el último acceso del usuario.
+- **RF-08.7** Auditoría integral de actividad — **Hoja de ruta**.
+- **RF-08.8** Operación sin conexión y sincronización posterior — **Hoja de ruta**.
+
+## Alcance de la versión 1.0.0
+
+La versión 1.0.0 cubre el circuito principal del comercio:
+
+1. autenticación y administración de empleados;
+2. catálogo de productos, categorías y control de stock;
+3. gestión de proveedores y compras;
+4. registro de ventas y medios de pago;
+5. movimientos contables, dashboard y cierres de caja;
+6. planificación de turnos laborales;
+7. permisos de interfaz según el rol.
+
+Las funciones predictivas, el escaneo de códigos de barras, las notificaciones automáticas, la auditoría completa y el modo sin conexión permanecen en la hoja de ruta.

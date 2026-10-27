@@ -1,91 +1,91 @@
-# Stack Used in the Project
+# Stack tecnológico
 
-This document describes the technology stack used in the project.
+> **Versión documentada:** 1.0.0
+>
+> **Última actualización:** octubre de 2026
 
-It is not intended to provide exact library versions, since that is not the main purpose of this document. The goal is to give a general overview of the technologies used. Specific versions will only be mentioned when they may affect compatibility or cause important changes in the codebase.
+Este documento describe las tecnologías presentes en el código de Almacén de Bolsillo. Las versiones exactas se administran desde los archivos `package.json` y `pnpm-lock.yaml`.
 
-We are going to use the following technologies:
+## Arquitectura
+
+El proyecto utiliza un workspace de pnpm con tres unidades principales:
+
+| Workspace         | Responsabilidad                               |
+| ----------------- | --------------------------------------------- |
+| `frontend`        | Aplicación móvil y web                        |
+| `backend`         | API REST y acceso a datos                     |
+| `@almacen/shared` | Tipos, DTO, permisos y utilidades compartidas |
 
 ## Frontend
 
-- Expo
-- React Native
+- Expo 58
+- React 19
+- React Native 0.88
+- TypeScript
+- Expo Router para navegación basada en archivos
+- React Navigation
+- NativeWind y Tailwind CSS para estilos
+- React Context API para estado de sesión y dominios
+- Fetch API para comunicación HTTP
+- AsyncStorage para preferencias locales
+- Expo Image, Haptics, Symbols y Web Browser
+- React Native Reanimated y Gesture Handler
+
+La aplicación admite Android, iOS y una salida web estática. EAS está configurado como proyecto de compilación de Expo.
 
 ## Backend
 
 - Node.js
-- Express
+- Express 5
 - TypeScript
-- Prisma ORM
+- Prisma ORM 7
+- Driver `pg` y adaptador PostgreSQL de Prisma
+- CORS
+- Dotenv
+- `tsx` para desarrollo con recarga
 
-## Runtime Environment
+La API expone recursos para autenticación, usuarios, empleados, productos, categorías, proveedores, compras, ventas, movimientos de stock, transacciones, balances y turnos laborales.
 
-- Node.js runtime
-
-## Database
+## Base de datos
 
 - PostgreSQL
+- Migraciones administradas con Prisma Migrate
+- Modelos Prisma con mapeo explícito hacia nombres físicos en PostgreSQL
+- Transacciones de Prisma para mantener consistentes ventas, compras, stock y movimientos contables
 
-## Containerization
+## Autenticación y autorización
 
-- Docker
-- Dockerfile
-- Docker Compose
+- Inicio de sesión mediante email y contraseña.
+- Hash de contraseñas con `scrypt` de Node.js, salt aleatorio y comparación segura.
+- Roles compartidos: `ADMIN`, `BUSINESS_OWNER`, `SUPERVISOR` y `EMPLOYEE`.
+- Matriz RBAC definida en `@almacen/shared` y consumida por el frontend.
 
-## Authentication and Authorization
+La versión actual no implementa tokens JWT. Los permisos de la interfaz no reemplazan una validación de autorización en la API.
 
-- JWT
-- Role-Based Access Control / RBAC
+## Calidad y herramientas
 
-## API Documentation
+- ESLint con la configuración de Expo para el frontend.
+- TypeScript en los tres workspaces.
+- Pruebas puntuales con el test runner nativo de Node.js.
+- Git y GitHub para control de versiones.
+- GitHub Issues y Projects para seguimiento del trabajo.
+- pnpm 11.9.0 para dependencias y ejecución del workspace.
 
-- Swagger / OpenAPI
+## Ejecución local
 
-## Validation
+Desde `almacen-de-bolsillo/`:
 
-- Zod
+```bash
+pnpm install
+pnpm dev
+```
 
-## API Communication
+Comandos de verificación disponibles:
 
-- Axios or Fetch API
+```bash
+pnpm --dir backend build
+pnpm --dir frontend lint
+pnpm --dir packages/shared build
+```
 
-## State Management
-
-- React Context API
-
-## Libraries and Tools
-
-- NativeWind
-- Bcrypt
-- Dotenv
-- CORS
-
-## Mobile Development and Build Tools
-
-- Expo CLI
-- Metro Bundler
-
-## Cloud Services and Deployment
-
-- Backend API: Render
-- Database: Supabase PostgreSQL or Neon PostgreSQL
-- Mobile app builds: Expo / Expo Go, later EAS if needed
-
-## Testing on Devices
-
-- Expo app for Android and iPhone
-- TestFlight for iPhone testing when needed
-
-## Package Management
-
-- pnpm
-
-## Project Management
-
-- GitHub Issues
-- GitHub Projects
-
-## Version Control
-
-- Git
-- GitHub
+Los scripts `test` de la raíz y del backend continúan siendo marcadores y no representan una suite completa.
