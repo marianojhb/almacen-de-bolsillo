@@ -13,6 +13,7 @@ const validInput = {
   expectedClosing: 130,
   actualClosing: 120,
   difference: -10,
+  movementType: 'R' as const,
 };
 
 function mockResponse() {

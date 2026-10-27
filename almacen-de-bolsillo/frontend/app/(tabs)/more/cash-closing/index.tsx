@@ -136,6 +136,7 @@ export default function CashClosingScreen() {
         expectedClosing: summary.expectedClosing,
         actualClosing,
         difference: summary.getDifference(actualClosing),
+        movementType: "R",
       });
       setIsSaving(false);
       router.replace("/" as Href);

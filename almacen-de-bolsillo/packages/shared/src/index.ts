@@ -14,3 +14,4 @@ export * from "./transactions/transaction.types.js";
 export * from "./employees/employee.types.js";
 export * from "./work-shifts/work-shift.types.js";
 export * from "./balances/balance.types.js";
+export * from "./profitability/profitability.types.js";

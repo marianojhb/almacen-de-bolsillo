@@ -38,6 +38,7 @@ test("un aporte crea un nuevo balance con el importe en cashIn", async () => {
     expectedClosing: 180.25,
     actualClosing: 180.25,
     difference: 0,
+    movementType: "C",
   });
 });
 
@@ -59,6 +60,7 @@ test("un retiro crea un nuevo balance con el importe en cashOut", async () => {
     expectedClosing: 100,
     actualClosing: 100,
     difference: 0,
+    movementType: "C",
   });
 });
 

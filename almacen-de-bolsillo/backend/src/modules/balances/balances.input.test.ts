@@ -11,6 +11,7 @@ const validInput = {
   expectedClosing: 130.25,
   actualClosing: 120,
   difference: -10.25,
+  movementType: "R",
 };
 
 test("acepta un cierre válido y devuelve una copia con el contrato previsto", () => {
@@ -47,6 +48,14 @@ test("exige todos los campos del cierre", () => {
     const input: Record<string, unknown> = { ...validInput };
     delete input[field];
     assert.throws(() => parseCreateBalanceInput(input), BalanceInputError);
+  }
+});
+
+test("acepta únicamente movimientos de capital o resultados", () => {
+  assert.equal(parseCreateBalanceInput({ ...validInput, movementType: "C" }).movementType, "C");
+  assert.equal(parseCreateBalanceInput(validInput).movementType, "R");
+  for (const movementType of [undefined, null, "", "c", "r", "X", 1]) {
+    assert.throws(() => parseCreateBalanceInput({ ...validInput, movementType }), BalanceInputError);
   }
 });
 

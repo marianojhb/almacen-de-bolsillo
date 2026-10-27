@@ -1,4 +1,4 @@
-import type { BalanceDto, CreateBalanceDto } from "../src/balances/balance.types.js";
+import type { BalanceDto, BalanceMovementType, CreateBalanceDto } from "../src/balances/balance.types.js";
 
 type Equal<Left, Right> =
   (<Value>() => Value extends Left ? 1 : 2) extends
@@ -17,6 +17,7 @@ type ExpectedBalanceDto = {
   actualClosing: number;
   difference: number;
   opening: number;
+  movementType: "C" | "R";
   employeeId: number | null;
   createdAt: string;
   updatedAt: string;
@@ -31,5 +32,6 @@ type ExpectedCreateBalanceDto = Omit<
 
 type BalanceContractMatches = Expect<Equal<BalanceDto, ExpectedBalanceDto>>;
 type CreateBalanceContractMatches = Expect<Equal<CreateBalanceDto, ExpectedCreateBalanceDto>>;
+type BalanceMovementTypeMatches = Expect<Equal<BalanceMovementType, "C" | "R">>;
 
-export type BalanceContractAssertions = [BalanceContractMatches, CreateBalanceContractMatches];
+export type BalanceContractAssertions = [BalanceContractMatches, CreateBalanceContractMatches, BalanceMovementTypeMatches];

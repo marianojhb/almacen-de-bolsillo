@@ -1,3 +1,5 @@
+export type BalanceMovementType = "C" | "R";
+
 export type BalanceDto = {
   id: number;
   date: string;
@@ -7,6 +9,7 @@ export type BalanceDto = {
   actualClosing: number;
   difference: number;
   opening: number;
+  movementType: BalanceMovementType;
   employeeId: number | null;
   createdAt: string;
   updatedAt: string;

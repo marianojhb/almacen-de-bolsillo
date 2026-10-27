@@ -93,6 +93,7 @@ test("el cierre envía el userId activo y navega al Dashboard tras guardarse", a
   assert.equal(requests.length, 1);
   assert.equal(requests[0].userId, 7);
   assert.equal(requests[0].actualClosing, 120.5);
+  assert.equal(requests[0].movementType, "R");
   assert.equal("employeeId" in requests[0], false);
   assert.deepEqual(screen.navigation, ["/"]);
 });

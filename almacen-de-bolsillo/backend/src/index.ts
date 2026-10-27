@@ -12,6 +12,7 @@ import transactionsRouter from "./modules/transactions/transactions.routes.js";
 import stockMovementsRouter from "./modules/stock-movements/stock-movements.routes.js";
 import workShiftTypesRouter from "./modules/work-shifts/work-shift-types.routes.js";
 import workShiftsRouter from "./modules/work-shifts/work-shifts.routes.js";
+import profitabilityRouter from "./modules/profitability/profitability.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -40,6 +41,7 @@ app.use("/transactions", transactionsRouter);
 app.use("/stock-movements", stockMovementsRouter);
 app.use("/work-shift-types", workShiftTypesRouter);
 app.use("/work-shifts", workShiftsRouter);
+app.use("/profitability", profitabilityRouter);
 
 // const PORT = process.env.PORT || 3000;
 function getPORT(): number {

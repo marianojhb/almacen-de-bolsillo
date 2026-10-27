@@ -20,7 +20,8 @@ export const NewSaleScreen = () => {
   const [isBillingExpanded, setIsBillingExpanded] = useState(false);
 
   const subtotal = Math.round(Number(totalAmount) * 100) / 100;
-  const discount = (Number(inputDiscount || 0) / 100) * 100;
+  const discountPercentage = Number(inputDiscount || 0);
+  const discount = Number(((subtotal * discountPercentage) / 100).toFixed(2));
   const total = Math.round((Number(totalAmount) - discount) * 100) / 100;
   const taxableBase = Math.round((subtotal - discount)/1.21 * 100) / 100;
   const ivaSales = Math.round(taxableBase * 0.21 * 100) / 100;

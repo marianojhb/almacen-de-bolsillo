@@ -72,6 +72,7 @@ export default function MoreLayout() {
       />
       <Stack.Protected guard={isOwner}>
         <Stack.Screen name="cash-closing/history" options={{ title: "Historial de cierres" }} />
+        <Stack.Screen name="profitability" options={{ title: "Rentabilidad" }} />
       </Stack.Protected>
       <Stack.Screen
         name="account"

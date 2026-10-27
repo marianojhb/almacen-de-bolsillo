@@ -72,6 +72,7 @@ export function createCashMovementBalance({
     expectedClosing: resultingCash,
     actualClosing: resultingCash,
     difference: 0,
+    movementType: "C",
   };
 }
 
@@ -102,7 +103,7 @@ export function calculateCashClosing({ now, balances, sales, transactions }: Cal
 
   const activeSales = sales.filter((sale) => sale.isActive && belongsToPeriod(sale.date));
   const cashSalesCents = sumInCents(
-    activeSales.filter((sale) => sale.paymentMethod === "EFECTIVO"),
+  activeSales.filter((sale) => sale.paymentMethod === "EFECTIVO"),
     (sale) => sale.total,
   );
   const mercadoPagoSalesCents = sumInCents(

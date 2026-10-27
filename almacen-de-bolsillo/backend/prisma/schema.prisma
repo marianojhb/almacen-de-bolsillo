@@ -136,9 +136,10 @@ model Balance {
   difference      Decimal   @map("difference_b")
   createdAt       DateTime  @default(now()) @map("created_at")
   opening         Decimal   @map("opening_b") @db.Decimal(10, 2)
+  movementType    String    @default("R") @map("movement_type_b") @db.Char(1)
   updatedAt       DateTime  @updatedAt @map("updated_at")
-  employeeId      Int      @map("id_employee_e")
-  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  employeeId      Int?      @map("id_employee_e")
+  employee        Employee? @relation(fields: [employeeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([employeeId])
   @@map("balance_b")

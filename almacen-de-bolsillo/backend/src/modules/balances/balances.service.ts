@@ -72,6 +72,7 @@ const postBalanceToDatabase = async (
       expectedClosing: balanceData.expectedClosing,
       actualClosing: balanceData.actualClosing,
       difference: balanceData.difference,
+      movementType: balanceData.movementType,
       employee: { connect: { id: employeeId } },
     },
   });

@@ -17,6 +17,7 @@ const input: CreateBalanceDto = {
   expectedClosing: 130,
   actualClosing: 120,
   difference: -10,
+  movementType: "R",
 };
 
 function createRepository(employeeId: number | null = 42) {
@@ -48,6 +49,7 @@ function createRepository(employeeId: number | null = 42) {
           expectedClosing: new Prisma.Decimal(input.expectedClosing),
           actualClosing: new Prisma.Decimal(input.actualClosing),
           difference: new Prisma.Decimal(input.difference),
+          movementType: input.movementType,
           createdAt: new Date(input.date),
           updatedAt: new Date(input.date),
         };

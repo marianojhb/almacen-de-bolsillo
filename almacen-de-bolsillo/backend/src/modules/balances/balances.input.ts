@@ -9,7 +9,7 @@ export class BalanceInputError extends Error {
 
 const allowedFields = new Set([
   "userId", "date", "opening", "cashIn", "cashOut",
-  "expectedClosing", "actualClosing", "difference",
+  "expectedClosing", "actualClosing", "difference", "movementType",
 ]);
 
 function readAmount(value: unknown, label: string, allowNegative = false): number {
@@ -58,6 +58,11 @@ export function parseCreateBalanceInput(input: unknown): CreateBalanceDto {
     throw new BalanceInputError("El identificador del usuario debe ser un entero positivo.");
   }
 
+  const movementType = source.movementType;
+  if (movementType !== "C" && movementType !== "R") {
+    throw new BalanceInputError("El tipo de movimiento debe ser C (capital) o R (resultados).");
+  }
+
   return {
     userId,
     date: readDate(source.date),
@@ -67,5 +72,6 @@ export function parseCreateBalanceInput(input: unknown): CreateBalanceDto {
     expectedClosing: readAmount(source.expectedClosing, "efectivo esperado", true),
     actualClosing: readAmount(source.actualClosing, "efectivo real"),
     difference: readAmount(source.difference, "diferencia", true),
+    movementType,
   };
 }

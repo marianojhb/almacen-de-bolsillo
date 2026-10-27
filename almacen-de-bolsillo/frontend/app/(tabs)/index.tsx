@@ -280,6 +280,21 @@ function Dashboard() {
                 <Text className="text-sm font-black text-ink dark:text-white">Productos</Text>
               </Pressable>
             )}
+            {isOwner && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver rentabilidad"
+                className="min-h-14 min-w-[46%] flex-1 flex-row items-center gap-3 rounded-xl border border-slate-300 px-3 py-2 active:opacity-70 dark:border-slate-700 dark:bg-slate-950"
+                onPress={() => router.push(
+                  { pathname: "/(tabs)/more/profitability" },
+                  { withAnchor: true },
+                )}>
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/60">
+                  <Ionicons name="analytics-outline" size={20} color={isDark ? "#FCD34D" : "#92400E"} />
+                </View>
+                <Text className="text-sm font-black text-ink dark:text-white">Rentabilidad</Text>
+              </Pressable>
+            )}
           </View>
         </View>
 
