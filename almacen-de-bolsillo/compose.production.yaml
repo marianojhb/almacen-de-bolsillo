@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: almacen-de-bolsillo-backend:latest
+    restart: unless-stopped
+    env_file:
+      - backend/.env.production
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  migrate:
+    image: almacen-de-bolsillo-backend:latest
+    profiles:
+      - tools
+    env_file:
+      - backend/.env.production
+    command:
+      - node
+      - backend/node_modules/prisma/build/index.js
+      - migrate
+      - deploy
+      - --config
+      - backend/prisma.config.ts

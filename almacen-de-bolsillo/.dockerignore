@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+**/dist
+**/.expo
+**/coverage
+frontend
+run*
+*.log
+*.md

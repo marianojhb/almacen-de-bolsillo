@@ -25,7 +25,11 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send(`Server is running at http://localhost:${getPORT()}`);
+  res.json({ name: "Almacén de Bolsillo API", status: "running" });
+});
+
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
 });
 
 app.use("/auth", authRouter);

@@ -1,4 +1,4 @@
-import { prisma } from "@/config/prisma.js";
+import { prisma } from "../../config/prisma.js";
 import type { Prisma } from "../../../generated/prisma/index.js";
 import type { CreateSalesOrderDto } from "@almacen/shared";
 
