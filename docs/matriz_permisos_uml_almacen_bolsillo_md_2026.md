@@ -19,23 +19,23 @@ La aplicación utiliza control de acceso basado en roles (RBAC) para habilitar r
 
 ## Acciones
 
-- **C:** crear o registrar.
-- **K:** consultar.
-- **M:** modificar.
-- **E:** eliminar, cancelar o desactivar, según el recurso.
+- **C — Create:** crear o registrar.
+- **R — Read:** consultar.
+- **U — Update:** modificar.
+- **D — Delete:** eliminar, cancelar o desactivar, según el recurso.
 - **—:** sin acceso configurado.
 
 ## Matriz vigente
 
 | Recurso | Admin | Dueño | Supervisor | Empleado |
 | --- | --- | --- | --- | --- |
-| Ventas | C / K / M / E | C / K / M / E | C / K / M | C / K |
-| Productos y stock | C / K / M / E | C / K / M / E | C / K / M | K |
-| Proveedores | C / K / M / E | C / K / M / E | C / K / M | — |
-| Compras | C / K / M / E | C / K / M / E | C / K / M | — |
-| Empleados | C / K / M / E | C / K / M / E | K | — |
-| Turnos laborales | C / K / M / E | C / K / M / E | C / K / M / E | K |
-| Tipos de turno | C / K / M / E | C / K / M / E | C / K / M / E | — |
+| Ventas | C / R / U / D | C / R / U / D | C / R / U | C / R |
+| Productos y stock | C / R / U / D | C / R / U / D | C / R / U | R |
+| Proveedores | C / R / U / D | C / R / U / D | C / R / U | — |
+| Compras | C / R / U / D | C / R / U / D | C / R / U | — |
+| Empleados | C / R / U / D | C / R / U / D | R | — |
+| Turnos laborales | C / R / U / D | C / R / U / D | C / R / U / D | R |
+| Tipos de turno | C / R / U / D | C / R / U / D | C / R / U / D | — |
 
 ## Reglas por rol
 
