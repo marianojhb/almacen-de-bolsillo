@@ -44,7 +44,7 @@ La aplicación admite Android, iOS y una salida web estática. EAS está configu
 - Dotenv
 - `tsx` para desarrollo con recarga
 
-La API expone recursos para autenticación, usuarios, empleados, productos, categorías, proveedores, compras, ventas, movimientos de stock, transacciones, balances y turnos laborales.
+La API expone recursos para autenticación, usuarios, empleados, productos, categorías, proveedores, compras, ventas, movimientos de stock, transacciones, balances, rentabilidad y turnos laborales.
 
 ## Base de datos
 

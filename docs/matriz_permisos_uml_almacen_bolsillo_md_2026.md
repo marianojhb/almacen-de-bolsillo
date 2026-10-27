@@ -45,7 +45,7 @@ Puede crear, consultar, modificar y eliminar todos los recursos incluidos en la 
 
 ### Dueño del comercio
 
-Posee acceso operativo completo. Además, la interfaz le presenta información financiera y acciones específicas del negocio, como indicadores de compras, ventas y cierres de caja.
+Posee acceso operativo completo. Además, la interfaz le presenta información financiera y acciones específicas del negocio, como indicadores de compras, ventas, cierres de caja y el resultado estimado de rentabilidad.
 
 ### Supervisor
 
@@ -68,4 +68,5 @@ EMPLOYEE ────────────► ventas + consulta de productos 
 
 - La matriz actual se comparte entre frontend y backend como contrato de dominio, pero los controles visibles se aplican principalmente en la navegación y en los componentes del frontend.
 - Toda operación sensible debería validar los permisos también en la API antes de considerarse protegida frente a solicitudes externas.
-- Los cierres de caja, transacciones y dashboard poseen reglas adicionales en la interfaz que todavía no están modeladas como recursos dentro de la matriz compartida.
+- Los cierres de caja, transacciones, dashboard y rentabilidad poseen reglas adicionales en la interfaz que todavía no están modeladas como recursos dentro de la matriz compartida.
+- La pantalla de rentabilidad y su acceso directo desde el dashboard están disponibles únicamente para el rol `BUSINESS_OWNER`.

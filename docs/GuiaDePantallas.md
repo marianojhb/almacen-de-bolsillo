@@ -10,9 +10,9 @@ Esta guía presenta las principales pantallas de Almacén de Bolsillo y resume l
 
 ### Pantalla de presentación
 
-La animación de inicio presenta la identidad visual de la aplicación mientras se prepara la experiencia inicial.
+La animación de inicio presenta la identidad visual de la aplicación mientras se prepara la experiencia inicial. El video puede reproducirse o descargarse desde el siguiente enlace:
 
-[Ver animación de inicio](./screenshots/almacendb-splash.mp4)
+[Reproducir animación de inicio](./screenshots/almacendb-splash.mp4)
 
 ### Inicio de sesión
 
@@ -22,7 +22,7 @@ Permite ingresar a la aplicación con las credenciales de una cuenta habilitada.
 
 ## Dashboard
 
-Es la pantalla principal de la aplicación. Centraliza el resumen operativo del comercio y ofrece acceso a las acciones frecuentes, como registrar ventas, compras o movimientos de caja. También presenta indicadores y alertas relevantes.
+Es la pantalla principal de la aplicación. Centraliza el resumen operativo del comercio y ofrece acceso a las acciones frecuentes, como registrar ventas, compras o movimientos de caja. También presenta indicadores y alertas relevantes. El dueño del comercio dispone además de un acceso directo a la consulta de rentabilidad.
 
 | Tema claro | Tema oscuro |
 | --- | --- |
@@ -171,6 +171,14 @@ Permite consultar los registros anteriores de caja y revisar los resultados de c
 Reúne los movimientos contables generados por las operaciones del comercio para facilitar el seguimiento de ingresos y egresos.
 
 <img src="./screenshots/almacendb-transactions.png" alt="Listado de transacciones" width="320" />
+
+## Rentabilidad
+
+Presenta al dueño del comercio una referencia general del resultado acumulado del negocio. El cálculo incorpora las ventas activas en efectivo y por medios digitales, los egresos de cierres regulares, los aportes y retiros de capital, y la mercadería disponible valuada al mejor costo corriente informado por proveedores activos.
+
+La pantalla desglosa cada componente e informa cuando existen productos con stock que no puede valuarse por falta de un precio utilizable. El resultado es una estimación orientativa basada en los registros disponibles: no representa la ganancia real por producto ni reemplaza un estado contable.
+
+<img src="./screenshots/almacendb-profitability.png" alt="Resumen estimado de rentabilidad del negocio" width="320" />
 
 ## Más opciones
 

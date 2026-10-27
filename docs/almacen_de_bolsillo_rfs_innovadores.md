@@ -73,6 +73,8 @@ Generar avisos priorizados, por ejemplo: “Hay tres productos con stock crític
 
 Combinar costos históricos, descuentos e ingresos para diferenciar los productos de mayor facturación de los que aportan mayor rentabilidad.
 
+La versión 1.0.0 ofrece como base un resultado general estimado del negocio, compuesto por ventas activas, movimientos históricos de caja y mercadería disponible valuada al mejor costo corriente informado por proveedores activos. Esta referencia acumulada no calcula la ganancia individual de cada producto ni reemplaza un estado contable; por eso, el análisis de rentabilidad por producto continúa en la hoja de ruta.
+
 ## Criterio de priorización
 
 Antes de incorporar una propuesta se deberá definir su alcance, reglas de negocio, permisos, comportamiento sin conexión y criterios verificables de aceptación.

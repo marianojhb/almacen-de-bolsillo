@@ -14,6 +14,10 @@ Almacén de Bolsillo es el proyecto final de la Tecnicatura Universitaria en Pro
 
 El repositorio está organizado como un workspace con una aplicación móvil desarrollada con Expo y React Native, una API construida con Node.js y Express, y un paquete compartido con contratos TypeScript.
 
+## Vista previa
+
+[Reproducir animación de inicio de Almacén de Bolsillo](./docs/screenshots/almacendb-splash.mp4)
+
 ## Estructura
 
 ```text

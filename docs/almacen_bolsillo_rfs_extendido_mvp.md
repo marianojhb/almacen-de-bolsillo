@@ -88,6 +88,10 @@ Este documento reúne el alcance funcional de la aplicación y distingue las fun
 - **RF-07.8** Registrar cierres de caja y consultar su historial.
 - **RF-07.9** Calcular la ganancia real por producto — **Hoja de ruta**.
 - **RF-07.10** Sugerir precios según un margen objetivo — **Hoja de ruta**.
+- **RF-07.11** Consultar un resultado general estimado a partir de las ventas activas, los movimientos históricos de caja y la mercadería disponible valuada a costos corrientes.
+- **RF-07.12** Desglosar el resultado estimado en ventas en efectivo, cobros digitales, egresos, aportes, retiros y valor del stock.
+- **RF-07.13** Advertir cuando existan productos activos con stock que no pueda valuarse por falta de un precio utilizable de un proveedor activo.
+- **RF-07.14** Restringir la consulta de rentabilidad al dueño del comercio.
 
 ## RF-08: Gestionar acceso y configuración — Parcial
 
@@ -108,7 +112,7 @@ La versión 1.0.0 cubre el circuito principal del comercio:
 2. catálogo de productos, categorías y control de stock;
 3. gestión de proveedores y compras;
 4. registro de ventas y medios de pago;
-5. movimientos contables, dashboard y cierres de caja;
+5. movimientos contables, dashboard, cierres de caja y resultado estimado de rentabilidad;
 6. planificación de turnos laborales;
 7. permisos de interfaz según el rol.
 
