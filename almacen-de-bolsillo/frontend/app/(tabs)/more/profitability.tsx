@@ -152,7 +152,7 @@ export default function ProfitabilityScreen() {
       <View>
         <Text className="font-handwriting text-2xl font-bold text-ink dark:text-white">Cómo se compone</Text>
         <View className="mt-2">
-          <SummaryRow icon="arrow-up-circle-outline" label="Ingresos en efectivo" description="Entradas de cierres regulares" value={summary.income} operation="add" />
+          <SummaryRow icon="arrow-up-circle-outline" label="Ventas en efectivo" description="Ventas activas registradas" value={summary.income} operation="add" />
           <SummaryRow icon="card-outline" label="Cobros digitales" description="Ventas activas con Mercado Pago y Ualá" value={summary.digitalIncome} operation="add" />
           <SummaryRow icon="arrow-down-circle-outline" label="Egresos" description="Salidas de cierres regulares" value={summary.expenses} operation="subtract" />
           <SummaryRow icon="add-circle-outline" label="Aportes" description="Capital incorporado por el dueño" value={summary.contributions} operation="subtract" />

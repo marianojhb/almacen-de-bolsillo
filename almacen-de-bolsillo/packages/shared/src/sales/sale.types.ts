@@ -16,7 +16,7 @@ export type SalesOrderItem = {
   productId: number;
   quantity: number;
   shortname: string;
-  longname: string;
+  longname: string | null;
   price: number;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +27,7 @@ export type SalesOrderItem = {
 
 export type SalesOrder = {
   id: number;
-  invoice?: string;
+  invoice: string | null;
   date: string;
   sellerId: number;
   createdAt: string;
@@ -55,7 +55,7 @@ export type SalesOrderDto = SalesOrder & {
 export type CreateSalesOrderItemDto = {
   productId: number;
   shortname: string;
-  longname: string;
+  longname: string | null;
   quantity: number;
   price: number;
   discount: number;
@@ -63,7 +63,7 @@ export type CreateSalesOrderItemDto = {
 };
 
 export type CreateSalesOrderDto = {
-  invoice: string;
+  invoice?: string | null;
   sellerId: number; // TODO: Conviene sacarlo porque el frontend no dice quien genero la venta. Preferiblemente JWT lo diga en req.user.id
   paymentMethod: PaymentMethod;
   discount: number;

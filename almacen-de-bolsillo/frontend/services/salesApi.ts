@@ -42,7 +42,8 @@ export async function createSalesOrderRequest(salesOrder: CreateSalesOrderDto): 
   });
 
   if (!response.ok) {
-    throw new Error("Error creating sales order");
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? "Error creating sales order");
   }
 
   return response.json();

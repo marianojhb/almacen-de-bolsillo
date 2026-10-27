@@ -10,7 +10,7 @@ import { matchesProductFilters } from "@/utils/product-filters";
 export default function SelectProductsModal() {
   const insets = useSafeAreaInsets();
   const { products, categories, isLoadingProducts, productsError } = useProducts();
-  const { addItems } = useSalesDraft();
+  const { items, addItems } = useSalesDraft();
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -24,8 +24,22 @@ export default function SelectProductsModal() {
     }));
   }, [categoryId, products, searchText, lowStockOnly, inactiveOnly]);
 
-  const selectedProducts = products.filter((product) => (quantities[product.id] ?? 0) > 0);
-  const selectedUnits = selectedProducts.reduce((total, product) => total + (quantities[product.id] ?? 0), 0);
+  const draftQuantities = useMemo(
+    () => new Map(items.map((item) => [item.productId, item.quantity])),
+    [items],
+  );
+
+  const getMaximumQuantity = (productId: number, stock: number) =>
+    Math.max(stock - (draftQuantities.get(productId) ?? 0), 0);
+
+  const getSelectedQuantity = (productId: number, stock: number) =>
+    Math.min(Math.max(quantities[productId] ?? 0, 0), getMaximumQuantity(productId, stock));
+
+  const selectedProducts = products.filter((product) => getSelectedQuantity(product.id, product.stock) > 0);
+  const selectedUnits = selectedProducts.reduce(
+    (total, product) => total + getSelectedQuantity(product.id, product.stock),
+    0,
+  );
 
   if (isLoadingProducts) {
     return (
@@ -139,7 +153,9 @@ export default function SelectProductsModal() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           renderItem={({ item: product }) => {
-            const quantity = quantities[product.id] ?? 0;
+            const maximumQuantity = getMaximumQuantity(product.id, product.stock);
+            const quantity = getSelectedQuantity(product.id, product.stock);
+            const availableStock = maximumQuantity - quantity;
 
             return (
               <View className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
@@ -171,8 +187,8 @@ export default function SelectProductsModal() {
                 </View>
 
                 <View className="mt-2 flex-row items-center gap-1.5">
-                  <Text className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                    Stock {product.stock} · Mín {product.stockMin}
+                   <Text className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                    Disponible {availableStock} · Mín {product.stockMin}
                   </Text>
 
                   <View className="ml-auto flex-row items-center gap-1.5">
@@ -211,7 +227,8 @@ export default function SelectProductsModal() {
                       placeholderTextColor="#94a3b8"
                       value={quantity.toString()}
                       onChangeText={(text) => {
-                        const nextQuantity = Number.parseInt(text, 10) || 0;
+                        const parsedQuantity = Number.parseInt(text, 10) || 0;
+                        const nextQuantity = Math.min(Math.max(parsedQuantity, 0), maximumQuantity);
 
                         setQuantities((currentQuantities) => ({
                           ...currentQuantities,
@@ -223,18 +240,31 @@ export default function SelectProductsModal() {
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={`Aumentar cantidad de ${product.shortname}`}
-                      className="h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white active:opacity-70 dark:border-slate-700 dark:bg-slate-950"
+                      accessibilityState={{ disabled: quantity >= maximumQuantity }}
+                      className={`h-8 w-8 items-center justify-center rounded-xl border active:opacity-70 ${
+                        quantity >= maximumQuantity
+                          ? "border-slate-100 bg-slate-100 dark:border-slate-800 dark:bg-slate-800"
+                          : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950"
+                      }`}
+                      disabled={quantity >= maximumQuantity}
                       onPress={() =>
                         setQuantities((currentQuantities) => {
                           const currentQuantity = currentQuantities[product.id] ?? 0;
 
                           return {
                             ...currentQuantities,
-                            [product.id]: currentQuantity + 1,
+                            [product.id]: Math.min(currentQuantity + 1, maximumQuantity),
                           };
                         })
                       }>
-                      <Text className="text-lg font-black text-slate-700 dark:text-slate-200">+</Text>
+                      <Text
+                        className={`text-lg font-black ${
+                          quantity >= maximumQuantity
+                            ? "text-slate-300 dark:text-slate-600"
+                            : "text-slate-700 dark:text-slate-200"
+                        }`}>
+                        +
+                      </Text>
                     </Pressable>
 
                   </View>
@@ -264,10 +294,10 @@ export default function SelectProductsModal() {
             addItems(
               selectedProducts.map((product) => ({
                 productId: product.id,
-                quantity: quantities[product.id],
+                quantity: getSelectedQuantity(product.id, product.stock),
                 shortname: product.shortname,
                 longname: product.longname,
-                price: product.price,
+                price: Number(product.price),
                 discount: 0,
                 subtotal: 0,
               })),

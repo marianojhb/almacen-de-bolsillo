@@ -59,22 +59,26 @@ export function calculateProfitability({ balances, sales, products }: Profitabil
   let withdrawalsCents = 0;
 
   for (const balance of balances) {
-    const cashInCents = toCents(toNumber(balance.cashIn));
     const cashOutCents = toCents(toNumber(balance.cashOut));
 
     if (balance.movementType === "C") {
-      contributionsCents += cashInCents;
+      contributionsCents += toCents(toNumber(balance.cashIn));
       withdrawalsCents += cashOutCents;
     } else if (balance.movementType === "R") {
-      incomeCents += cashInCents;
       expensesCents += cashOutCents;
     }
   }
 
   for (const sale of sales) {
+    if (!sale.isActive) continue;
+
+    const totalCents = toCents(toNumber(sale.total));
     const isDigitalPayment = sale.paymentMethod === "MERCADOPAGO" || sale.paymentMethod === "UALA";
-    if (sale.isActive && isDigitalPayment) {
-      digitalIncomeCents += toCents(toNumber(sale.total));
+
+    if (isDigitalPayment) {
+      digitalIncomeCents += totalCents;
+    } else if (sale.paymentMethod === "EFECTIVO") {
+      incomeCents += totalCents;
     }
   }
 

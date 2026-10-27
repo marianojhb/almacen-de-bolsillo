@@ -1,23 +1,51 @@
 import { CreateSalesOrderDto } from "@almacen/shared";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, usePreventRemove } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSales } from "@/contexts/sales";
 import { useSalesDraft } from "@/contexts/sales-draft";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProducts } from "@/contexts/products";
 
 export const NewSaleScreen = () => {
   const { user } = useAuth();
   const { items, totalAmount, removeItem, clearSales } = useSalesDraft();
   const { addSale, refreshSales } = useSales();
+  const { refreshProducts } = useProducts();
 
   const [inputDiscount, setInputDiscount] = useState("");
   const [metodoDePago, setMetodoDePago] = useState<"EFECTIVO" | "MERCADOPAGO" | "UALA">("EFECTIVO");
   const [numeroFactura, setNumeroFactura] = useState("");
   const [isSavingSale, setIsSavingSale] = useState(false);
+  const [isDiscardingDraft, setIsDiscardingDraft] = useState(false);
   const [isProductsExpanded, setIsProductsExpanded] = useState(false);
   const [isBillingExpanded, setIsBillingExpanded] = useState(false);
+
+  const hasDraftChanges =
+    items.length > 0 ||
+    inputDiscount.length > 0 ||
+    numeroFactura.length > 0 ||
+    metodoDePago !== "EFECTIVO";
+
+  usePreventRemove(hasDraftChanges && !isSavingSale && !isDiscardingDraft, ({ repeat }) => {
+    Alert.alert(
+      "¿Descartar la venta?",
+      "Si salís de Nueva venta, se eliminará el borrador.",
+      [
+        { text: "Seguir editando", style: "cancel" },
+        {
+          text: "Descartar",
+          style: "destructive",
+          onPress: () => {
+            setIsDiscardingDraft(true);
+            clearSales();
+            repeat();
+          },
+        },
+      ],
+    );
+  });
 
   const subtotal = Math.round(Number(totalAmount) * 100) / 100;
   const discountPercentage = Number(inputDiscount || 0);
@@ -30,6 +58,12 @@ export const NewSaleScreen = () => {
 
   async function handleAddSale() {
     if (!user || isDisabled) return;
+
+    if (![subtotal, discount, taxableBase, ivaSales, total].every(Number.isFinite)) {
+      Alert.alert("Datos inválidos", "Revisá el descuento antes de guardar la venta.");
+      return;
+    }
+
     const payload: CreateSalesOrderDto = {
       invoice: numeroFactura,
       sellerId: user.id,
@@ -44,16 +78,23 @@ export const NewSaleScreen = () => {
         shortname: item.shortname,
         longname: item.longname,
         quantity: item.quantity,
-        price: item.price,
+        price: Number(item.price),
         discount: 0,
         subtotal: item.quantity * item.price,
       })),
     };
 
     setIsSavingSale(true);
-    await addSale(payload);
+    const saleWasCreated = await addSale(payload);
+
+    if (!saleWasCreated) {
+      setIsSavingSale(false);
+      Alert.alert("No se pudo guardar la venta", "Revisá el stock disponible e intentá nuevamente.");
+      return;
+    }
+
     clearSales();
-    await refreshSales();
+    await Promise.all([refreshSales(), refreshProducts()]);
     router.replace("/sales");
     setIsSavingSale(false);
   }
@@ -301,10 +342,7 @@ export const NewSaleScreen = () => {
 
           <Pressable
             className="flex-1 items-center rounded-2xl border border-slate-300 bg-white px-3 py-3 active:opacity-80 dark:border-slate-700 dark:bg-slate-950"
-            onPress={() => {
-              clearSales();
-              router.back();
-            }}>
+            onPress={() => router.back()}>
             <Text className="text-base font-bold text-slate-700 dark:text-slate-200">Cancelar</Text>
           </Pressable>
         </View>
