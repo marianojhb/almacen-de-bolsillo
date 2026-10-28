@@ -15,6 +15,10 @@ FROM base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json backend/package.json
 COPY packages/shared/package.json packages/shared/package.json
+# The root postinstall builds the shared package. Keep the files required by
+# that build in this layer; the rest of the source is copied in the build stage.
+COPY packages/shared/tsconfig.json packages/shared/tsconfig.json
+COPY packages/shared/src packages/shared/src
 COPY patches patches
 
 RUN pnpm install --frozen-lockfile
