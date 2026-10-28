@@ -28,12 +28,22 @@ docker compose -f compose.production.yaml up -d backend
 docker compose -f compose.production.yaml ps
 ```
 
-El puerto queda publicado solamente en `127.0.0.1:3000` para que un proxy inverso del VPS, como Nginx o Caddy, sea el único punto de acceso público.
+El backend queda publicado en el puerto externo `3103` del VPS y usa el puerto interno `3000` del contenedor. Esto permite acceder temporalmente mediante la IP del servidor:
+
+```text
+http://IP_DEL_SERVIDOR:3103
+```
+
+Si el VPS usa UFW, permitir el puerto:
+
+```bash
+sudo ufw allow 3103/tcp
+```
 
 Comprobar el servicio desde el VPS:
 
 ```bash
-curl http://127.0.0.1:3000/health
+curl http://127.0.0.1:3103/health
 ```
 
 La respuesta esperada es `{"status":"ok"}`.
