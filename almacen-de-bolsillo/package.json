@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "pnpm --filter @almacen/shared build",
     "dev": "concurrently \"pnpm --filter @almacen/shared dev\" \"pnpm --filter backend dev\" \"pnpm --filter frontend start\"",
     "dev:backend": "pnpm --dir backend dev",
     "dev:frontend": "pnpm --dir frontend start",

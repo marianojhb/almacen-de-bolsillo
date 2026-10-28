@@ -5,6 +5,7 @@ packages:
 supportedArchitectures:
   os:
     - darwin
+    - linux
     - win32
   cpu:
     - arm64
@@ -16,3 +17,16 @@ allowBuilds:
   unrs-resolver: true
 patchedDependencies:
   react-native-css-interop@0.2.6: patches/react-native-css-interop@0.2.6.patch
+minimumReleaseAgeExclude:
+  - '@expo/cli@58.1.16'
+  - '@expo/fingerprint@0.21.7'
+  - '@expo/metro-config@58.0.18'
+  - '@expo/router-server@58.0.18'
+  - babel-preset-expo@58.0.21
+  - expo-file-system@58.0.12
+  - expo-modules-cli@0.3.3
+  - expo-modules-core@58.0.27
+  - expo-modules-jsi@58.0.20
+  - expo@58.0.20
+  - expo-router@58.0.27
+  - expo-web-browser@58.0.7

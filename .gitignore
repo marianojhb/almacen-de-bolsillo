@@ -1,4 +1,7 @@
 .DS_Store
+.ds_store
+**/.DS_Store
+**/.ds_store
 DS_Store
 .clinerules
 .vscode
