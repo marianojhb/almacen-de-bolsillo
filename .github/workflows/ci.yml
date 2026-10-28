@@ -38,6 +38,8 @@ jobs:
 
       - name: Build backend
         run: pnpm --dir backend build
+        env:
+          DIRECT_URL: postgresql://ci:ci@127.0.0.1:5432/ci
 
       - name: Validate Expo configuration
         run: pnpm --dir frontend exec expo config --type public --json > /tmp/expo-config.json
