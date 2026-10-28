@@ -63,3 +63,17 @@ Consultar los logs con:
 ```bash
 docker compose -f compose.production.yaml logs --tail=100 backend
 ```
+
+## Despliegue automático
+
+El workflow `.github/workflows/deploy-backend.yml` actualiza este directorio desde GitHub cuando hay cambios relevantes en `main`:
+
+```text
+/opt/apps/almacen-de-bolsillo-repo/almacen-de-bolsillo
+```
+
+También puede ejecutarse manualmente desde `Actions → Deploy backend → Run workflow`.
+
+El acceso SSH usa el usuario `deploy-almacen-de-bolsillo` en el puerto `5460`. La conexión se autentica mediante una clave almacenada en GitHub como `VPS_SSH_KEY`.
+
+La documentación completa de CI/CD está en [`docs/CI-CD.md`](../docs/CI-CD.md).

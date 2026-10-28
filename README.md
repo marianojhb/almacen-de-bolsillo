@@ -74,6 +74,7 @@ Consultá el [detalle completo del stack](./docs/Stack.md).
 - [Requisitos funcionales innovadores](./docs/almacen_de_bolsillo_rfs_innovadores.md)
 - [Matriz de roles y permisos](./docs/matriz_permisos_uml_almacen_bolsillo_md_2026.md)
 - [Convenciones de nombres](./docs/NamingConventions.md)
+- [CI/CD y despliegue](./docs/CI-CD.md)
 - [Diseño entidad-relación](./docs/DER%20v1.drawio.png)
 - [Diseño entidad-relación — modo oscuro](./docs/DER%20v1_oscuro.drawio.png)
 
