@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: almacen-de-bolsillo
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: almacen-de-bolsillo/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm --filter @almacen/shared build
+
+      - name: Build backend
+        run: pnpm --dir backend build
+
+      - name: Validate Expo configuration
+        run: pnpm --dir frontend exec expo config --type public --json > /tmp/expo-config.json
+
+      - name: Bundle Android JavaScript
+        run: >-
+          pnpm --dir frontend exec expo export:embed
+          --platform android
+          --dev false
+          --bundle-output /tmp/almacen-index.android.bundle
+          --assets-dest /tmp/almacen-assets

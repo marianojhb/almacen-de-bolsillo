@@ -1,0 +1,50 @@
+name: Deploy backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "almacen-de-bolsillo/backend/**"
+      - "almacen-de-bolsillo/packages/**"
+      - "almacen-de-bolsillo/Dockerfile"
+      - "almacen-de-bolsillo/compose.production.yaml"
+      - "almacen-de-bolsillo/pnpm-lock.yaml"
+      - "almacen-de-bolsillo/pnpm-workspace.yaml"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: backend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS host key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy through SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh "$VPS_USER@$VPS_HOST" <<'REMOTE'
+            set -euo pipefail
+            cd /opt/apps/almacen-de-bolsillo-repo
+            git pull --ff-only origin main
+            cd almacen-de-bolsillo
+            docker compose -f compose.production.yaml build backend
+            docker compose -f compose.production.yaml --profile tools run --rm migrate
+            docker compose -f compose.production.yaml up -d --force-recreate backend
+            curl --fail --silent http://127.0.0.1:3103/health
+          REMOTE
