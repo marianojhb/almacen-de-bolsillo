@@ -2,8 +2,7 @@
 
 Duración objetivo: 15 minutos. Reparto: Lautaro, secciones 2, 4 y 7; Mariano, secciones 1, 3 y 5; sección 6 compartida.
 
-1. Presentación
-Tiempo: 0:30. Expositor: Mariano.
+### 1. Presentación - Tiempo: 0:30. Expositor: Mariano.
 
 **Explicación del guion**
 
@@ -17,17 +16,9 @@ Para mostrar cómo funciona, vamos a seguir el caso ficticio de Juan y recorrer 
 
 Lautaro les va a contar qué dificultades buscamos resolver.”
 
-**PowerPoint**
-
-Estado: Terminada.
-
-Fuentes del proyecto: README.md; docs/GuiaDePantallas.md.
-Caso de Juan y cantidades: ejemplo ficticio para la demostración.
-
 ---
 
-2. Problema y público objetivo
-Tiempo: 2:00. Expositor: Lautaro.
+### 2. Problema y público objetivo - Tiempo: 2:00. Expositor: Lautaro.
 
 **Explicación del guion**
 
@@ -55,25 +46,9 @@ Así, además de atender, Juan tiene que dedicar tiempo a reconstruir lo que pas
 
 Este ejemplo representa las dificultades que buscamos abordar en kioscos y almacenes de barrio. A partir de este problema, Mariano va a presentar nuestra propuesta.”
 
-**PowerPoint**
-
-Estado: Base definida; pendiente de armar.
-
-- Objetivo de la diapositiva: mostrar el comercio de Juan sin la aplicación y las dificultades de organizarlo con información dispersa.
-- Título sugerido: “¿Qué pasó en el negocio mientras Juan no estaba?”.
-- Perfil del cliente: Juan, dueño de un kiosco o almacén de barrio. Atiende cuando puede y se alterna con un empleado. Una persona atiende por turno.
-- Situación: atender a varios clientes seguidos y cambiar de turno mientras las anotaciones quedan para después.
-- Dificultades en pantalla: “Anotaciones dispersas”, “Novedades sin comunicar” y “Dudas sobre la mercadería disponible”.
-- Consecuencias: volver a contar productos, detectar faltantes tarde y dedicar tiempo a reconstruir lo ocurrido.
-- Recursos visuales: secuencia de dos turnos, primero el empleado y después Juan; entre ambos, un cuaderno y mensajes dispersos. Juan aparece con las preguntas “¿Qué se vendió?” y “¿Cuánto queda?”. Aclaración breve: “Caso ficticio”. Mostrar una sola persona atendiendo en cada turno y reservar las capturas de la aplicación para la presentación de la solución.
-
-Fuentes del proyecto: README.md; docs/GuiaDePantallas.md.
-Caso de Juan y cantidades: ejemplo ficticio para la demostración.
-
 ---
 
-3. Nuestra solución y mapa de valor
-Tiempo: 1:00. Expositor: Mariano.
+### 3. Nuestra solución y mapa de valor - Tiempo: 1:00. Expositor: Mariano.
 
 **Explicación del guion**
 
@@ -97,72 +72,66 @@ La propuesta para Juan y otros comerciantes de barrio es reunir esa información
 
 Ahora Lautaro va a mostrar cómo se organizan las personas y los turnos dentro de la aplicación.”
 
-**PowerPoint**
-
-Estado: Base definida; pendiente de armar.
-
-- Objetivo de la diapositiva: relacionar las dificultades del punto 2 con las funciones de la aplicación y su utilidad para Juan y otros comerciantes de barrio.
-- Título sugerido: “De la información dispersa a una gestión compartida”.
-- Contenido en pantalla: mapa de valor con tres columnas: “Dificultad”, “Respuesta de la aplicación” y “Utilidad para el comercio”.
-- Primera relación: “Anotaciones dispersas” → “Registro e historial de ventas” → “Consultar qué se vendió durante cada turno”.
-- Segunda relación: “Dudas sobre cuánto queda” → “Existencias actualizadas al registrar operaciones” → “Consultar disponibilidad y orientar la reposición”.
-- Tercera relación: “Horarios acordados de palabra” → “Asignación y consulta de turnos” → “Saber qué horarios tiene asignados el empleado”.
-- Mensaje de cierre: “Para Juan y otros comercios de barrio: registros y turnos en una misma herramienta”.
-- Recursos visuales: mantener a Juan y al empleado del punto anterior e incorporar iconos de ventas, productos y calendario. Recorrer las tres relaciones en ese orden; reservar la demostración detallada para los videos.
-
-Fuentes del proyecto: README.md; docs/GuiaDePantallas.md.
-Caso de Juan y cantidades: ejemplo ficticio para la demostración.
 
 ---
 
-4. Video: bienvenida y personas
-Tiempo: 1:30. Expositor: Lautaro.
+### 4. Video: bienvenida y personas - Tiempo: 1:30. Expositor: Lautaro.
 
 **Explicación del guion**
 
-Recorrido de grabación: 0:00 inicio de sesión; 0:10 breve registro del dueño con datos ficticios; 0:25 ingreso y orientación en dashboard; 0:35 cuenta de empleado y selección de rol; 0:55 jornada asignada en varias fechas; 1:15 acceso del empleado y consulta de sus turnos. Explicar que el dueño administra su cuenta y que las opciones visibles cambian según el rol. No convertir el registro en el centro de la demo. Las capturas actuales son un respaldo visual real del proyecto, no una grabación del caso. Transición a Mariano: ya conocemos a las personas; ahora seguimos la mercadería.
+Crear Comercio: 
+- Manolo
+- manolo@gmail.com
+- 123
+Inicio Sesion con la cuenta Owner.
 
-**Texto para decir**
+Ir a seccion de empleado y crear uno:
+- Felipe
+- felipe@gmail.com
+- 123
+- Rol Empleado
+- 
+Ir a Turnos Laborales y crear una jornada llamada turno laboral (Horario al azar) 
 
-Pendiente de redactar.
+Asignar al Empleado felipe turno laboral.
 
-**PowerPoint**
+Acceder a la cuenta de felipe y consultar turnos:
+- felipe@gmail.com
+- 123
 
-Estado: Pendiente de trabajar.
-- Objetivo de la diapositiva: por definir.
-- Contenido en pantalla: por definir.
-- Recursos visuales o video: por definir.
-
-Fuentes del proyecto: README.md; docs/GuiaDePantallas.md.
-Caso de Juan y cantidades: ejemplo ficticio para la demostración.
 
 ---
 
-5. Video: un día en el comercio
-Tiempo: 4:00. Expositor: Mariano.
+###  5. Video: un día en el comercio - Tiempo: 4:00. Expositor: Mariano.
 
 **Explicación del guion**
 
-0:00 presentar arroz de 1 kg con 2 unidades y mínimo 5. 0:25 mostrar proveedor asociado y registrar una compra de 10 unidades. 1:20 confirmar la compra y consultar 12 unidades. 1:50 registrar una venta de 3 unidades. 2:50 volver al producto y comprobar 9 unidades. 3:15 revisar historial y dashboard. 3:45 cerrar la demostración: la misma operación queda conectada con las existencias y el resumen del negocio. Las cifras son un guion ficticio que debe prepararse antes de grabar. Restaurar el estado inicial antes de repetir. No afirmar que los importes de las capturas corresponden a este ejemplo.
+Crear un proveedor:
 
-**Texto para decir**
+- Distribuidora Pacheco SRL
+- CUIT 30112223334
 
-Pendiente de redactar.
+Creo un producto y le asigno 2 proveedores: 
 
-**PowerPoint**
+- Hamburguesas PATY 4 Uni
+- Caja de Hamburguesas Paty x 4 unidades 80 gr clásicas
+$9600
+- minimo 10 unidades
 
-Estado: Pendiente de trabajar.
-- Objetivo de la diapositiva: por definir.
-- Contenido en pantalla: por definir.
-- Recursos visuales o video: por definir.
+Compro el producto:
+- 30 cajas ($4800 x 30 = $144.000)
 
-Fuentes del proyecto: README.md; docs/GuiaDePantallas.md.
-Caso de Juan y cantidades: ejemplo ficticio para la demostración.
+Vendo 15 unidades 
+
+Usuario Owner:
+- Manolo
+- manolo@gmail.com
+- 123
+
 
 ---
 
-6. Cómo funciona la aplicación: tecnologías, accesibilidad e impacto social
-Tiempo: hasta 4:00. Expositores: Lautaro y Mariano. Texto base: aproximadamente 3:30, con margen para señalar el esquema y hacer pausas.
+### 6. Cómo funciona la aplicación: tecnologías, accesibilidad e impacto social - Tiempo: hasta 4:00. Expositores: Lautaro y Mariano. 
 
 **Explicación del guion**
 
@@ -206,26 +175,10 @@ Esto también se relaciona con la ética y el impacto social del software. Nuest
 
 Esta es la base que permite conectar las acciones de quien atiende con la información que Juan necesita consultar. Ahora pasamos a los resultados y las mejoras pendientes.”
 
-**PowerPoint**
-
-Estado: Base definida; pendiente de armar.
-
-- Objetivo de la diapositiva: explicar las tres capas con una venta como ejemplo y mostrar cómo el diseño y el cuidado de las personas forman parte de la propuesta.
-- Título sugerido: “¿Cómo funciona por dentro?”.
-- Visual principal: tres bloques conectados: “Frontend: lo que vemos” → “Backend: donde se procesan las operaciones” → “Base de datos: donde se guarda la información”.
-- Tecnologías en texto secundario: “React Native + Expo” debajo de frontend; “Node.js + Express” debajo de backend; “PostgreSQL” debajo de base de datos. Mencionar Prisma oralmente como la herramienta que conecta el trabajo del backend con los datos.
-- Ejemplo bajo el esquema: “El empleado confirma una venta” → “Se procesa la operación” → “Se guardan la venta y las nuevas cantidades”.
-- Apoyo visual: iconos de celular, engranajes y archivo de datos. Mostrar el recorrido de izquierda a derecha.
-- Bloque de accesibilidad y facilidad de uso: “Botones que guían · Pantallas consistentes · Tipografía clara · Textos breves”. Acompañar con una captura del recorrido de venta que permita señalar estas decisiones de diseño.
-- Debajo, bloque de ética e impacto social: “Herramientas para comercios de barrio · Autonomía para decidir · Cuidado de los datos”. Explicar estos objetivos sin presentar un impacto social ya medido.
-- Reservar los detalles técnicos para las preguntas y mostrar los bloques progresivamente para mantener la diapositiva legible.
-
-Fuentes del proyecto: README.md; docs/Stack.md; docs/GuiaDePantallas.md; frontend/components/auth/CredentialsForm.tsx.
-Caso de Juan: ejemplo ficticio para la demostración.
 
 ---
 
-7. Conclusiones y futuro
+### 7. Conclusiones y futuro
 Tiempo: 2:00 a 3:00. Expositor: Lautaro. Apuntar a 2:00 en el ensayo para mantener la duración objetivo de la presentación.
 
 **Explicación del guion**
@@ -258,16 +211,4 @@ El proyecto nos deja una base funcional para seguir mejorando. El próximo paso 
 
 Muchas gracias. Los escuchamos si tienen preguntas.”
 
-**PowerPoint**
 
-Estado: Base definida; pendiente de armar.
-
-- Objetivo de la diapositiva: resumir el aporte del proyecto, reconocer sus límites y mostrar oportunidades concretas de evolución.
-- Título sugerido: “Conclusiones y futuro”.
-- Bloque “Impacto”: “Información reunida”, “Continuidad entre turnos” y “Gestión desde el celular”. Presentarlo como aporte y propósito, sin cifras de impacto no medidas.
-- Bloque “Limitaciones”: “Sin separación por comercio”, “Funciones con alcance inicial” y “Sin modo de trabajo offline”.
-- Bloque “Futura versión”: destacar “Una base de datos propia para cada comercio: multi tenant” y “Mejora de las funciones actuales”. Como ejemplos breves: “Escaneo de códigos SKU · Operaciones sin conexión · Productos sin ventas recientes”.
-- Recursos visuales: tres bloques con iconos sencillos y poco texto. Recuperar a Juan como referencia del comercio al que se dirige la propuesta. Mostrar al final “Gracias · ¿Preguntas?”.
-
-Fuentes del proyecto: README.md; docs/GuiaDePantallas.md; docs/Stack.md; docs/almacen_de_bolsillo_rfs_innovadores.md.
-Caso de Juan: ejemplo ficticio para la demostración.
