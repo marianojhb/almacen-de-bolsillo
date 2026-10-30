@@ -37,8 +37,9 @@ test("stock bajo incluye por debajo, en mínimo y sin stock, pero no por encima"
   }
 });
 
-test("los filtros se combinan con categoría, búsqueda e inactivos sin alterar el comportamiento por defecto", () => {
-  assert.equal(filters.matchesProductFilters({ ...product, isActive: false }, defaults), true);
+test("los productos activos se muestran por defecto y los inactivos solo con su filtro", () => {
+  assert.equal(filters.matchesProductFilters(product, defaults), true);
+  assert.equal(filters.matchesProductFilters({ ...product, isActive: false }, defaults), false);
   const selected = { ...defaults, categoryId: "1", searchText: "  AGUA ", inactiveOnly: true, lowStockOnly: true };
   assert.equal(filters.matchesProductFilters({ ...product, isActive: false }, selected), true);
   assert.equal(filters.matchesProductFilters(product, selected), false);
@@ -105,7 +106,7 @@ async function renderScreen(path) {
     "@/utils/product-filters": filters,
     "@/contexts/products": { useProducts: () => ({ products, categories }) },
     "@/contexts/purchase-draft": { usePurchaseDraft: () => ({ items: [] }) },
-    "@/contexts/sales-draft": { useSalesDraft: () => ({ addItems: () => {} }) },
+    "@/contexts/sales-draft": { useSalesDraft: () => ({ items: [], addItems: () => {} }) },
   });
   return () => { cursor = 0; return module.default(); };
 }
@@ -120,22 +121,22 @@ for (const [name, path] of [
     const pills = () => find(render(), "ScrollView").props.children;
     const ids = () => find(render(), "FlatList").props.data.map((item) => item.id);
     assert.deepEqual(pills().map((pill) => pill.props.accessibilityLabel), ["Stock bajo", "Bebidas", "Almacén", "Inactivos"]);
-    assert.deepEqual(ids(), [1, 2, 3, 4, 5]);
+    assert.deepEqual(ids(), [1, 2, 3, 5]);
     pills()[0].props.onPress();
-    assert.deepEqual(ids(), [1, 2, 4, 5]);
+    assert.deepEqual(ids(), [1, 2, 5]);
     pills()[1].props.onPress();
-    assert.deepEqual(ids(), [1, 4]);
+    assert.deepEqual(ids(), [1]);
     pills().at(-1).props.onPress();
     assert.deepEqual(ids(), [4]);
     pills().at(-1).props.onPress();
     pills()[1].props.onPress();
     pills()[0].props.onPress();
-    assert.deepEqual(ids(), [1, 2, 3, 4, 5]);
+    assert.deepEqual(ids(), [1, 2, 3, 5]);
   });
 }
 
 test("Nueva compra mantiene el filtro existente de solo faltantes", async () => {
   const render = await renderScreen("../app/(tabs)/purchases/new/index.tsx");
   find(render(), "Switch").props.onValueChange(true);
-  assert.deepEqual(find(render(), "FlatList").props.data.map((item) => item.id), [1, 4]);
+  assert.deepEqual(find(render(), "FlatList").props.data.map((item) => item.id), [1]);
 });

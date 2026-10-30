@@ -19,6 +19,6 @@ export function matchesProductFilters(product: FilterableProduct, filters: Produ
     (!filters.categoryId || product.categoryId === Number(filters.categoryId)) &&
     (!search || product.shortname.toLowerCase().includes(search)) &&
     (!filters.lowStockOnly || product.stock <= product.stockMin) &&
-    (!filters.inactiveOnly || !product.isActive)
+    (filters.inactiveOnly ? !product.isActive : product.isActive)
   );
 }
