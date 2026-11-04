@@ -5,7 +5,7 @@ import { SalesProvider } from "@/contexts/sales/provider";
 import { PurchasesProvider } from "@/contexts/purchases/provider";
 import { SuppliersProvider } from "@/contexts/suppliers/provider";
 import { ProductsProvider } from "@/contexts/products/provider";
-import { useColorScheme } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { EmployeesProvider } from "@/contexts/employees";
 import { WorkShiftsProvider } from "@/contexts/work-shifts";
 import { usePermissions } from "@/hooks/usePermissions";

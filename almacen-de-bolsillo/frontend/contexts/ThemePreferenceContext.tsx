@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme as useUtilityColorScheme } from "nativewind";
+import { Platform } from "react-native";
 import {
   createContext,
   useCallback,
@@ -27,7 +28,7 @@ function isThemePreference(value: string | null): value is ThemePreference {
 }
 
 export function ThemePreferenceProvider({ children }: { children: ReactNode }) {
-  const [themePreference, setThemePreferenceState] = useState<ThemePreference>("system");
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(Platform.OS === "web" ? "light" : "system");
   const { setColorScheme } = useUtilityColorScheme();
   const setColorSchemeRef = useRef(setColorScheme);
   const hasManualSelectionRef = useRef(false);

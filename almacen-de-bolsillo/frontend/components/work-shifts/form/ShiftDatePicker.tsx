@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, Text, View, useColorScheme } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { CalendarBoard } from "../CalendarBoard";
 import { formatCalendarDate, getMonthLabel } from "@/utils/work-shift-calendar";
 

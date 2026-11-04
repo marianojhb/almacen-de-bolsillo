@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View, useColorScheme, useWindowDimensions } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { notebook, notebookFonts } from "@/constants/notebook";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export function NotebookPaper({ appearance }: { appearance?: "light" | "dark" } = {}) {
   const { height } = useWindowDimensions();

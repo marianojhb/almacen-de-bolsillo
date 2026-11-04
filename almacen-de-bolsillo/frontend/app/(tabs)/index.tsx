@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Text, View, useColorScheme } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useProducts } from "@/contexts/products";
 import { usePurchases } from "@/contexts/purchases";
 import { useSales } from "@/contexts/sales";
@@ -9,6 +9,7 @@ import { Permission } from "@/components/auth/Permission";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { NotebookHeading } from "@/components/ui/notebook";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type FinancialRecord = {
   createdAt: string;

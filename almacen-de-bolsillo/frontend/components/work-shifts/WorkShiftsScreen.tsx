@@ -11,8 +11,8 @@ import {
   ScrollView,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 import { useWorkShifts } from "@/contexts/work-shifts";
 import { usePermissions } from "@/hooks/usePermissions";

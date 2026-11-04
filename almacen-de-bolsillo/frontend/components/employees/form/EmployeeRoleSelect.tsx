@@ -1,7 +1,8 @@
 import { EMPLOYEE_ROLES, ROLE_LABELS, type EmployeeRole } from "@almacen/shared";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Keyboard, Pressable, Text, View, useColorScheme } from "react-native";
+import { Keyboard, Pressable, Text, View } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type Props = {
   value: EmployeeRole;

@@ -30,3 +30,4 @@ minimumReleaseAgeExclude:
   - expo@58.0.20
   - expo-router@58.0.27
   - expo-web-browser@58.0.7
+  - '@expo/metro-runtime@58.0.17'

@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { usePermissions } from "@/hooks/usePermissions";
 import { router } from "expo-router";
-import { Pressable, useColorScheme } from "react-native";
+import { Pressable } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type EditEmployeeButtonProps = {
     id: number;
