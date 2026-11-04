@@ -1,8 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { formatFullName, ROLE_LABELS } from "@almacen/shared";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useState } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { getApiUrl } from "@/services/apiClient";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 type AccountDetailProps = {
   label: string;
@@ -23,10 +27,30 @@ function AccountDetail({ label, value }: AccountDetailProps) {
 }
 
 export default function AccountScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, uploadProfileImage } = useAuth();
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const profile = user?.employee;
   const fullname = formatFullName(profile?.firstname, profile?.lastname);
   const role = user ? ROLE_LABELS[user.role] : null;
+
+  const handlePickProfileImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    setIsUploadingImage(true);
+    try {
+      await uploadProfileImage(result.assets[0]);
+    } catch (error) {
+      Alert.alert("No se pudo actualizar la foto", error instanceof Error ? error.message : "Intentá nuevamente.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -34,9 +58,20 @@ export default function AccountScreen() {
       contentContainerClassName="gap-4 px-4 pb-8 pt-4"
       showsVerticalScrollIndicator={false}>
       <View className="items-center rounded-2xl bg-ink px-5 py-7 dark:bg-slate-950">
-        <View className="h-20 w-20 items-center justify-center rounded-full bg-emerald-400/15">
-          <Ionicons name="person-outline" size={38} color="#6ee7b7" />
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Cambiar foto de perfil"
+          disabled={isUploadingImage}
+          onPress={() => void handlePickProfileImage()}
+          className="h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-emerald-400/15 active:opacity-70">
+          {user?.profileImageUrl ? (
+            <OptimizedImage contentFit="cover" source={{ uri: getApiUrl(user.profileImageUrl) }} style={{ width: "100%", height: "100%" }} />
+          ) : (
+            <Ionicons name="person-outline" size={38} color="#6ee7b7" />
+          )}
+          {isUploadingImage ? <View className="absolute inset-0 items-center justify-center bg-black/50"><Text className="text-xs font-bold text-white">Subiendo…</Text></View> : null}
+        </Pressable>
+        <Text className="mt-2 text-xs font-semibold text-emerald-200">Tocá para cambiar la foto</Text>
         <Text className="mt-4 text-center text-2xl font-black text-white">
           {fullname || "Nombre no registrado"}
         </Text>

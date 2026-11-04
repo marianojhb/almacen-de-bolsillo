@@ -13,6 +13,8 @@ services:
       PORT: 3000
     ports:
       - "0.0.0.0:3103:3000"
+    volumes:
+      - profile_uploads:/app/uploads
     healthcheck:
       test:
         - CMD
@@ -37,3 +39,6 @@ services:
       - deploy
       - --config
       - backend/prisma.config.ts
+
+volumes:
+  profile_uploads:

@@ -154,6 +154,7 @@ model User {
   isActive     Boolean   @default(true) @map("is_active_u")
   passwordHash String    @map("password_hash_u")
   role         Role      @default(EMPLOYEE) @map("role_u")
+  profileImageUrl String? @map("profile_image_url_u")
 
   employee       Employee?
   salesOrders    SalesOrder[]

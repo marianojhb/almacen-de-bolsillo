@@ -4,8 +4,11 @@ import {
   getUserByIdFromDatabase,
   postUserToDatabase,
   updateUserFromDatabase,
+  updateProfileImage,
   deleteUserFromDatabase,
 } from './users.service.js';
+
+import { unlink } from "node:fs/promises";
 
 const getUsers = async (req: Request, res: Response) => {
   try {
@@ -42,6 +45,34 @@ const updateUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+const uploadProfileImage = async (req: Request, res: Response) => {
+  const userId = Number(req.params.id);
+  const file = req.file;
+  if (!Number.isInteger(userId) || userId <= 0) {
+    if (file) await unlink(file.path).catch(() => undefined);
+    res.status(400).json({ message: 'El usuario indicado no es válido.' });
+    return;
+  }
+  if (!file) {
+    res.status(400).json({ message: 'Seleccioná una imagen de perfil.' });
+    return;
+  }
+
+  try {
+    const user = await updateProfileImage(userId, file.filename);
+    if (!user) {
+      await unlink(file.path).catch(() => undefined);
+      res.status(404).json({ message: 'Usuario no encontrado.' });
+      return;
+    }
+    res.json({ profileImageUrl: user.profileImageUrl });
+  } catch (error) {
+    await unlink(file.path).catch(() => undefined);
+    console.error('Error uploading profile image:', error);
+    res.status(500).json({ message: 'No se pudo guardar la foto de perfil.' });
+  }
+};
 const deleteUser = async (req: Request, res: Response) => {
   const userId = Number(req.params.id);
   try {
@@ -53,4 +84,4 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export { getUsers, getUserById, postUser, updateUser, deleteUser };
+export { getUsers, getUserById, postUser, updateUser, uploadProfileImage, deleteUser };

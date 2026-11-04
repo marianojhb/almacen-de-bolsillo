@@ -24,6 +24,7 @@ const authUserSelect = {
   id: true,
   email: true,
   role: true,
+  profileImageUrl: true,
   employee: {
     select: { firstname: true, lastname: true, fullname: true, dni: true, gender: true },
   },

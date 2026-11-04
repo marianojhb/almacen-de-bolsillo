@@ -1,5 +1,10 @@
 import { API_URL } from "@/constants/api";
 
+export function getApiUrl(path: string): string {
+  const baseUrl = (process.env.EXPO_PUBLIC_API_URL || API_URL).replace(/\/$/, "");
+  return path.startsWith("http") ? path : `${baseUrl}${path}`;
+}
+
 export class ApiError extends Error {
   constructor(public readonly status: number, message: string) {
     super(message);
@@ -8,12 +13,11 @@ export class ApiError extends Error {
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const baseUrl = (process.env.EXPO_PUBLIC_API_URL || API_URL).replace(/\/$/, "");
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
-    const response = await fetch(`${baseUrl}${path}`, { ...options, signal: controller.signal });
+    const response = await fetch(getApiUrl(path), { ...options, signal: controller.signal });
     const body: unknown = await response.json().catch(() => null);
 
     if (!response.ok) {

@@ -15,6 +15,7 @@ import workShiftsRouter from "./modules/work-shifts/work-shifts.routes.js";
 import profitabilityRouter from "./modules/profitability/profitability.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "node:path";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors());
+app.use("/uploads", express.static(path.resolve(process.env.UPLOADS_DIR ?? path.resolve(process.cwd(), "uploads"))));
 
 app.get("/", (req, res) => {
   res.json({ name: "Almacén de Bolsillo API", status: "running" });

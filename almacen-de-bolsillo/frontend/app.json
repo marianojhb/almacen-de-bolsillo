@@ -42,6 +42,14 @@
       ],
       "expo-font",
       "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Almacén de Bolsillo necesita acceso a tus fotos para elegir tu foto de perfil.",
+          "cameraPermission": "Almacén de Bolsillo necesita acceso a tu cámara para tomar tu foto de perfil.",
+          "microphonePermission": false
+        }
+      ],
       "expo-status-bar",
       "expo-web-browser",
       [

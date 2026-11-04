@@ -1,12 +1,15 @@
 import type { AuthUser, CreateOwnerDto, LoginDto } from "@almacen/shared";
+import type { ImagePickerAsset } from "expo-image-picker";
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { createOwnerRequest, loginRequest } from "@/services/authApi";
+import { uploadProfileImageRequest } from "@/services/usersApi";
 
 type AuthContextType = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   login: (credentials: LoginDto) => Promise<void>;
   createOwner: (credentials: CreateOwnerDto) => Promise<void>;
+  uploadProfileImage: (asset: ImagePickerAsset) => Promise<void>;
   logout: () => void;
 };
 
@@ -28,12 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (request === operation.current) setUser(response.user);
   }, []);
 
+  const uploadProfileImage = useCallback(async (asset: ImagePickerAsset) => {
+    if (!user) throw new Error("No hay un usuario autenticado.");
+    const response = await uploadProfileImageRequest(user.id, asset);
+    setUser((currentUser) => currentUser ? { ...currentUser, profileImageUrl: response.profileImageUrl } : currentUser);
+  }, [user]);
+
   const logout = useCallback(() => {
     operation.current += 1;
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, isAuthenticated: user !== null, login, createOwner, logout }), [user, login, createOwner, logout]);
+  const value = useMemo(() => ({ user, isAuthenticated: user !== null, login, createOwner, uploadProfileImage, logout }), [user, login, createOwner, uploadProfileImage, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
