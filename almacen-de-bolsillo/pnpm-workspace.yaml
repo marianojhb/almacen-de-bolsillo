@@ -18,16 +18,28 @@ allowBuilds:
 patchedDependencies:
   react-native-css-interop@0.2.6: patches/react-native-css-interop@0.2.6.patch
 minimumReleaseAgeExclude:
-  - '@expo/cli@58.1.16'
-  - '@expo/fingerprint@0.21.7'
-  - '@expo/metro-config@58.0.18'
-  - '@expo/router-server@58.0.18'
-  - babel-preset-expo@58.0.21
+  - '@expo/cli@58.1.16 || 58.1.19'
+  - '@expo/fingerprint@0.21.7 || 0.21.9'
+  - '@expo/metro-config@58.0.18 || 58.0.21'
+  - '@expo/router-server@58.0.18 || 58.0.21'
+  - babel-preset-expo@58.0.21 || 58.0.24
   - expo-file-system@58.0.12
   - expo-modules-cli@0.3.3
-  - expo-modules-core@58.0.27
-  - expo-modules-jsi@58.0.20
-  - expo@58.0.20
-  - expo-router@58.0.27
+  - expo-modules-core@58.0.27 || 58.0.30
+  - expo-modules-jsi@58.0.20 || 58.0.22
+  - expo@58.0.20 || 58.0.23
+  - expo-router@58.0.27 || 58.0.30
   - expo-web-browser@58.0.7
   - '@expo/metro-runtime@58.0.17'
+  - '@expo/config-plugins@58.0.12'
+  - '@expo/config@58.0.11'
+  - '@expo/env@2.5.4'
+  - '@expo/inline-modules@0.2.9'
+  - '@expo/local-build-cache-provider@58.0.11'
+  - '@expo/log-box@58.0.15'
+  - '@expo/prebuild-config@58.0.19'
+  - expo-asset@58.0.20
+  - expo-constants@58.0.15
+  - expo-modules-autolinking@58.0.17
+  - expo-linking@58.0.16
+  - expo-splash-screen@58.0.13

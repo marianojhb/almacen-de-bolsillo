@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "deed0e01-fc65-4aad-954c-35d572623235"
+      }
+    },
+    "android": {
+      "package": "com.almacendb.backend"
+    }
+  }
+}
