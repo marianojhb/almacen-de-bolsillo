@@ -7,6 +7,7 @@ on:
       - "almacen-de-bolsillo/backend/**"
       - "almacen-de-bolsillo/packages/**"
       - "almacen-de-bolsillo/Dockerfile"
+      - "almacen-de-bolsillo/Dockerfile.dell"
       - "almacen-de-bolsillo/compose.production.yaml"
       - "almacen-de-bolsillo/pnpm-lock.yaml"
       - "almacen-de-bolsillo/pnpm-workspace.yaml"
