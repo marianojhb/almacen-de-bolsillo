@@ -1,0 +1,77 @@
+
+name: Deploy Expo Web to Dell
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "almacen-de-bolsillo/frontend/**"
+      - "almacen-de-bolsillo/packages/shared/**"
+      - "almacen-de-bolsillo/pnpm-lock.yaml"
+      - ".github/workflows/deploy-web-dell.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-almacen-web
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: almacen-de-bolsillo
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: almacen-de-bolsillo/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm --filter @almacen/shared build
+
+      - name: Export Expo Web
+        env:
+          EXPO_PUBLIC_API_URL: https://almacen-de-bolsillo.marianojhb.is-a.dev/api
+        run: pnpm --filter frontend exec expo export --platform web
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DELL_DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy to Dell
+        run: |
+          rsync -avz --delete \
+            --exclude=compose.yaml \
+            --exclude=nginx.conf \
+            -e "ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o ProxyCommand='ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p 5460 mariano@149.34.226.5 -W %h:%p'" \
+            frontend/dist/ \
+            mabelo-inspiron5481@10.77.0.2:/opt/apps/almacen-de-bolsillo-web/
+
